@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Test</title>
+        <link href="../static/css/test.css" rel="stylesheet">
+    </head>
+    <body>
+        <div class="arr">
+            {{ range .Cells}}
+                <img class="arr__cell" src="{{ .Cell }}">
+            {{ end }}
+        </div>
+    </body>
+</html>
