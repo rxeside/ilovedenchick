@@ -50,7 +50,10 @@ document.addEventListener("DOMContentLoaded", function() {
             {
                }  else {                                   
                     tank.style.top = (parseInt(tank.style.top) - 4) + "px";
-                    shell.direction = 1;
+                    if (shell.update == 0) {
+                        shell.direction = 1;
+                    }
+                   // shell.direction = 1;
                     if (status === 0) {
                         status = 1;
                         tank.src = 'img/top.png';
@@ -68,7 +71,10 @@ document.addEventListener("DOMContentLoaded", function() {
             {
                }  else {   
             tank.style.top = (parseInt(tank.style.top) + 4) + "px";
-            shell.direction = 2;
+            if (shell.update == 0) {
+                shell.direction = 2;
+            }
+           // shell.direction = 2;
             if (status === 0) {
                 status = 1;
                 tank.src = 'img/down.png';
@@ -85,7 +91,10 @@ document.addEventListener("DOMContentLoaded", function() {
             {
                }  else {   
             tank.style.left = (parseInt(tank.style.left) - 4) + "px";
-            shell.direction = 3;
+            if (shell.update == 0) {
+                shell.direction = 3;
+            }
+
             if (status === 0) {
                 status = 1;
                 tank.src = 'img/left.png';
@@ -102,7 +111,9 @@ document.addEventListener("DOMContentLoaded", function() {
             {
                }  else {  
             tank.style.left = (parseInt(tank.style.left) + 4) + "px";
-            shell.direction = 4;
+            if (shell.update == 0) {
+                shell.direction = 4;
+            }
             if (status === 0) {
                 status = 1;
                 tank.src = 'img/right.png';
@@ -137,13 +148,10 @@ document.addEventListener("DOMContentLoaded", function() {
         if ((parseInt(shell.style.top) < 0) || ((parseInt(shell.style.top) + 16) >= boardHeight) || (parseInt(shell.style.left) < 0) || (parseInt(shell.style.left) >= boardWidth - 16)) {
             shell.update = 0;
             gameBoard.removeChild(shell);
-          // shell.style.top = 0 + "px";
-            //shell.style.left = 0 + "px";
         }
         if (shell.update == 1) {
             requestAnimationFrame(play);
         }
-       // requestAnimationFrame(play);
     }
 
     // управление снарядом
