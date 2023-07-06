@@ -27,6 +27,8 @@ document.addEventListener("DOMContentLoaded", function() {
     shell.direction = 1;
     shell.directionNew = 1;
     shell.update = 0;
+    shell.height = 14;
+    shell.width = 12;
     
     // Создание танка
     var tank = document.createElement("img");
@@ -136,6 +138,15 @@ document.addEventListener("DOMContentLoaded", function() {
         if ((parseInt(shell.style.top) < 0) || ((parseInt(shell.style.top) + 16) >= boardHeight) || (parseInt(shell.style.left) < 0) || (parseInt(shell.style.left) >= boardWidth - 16)) {
             shell.update = 0;
             gameBoard.removeChild(shell);
+        }
+        for (var i = 0; i < bricks.length; i++) {
+            brick.style.top = bricks[i].top + "px";
+            brick.style.left = bricks[i].left + "px";
+            if ((((parseInt(shell.style.top) + shell.height) > parseInt(brick.style.top)) && (parseInt(shell.style.top) < (parseInt(brick.style.top) + 40))) && (((parseInt(shell.style.left) + shell.width) > parseInt(brick.style.left)) && (parseInt(shell.style.left) < (parseInt(brick.style.left) + 40)))) {
+                shell.update = 0;
+                gameBoard.removeChild(shell);
+                console.log("1");
+            }
         }
         if (shell.update == 1) {
             requestAnimationFrame(play);
