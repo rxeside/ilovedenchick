@@ -45,9 +45,7 @@ document.addEventListener("DOMContentLoaded", function() {
     document.addEventListener("keydown", function(event) {
         var key = event.key;
         if ((key === "ArrowUp")) {
-            if (((parseInt(tank.style.top) - 40 == 80) && (parseInt(tank.style.left) == 160)) || ((parseInt(tank.style.top) - 40 == 240) && (parseInt(tank.style.left) == 120))
-            || ((parseInt(tank.style.top) - 40 == 400) && (parseInt(tank.style.left) == 240)) || ((parseInt(tank.style.top) - 40 == 560) && (parseInt(tank.style.left) == 560))
-            || (parseInt(tank.style.top) - 40 == -40)) 
+            if ((((parseInt(tank.style.top) + 40) > parseInt(brick.style.top)) && (parseInt(tank.style.top) < (parseInt(brick.style.top) + 40))) && (((parseInt(tank.style.left) + 40) > parseInt(brick.style.left)) && (parseInt(tank.style.left) < (parseInt(brick.style.left) + 40)))) 
             {
                }  else {                                   
                     tank.style.top = (parseInt(tank.style.top) - 4) + "px";
@@ -63,10 +61,9 @@ document.addEventListener("DOMContentLoaded", function() {
            // arr[x-1][y]
            
         } else if ((key === "ArrowDown")) {
-            if (((parseInt(tank.style.top) + 40 == 80) && (parseInt(tank.style.left) == 160)) || ((parseInt(tank.style.top) + 40 == 240) && (parseInt(tank.style.left) == 120))
-            || ((parseInt(tank.style.top) + 40 == 400) && (parseInt(tank.style.left) == 240)) || ((parseInt(tank.style.top) + 40 == 560) && (parseInt(tank.style.left) == 560))
-            || (parseInt(tank.style.top) + 40 == 800)) 
+            if ((((parseInt(tank.style.top) + 40) > parseInt(brick.style.top)) && (parseInt(tank.style.top) < (parseInt(brick.style.top) + 40))) && (((parseInt(tank.style.left) + 40) > parseInt(brick.style.left)) && (parseInt(tank.style.left) < (parseInt(brick.style.left) + 40)))) 
             {
+                console.log("2");
                }  else {   
             tank.style.top = (parseInt(tank.style.top) + 4) + "px";
             shell.directionNew = 2;
@@ -80,9 +77,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }   // arr[x+1][y]
 
         } else if ((key === "ArrowLeft")) {
-            if (((parseInt(tank.style.top) == 80) && (parseInt(tank.style.left) - 40 == 160)) || ((parseInt(tank.style.top) == 240) && (parseInt(tank.style.left) - 40 == 120))
-            || ((parseInt(tank.style.top) == 400) && (parseInt(tank.style.left) - 40 == 240)) || ((parseInt(tank.style.top) == 560) && (parseInt(tank.style.left) - 40 == 560))
-            || (parseInt(tank.style.left) - 40 == -40)) 
+            if ((((parseInt(tank.style.top) + 40) > parseInt(brick.style.top)) && (parseInt(tank.style.top) < (parseInt(brick.style.top) + 40))) && (((parseInt(tank.style.left) + 40) > parseInt(brick.style.left)) && (parseInt(tank.style.left) < (parseInt(brick.style.left) + 40)))) 
             {
                }  else {   
             tank.style.left = (parseInt(tank.style.left) - 4) + "px";
@@ -97,9 +92,7 @@ document.addEventListener("DOMContentLoaded", function() {
         } // arr[x][y-1]
 
         } else if ((key === "ArrowRight")) {
-            if (((parseInt(tank.style.top) == 80) && (parseInt(tank.style.left) + 40 == 160)) || ((parseInt(tank.style.top) == 240) && (parseInt(tank.style.left) + 40 == 120))
-            || ((parseInt(tank.style.top) == 400) && (parseInt(tank.style.left) + 40 == 240)) || ((parseInt(tank.style.top) == 560) && (parseInt(tank.style.left) + 40 == 560))
-            || (parseInt(tank.style.left) + 40 == 800)) 
+            if ((((parseInt(tank.style.top) + 40) > parseInt(brick.style.top)) && (parseInt(tank.style.top) < (parseInt(brick.style.top) + 40))) && (((parseInt(tank.style.left) + 40) > parseInt(brick.style.left)) && (parseInt(tank.style.left) < (parseInt(brick.style.left) + 40)))) 
             {
                }  else {  
             tank.style.left = (parseInt(tank.style.left) + 4) + "px";
