@@ -29,6 +29,11 @@ document.addEventListener("DOMContentLoaded", function() {
     shell.update = 0;
     shell.height = 14;
     shell.width = 12;
+
+    //Создание взрыва
+    var explosion = document.createElement("img");
+    explosion.className = "explosion";
+    explosion.src = 'img/explosion1.png'
     
     // Создание танка
     var tank = document.createElement("img");
@@ -111,17 +116,30 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function updateShall() {
         if (shell.direction == 1) {
-            shell.style.top = (parseInt(shell.style.top) - 4) + "px";
+            shell.style.top = (parseInt(shell.style.top) - 6) + "px";
         }
         if (shell.direction == 2) {
-            shell.style.top = (parseInt(shell.style.top) + 4) + "px";
+            shell.style.top = (parseInt(shell.style.top) + 6) + "px";
         }
         if (shell.direction == 3) {
-            shell.style.left = (parseInt(shell.style.left) - 4) + "px";
+            shell.style.left = (parseInt(shell.style.left) - 6) + "px";
         }
         if (shell.direction == 4) {
-            shell.style.left = (parseInt(shell.style.left) + 4) + "px";
+            shell.style.left = (parseInt(shell.style.left) + 6) + "px";
         }
+    }
+
+    function explosionShall() {
+        shell.update = 0;
+        gameBoard.removeChild(shell);
+        explosion.style.top = (parseInt(shell.style.top) - 9) + "px";
+        explosion.style.left = (parseInt(shell.style.left) - 9) + "px";
+        explosion.src = 'img/explosion1.png';
+        gameBoard.appendChild(explosion);
+        setTimeout(() => { explosion.src = 'img/explosion2.png'; explosion.style.top = (parseInt(explosion.style.top) - 2) + "px"; explosion.style.left = (parseInt(explosion.style.left) - 2) + "px"; }, 80 );
+        setTimeout(() => { explosion.src = 'img/explosion3.png'; explosion.style.top = (parseInt(explosion.style.top) - 1) + "px"; explosion.style.left = (parseInt(explosion.style.left) - 1) + "px"; }, 160 );
+        setTimeout(() => { gameBoard.removeChild(explosion); }, 240 );
+
     }
 
     function play() {
@@ -129,15 +147,13 @@ document.addEventListener("DOMContentLoaded", function() {
         updateShall();
         shell.update = 1;
         if ((parseInt(shell.style.top) < 0) || ((parseInt(shell.style.top) + 16) >= boardHeight) || (parseInt(shell.style.left) < 0) || (parseInt(shell.style.left) >= boardWidth - 16)) {
-            shell.update = 0;
-            gameBoard.removeChild(shell);
+            explosionShall();
         }
         for (var i = 0; i < bricks.length; i++) {
             brick.style.top = bricks[i].top + "px";
             brick.style.left = bricks[i].left + "px";
             if ((((parseInt(shell.style.top) + shell.height) > parseInt(brick.style.top)) && (parseInt(shell.style.top) < (parseInt(brick.style.top) + 40))) && (((parseInt(shell.style.left) + shell.width) > parseInt(brick.style.left)) && (parseInt(shell.style.left) < (parseInt(brick.style.left) + 40)))) {
-                shell.update = 0;
-                gameBoard.removeChild(shell);
+                explosionShall();
                 console.log("1");
             }
         }
