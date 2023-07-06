@@ -23,10 +23,9 @@ document.addEventListener("DOMContentLoaded", function() {
     //Создание снаряда
     var shell = document.createElement("img");
     shell.className = "shell";
-  //  shell.style.top = (boardHeight / 2 - 50) + "px";
-    //shell.style.left = (boardWidth / 2 - 26) + "px";
     shell.src = "img/ShellTop.png";
     shell.direction = 1;
+    shell.directionNew = 1;
     shell.update = 0;
     
     // Создание танка
@@ -50,10 +49,7 @@ document.addEventListener("DOMContentLoaded", function() {
             {
                }  else {                                   
                     tank.style.top = (parseInt(tank.style.top) - 4) + "px";
-                    if (shell.update == 0) {
-                        shell.direction = 1;
-                    }
-                   // shell.direction = 1;
+                    shell.directionNew = 1;
                     if (status === 0) {
                         status = 1;
                         tank.src = 'img/top.png';
@@ -71,10 +67,7 @@ document.addEventListener("DOMContentLoaded", function() {
             {
                }  else {   
             tank.style.top = (parseInt(tank.style.top) + 4) + "px";
-            if (shell.update == 0) {
-                shell.direction = 2;
-            }
-           // shell.direction = 2;
+            shell.directionNew = 2;
             if (status === 0) {
                 status = 1;
                 tank.src = 'img/down.png';
@@ -91,10 +84,7 @@ document.addEventListener("DOMContentLoaded", function() {
             {
                }  else {   
             tank.style.left = (parseInt(tank.style.left) - 4) + "px";
-            if (shell.update == 0) {
-                shell.direction = 3;
-            }
-
+            shell.directionNew = 3;
             if (status === 0) {
                 status = 1;
                 tank.src = 'img/left.png';
@@ -111,9 +101,7 @@ document.addEventListener("DOMContentLoaded", function() {
             {
                }  else {  
             tank.style.left = (parseInt(tank.style.left) + 4) + "px";
-            if (shell.update == 0) {
-                shell.direction = 4;
-            }
+            shell.directionNew = 4;
             if (status === 0) {
                 status = 1;
                 tank.src = 'img/right.png';
@@ -157,23 +145,24 @@ document.addEventListener("DOMContentLoaded", function() {
     // управление снарядом
     document.addEventListener("keydown", function(event) {
         var shot = event.code;
-        if (shot == 'KeyZ') {
-            if ((shell.direction == 1) && (shell.update == 0)) {
+        if ((shot == 'KeyZ') && (shell.update == 0)){
+            shell.direction = shell.directionNew;
+            if (shell.direction == 1) {
                 shell.src = "img/ShellTop.png";
                 shell.style.top = (parseInt(tank.style.top) - 6) + "px";
                 shell.style.left = (parseInt(tank.style.left) + 14) + "px";
             }
-            if ((shell.direction == 2) && (shell.update == 0)) {
+            if (shell.direction == 2) {
                 shell.src = "img/ShellDown.png";
                 shell.style.top = (parseInt(tank.style.top) + 34) + "px";
                 shell.style.left = (parseInt(tank.style.left) + 14) + "px";
             }
-            if ((shell.direction == 3) && (shell.update == 0)) {
+            if (shell.direction == 3) {
                 shell.src = "img/ShellLeft.png";
                 shell.style.top = (parseInt(tank.style.top) + 13) + "px";
                 shell.style.left = (parseInt(tank.style.left) - 5) + "px";
             }
-            if ((shell.direction == 4) && (shell.update == 0)) {
+            if (shell.direction == 4) {
                 shell.src = "img/ShellRight.png";
                 shell.style.top = (parseInt(tank.style.top) + 13) + "px";
                 shell.style.left = (parseInt(tank.style.left) + 34) + "px";
