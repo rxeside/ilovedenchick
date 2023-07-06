@@ -17,6 +17,7 @@ document.addEventListener("DOMContentLoaded", function() {
         brick.className = "brick";
         brick.style.top = bricks[i].top + "px";
         brick.style.left = bricks[i].left + "px";
+        
         gameBoard.appendChild(brick);
     }
 
@@ -46,6 +47,11 @@ document.addEventListener("DOMContentLoaded", function() {
     document.addEventListener("keydown", function(event) {
         var key = event.key;
         if ((key === "ArrowUp")) {
+            for (var i = 0; i < bricks.length; i++) {
+                var brick = document.createElement("div");
+                brick.className = "brick";
+                brick.style.top = bricks[i].top + "px";
+                brick.style.left = bricks[i].left + "px";
             if (!((((parseInt(tank.style.top) + 40) > parseInt(brick.style.top)) && (parseInt(tank.style.top) < (parseInt(brick.style.top) + 44))) && (((parseInt(tank.style.left) + 40) > parseInt(brick.style.left)) && (parseInt(tank.style.left) < (parseInt(brick.style.left) + 40))))) 
             {                                
                     tank.style.top = (parseInt(tank.style.top) - 4) + "px";
@@ -59,6 +65,8 @@ document.addEventListener("DOMContentLoaded", function() {
                     }
         }
            // arr[x-1][y]
+           gameBoard.appendChild(brick);
+    }
            
         } else if ((key === "ArrowDown")) {
             if (!((((parseInt(tank.style.top) + 44) > parseInt(brick.style.top)) && (parseInt(tank.style.top) < (parseInt(brick.style.top) + 40))) && (((parseInt(tank.style.left) + 40) > parseInt(brick.style.left)) && (parseInt(tank.style.left) < (parseInt(brick.style.left) + 40))))) 
