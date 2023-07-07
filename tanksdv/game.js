@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", function() {
         { top: 240, left: 120 },
         { top: 400, left: 240 },
         { top: 560, left: 560 },
+        { top: 300, left: 300},
     ];
     
     for (var i = 0; i < bricks.length; i++) {
@@ -46,70 +47,89 @@ document.addEventListener("DOMContentLoaded", function() {
     gameBoard.appendChild(tank);
     
     // Обработка клавиш для управления танком
+    let found = 0;
+    let foundHere = 0;
+    let went = 0;
     var status = 0; 
     document.addEventListener("keydown", function(event) {
         var key = event.key;
         if ((key === "ArrowUp")) {
-            if ((((parseInt(tank.style.top) + 40) > parseInt(brick.style.top)) && (parseInt(tank.style.top) < (parseInt(brick.style.top) + 40))) && (((parseInt(tank.style.left) + 40) > parseInt(brick.style.left)) && (parseInt(tank.style.left) < (parseInt(brick.style.left) + 40)))) 
-            {
-               }  else {                                   
-                    tank.style.top = (parseInt(tank.style.top) - 4) + "px";
+            for (var i = 0; i < bricks.length; i++) {
+                brick.style.top = bricks[i].top + "px";
+                brick.style.left = bricks[i].left + "px";
+                if ((!((((parseInt(tank.style.top) + 40) > parseInt(brick.style.top)) && (parseInt(tank.style.top) < (parseInt(brick.style.top) + 44))) && (((parseInt(tank.style.left) + 40) > parseInt(brick.style.left)) && (parseInt(tank.style.left) < (parseInt(brick.style.left) + 40))))) & (found == 0))
+                {   
+                    if (went == 0) {                             
+                        tank.style.top = (parseInt(tank.style.top) - 4) + "px";
+                    }
+                    went = 1;
                     shell.directionNew = 1;
                     if (status === 0) {
                         status = 1;
                         tank.src = 'img/top.png';
                     } else if (status === 1) {
-                        status = 0;
-                        tank.src = 'img/top1.png';
+                       status = 0;
+                    tank.src = 'img/top1.png';
                     }
-        }
+                } else {
+                    if (found == 0) {
+                        foundHere = i;
+                    }
+                    found = 1;
+                }
+            }
+            went = 0;
+            if (found == 1) {
+                brick.style.top = bricks[foundHere].top + "px";
+                brick.style.left = bricks[foundHere].left + "px";
+                if (!((((parseInt(tank.style.top) + 40) > parseInt(brick.style.top)) && (parseInt(tank.style.top) < (parseInt(brick.style.top) + 44))) && (((parseInt(tank.style.left) + 40) > parseInt(brick.style.left)) && (parseInt(tank.style.left) < (parseInt(brick.style.left) + 40)))))
+                {
+                    found = 0;
+                }
+            }
            // arr[x-1][y]
            
         } else if ((key === "ArrowDown")) {
-            if ((((parseInt(tank.style.top) + 40) > parseInt(brick.style.top)) && (parseInt(tank.style.top) < (parseInt(brick.style.top) + 40))) && (((parseInt(tank.style.left) + 40) > parseInt(brick.style.left)) && (parseInt(tank.style.left) < (parseInt(brick.style.left) + 40)))) 
-            {
-                console.log("2");
-               }  else {   
-            tank.style.top = (parseInt(tank.style.top) + 4) + "px";
-            shell.directionNew = 2;
-            if (status === 0) {
-                status = 1;
-                tank.src = 'img/down.png';
-            } else if (status === 1) {
-                status = 0;
-                tank.src = 'img/down1.png';
-            }
-        }   // arr[x+1][y]
+            if (!((((parseInt(tank.style.top) + 44) > parseInt(brick.style.top)) && (parseInt(tank.style.top) < (parseInt(brick.style.top) + 40))) && (((parseInt(tank.style.left) + 40) > parseInt(brick.style.left)) && (parseInt(tank.style.left) < (parseInt(brick.style.left) + 40)))) )
+            {   
+                tank.style.top = (parseInt(tank.style.top) + 4) + "px";
+                shell.directionNew = 2;
+                if (status === 0) {
+                    status = 1;
+                    tank.src = 'img/down.png';
+                } else if (status === 1) {
+                    status = 0;
+                    tank.src = 'img/down1.png';
+                }
+            }   // arr[x+1][y]
 
         } else if ((key === "ArrowLeft")) {
-            if ((((parseInt(tank.style.top) + 40) > parseInt(brick.style.top)) && (parseInt(tank.style.top) < (parseInt(brick.style.top) + 40))) && (((parseInt(tank.style.left) + 40) > parseInt(brick.style.left)) && (parseInt(tank.style.left) < (parseInt(brick.style.left) + 40)))) 
+            if (!((((parseInt(tank.style.top) + 40) > parseInt(brick.style.top)) && (parseInt(tank.style.top) < (parseInt(brick.style.top) + 40))) && (((parseInt(tank.style.left) + 40) > parseInt(brick.style.left)) && (parseInt(tank.style.left) < (parseInt(brick.style.left) + 44)))) )
             {
-               }  else {   
-            tank.style.left = (parseInt(tank.style.left) - 4) + "px";
-            shell.directionNew = 3;
-            if (status === 0) {
-                status = 1;
-                tank.src = 'img/left.png';
-            } else if (status === 1) {
-                status = 0;
-                tank.src = 'img/left1.png';
-            }
-        } // arr[x][y-1]
+                tank.style.left = (parseInt(tank.style.left) - 4) + "px";
+                shell.directionNew = 3;
+                if (status === 0) {
+                    status = 1;
+                    tank.src = 'img/left.png';
+                } else if (status === 1) {
+                    status = 0;
+                    tank.src = 'img/left1.png';
+                }
+            } // arr[x][y-1]
 
         } else if ((key === "ArrowRight")) {
-            if ((((parseInt(tank.style.top) + 40) > parseInt(brick.style.top)) && (parseInt(tank.style.top) < (parseInt(brick.style.top) + 40))) && (((parseInt(tank.style.left) + 40) > parseInt(brick.style.left)) && (parseInt(tank.style.left) < (parseInt(brick.style.left) + 40)))) 
-            {
-               }  else {  
-            tank.style.left = (parseInt(tank.style.left) + 4) + "px";
-            shell.directionNew = 4;
-            if (status === 0) {
-                status = 1;
-                tank.src = 'img/right.png';
-            } else if (status === 1) {
-                status = 0;
-                tank.src = 'img/right1.png';
-            }
-        } // arr[x][y+1]
+            if (!((((parseInt(tank.style.top) + 40) > parseInt(brick.style.top)) && (parseInt(tank.style.top) < (parseInt(brick.style.top) + 40))) && (((parseInt(tank.style.left) + 44) > parseInt(brick.style.left)) && (parseInt(tank.style.left) < (parseInt(brick.style.left) + 40)))) )
+            { 
+                tank.style.left = (parseInt(tank.style.left) + 4) + "px";
+                shell.directionNew = 4;
+                if (status === 0) {
+                    status = 1;
+                    tank.src = 'img/right.png';
+                } else if (status === 1) {
+                    status = 0;
+                    tank.src = 'img/right1.png';
+                }
+            } // arr[x][y+1]
 
         }
     });
