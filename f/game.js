@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", function() {
         { top: 240, left: 120 },
         { top: 400, left: 240 },
         { top: 560, left: 560 },
+        { top: 300, left: 300},
     ];
     
     for (var i = 0; i < bricks.length; i++) {
@@ -17,7 +18,6 @@ document.addEventListener("DOMContentLoaded", function() {
         brick.className = "brick";
         brick.style.top = bricks[i].top + "px";
         brick.style.left = bricks[i].left + "px";
-        
         gameBoard.appendChild(brick);
     }
 
@@ -30,6 +30,11 @@ document.addEventListener("DOMContentLoaded", function() {
     shell.update = 0;
     shell.height = 14;
     shell.width = 12;
+
+    //Создание взрыва
+    var explosion = document.createElement("img");
+    explosion.className = "explosion";
+    explosion.src = 'img/explosion1.png'
     
     // Создание танка
     var tank = document.createElement("img");
@@ -45,89 +50,122 @@ document.addEventListener("DOMContentLoaded", function() {
     
     var status = 0; 
     document.addEventListener("keydown", function(event) {
+        let x = 0;
         var key = event.key;
         if ((key === "ArrowUp")) {
             for (var i = 0; i < bricks.length; i++) {
-                var brick = document.createElement("div");
-                brick.className = "brick";
                 brick.style.top = bricks[i].top + "px";
                 brick.style.left = bricks[i].left + "px";
-            if (!((((parseInt(tank.style.top) + 40) > parseInt(brick.style.top)) && (parseInt(tank.style.top) < (parseInt(brick.style.top) + 44))) && (((parseInt(tank.style.left) + 40) > parseInt(brick.style.left)) && (parseInt(tank.style.left) < (parseInt(brick.style.left) + 40))))) 
-            {                                
-                    tank.style.top = (parseInt(tank.style.top) - 4) + "px";
-                    shell.directionNew = 1;
-                    if (status === 0) {
-                        status = 1;
-                        tank.src = 'img/top.png';
-                    } else if (status === 1) {
-                        status = 0;
-                        tank.src = 'img/top1.png';
-                    }
-        }
+                if (!((((parseInt(tank.style.top) + 40) > parseInt(brick.style.top)) && (parseInt(tank.style.top) < (parseInt(brick.style.top) + 44))) && (((parseInt(tank.style.left) + 40) > parseInt(brick.style.left)) && (parseInt(tank.style.left) < (parseInt(brick.style.left) + 40))) || ((parseInt(tank.style.top) <= 0))))
+                {  
+                    x+=1;
+                    if (x == bricks.length) {
+                        tank.style.top = (parseInt(tank.style.top) - 4) + "px";
+                        shell.directionNew = 1;
+                        if (status === 0) {
+                            status = 1;
+                            tank.src = 'img/top.png';
+                        } else if (status === 1) {
+                            status = 0;
+                            tank.src = 'img/top1.png';
+                        }
+                    } 
+                }
+            }    
            // arr[x-1][y]
-           gameBoard.appendChild(brick);
-    }
            
         } else if ((key === "ArrowDown")) {
-            if (!((((parseInt(tank.style.top) + 44) > parseInt(brick.style.top)) && (parseInt(tank.style.top) < (parseInt(brick.style.top) + 40))) && (((parseInt(tank.style.left) + 40) > parseInt(brick.style.left)) && (parseInt(tank.style.left) < (parseInt(brick.style.left) + 40))))) 
-            {
-            tank.style.top = (parseInt(tank.style.top) + 4) + "px";
-            shell.directionNew = 2;
-            if (status === 0) {
-                status = 1;
-                tank.src = 'img/down.png';
-            } else if (status === 1) {
-                status = 0;
-                tank.src = 'img/down1.png';
-            }
-        }   // arr[x+1][y]
+            for (let i = 0; i < bricks.length; i++) {
+                brick.style.top = bricks[i].top + "px";
+                brick.style.left = bricks[i].left + "px";
+                if (!((((parseInt(tank.style.top) + 44) > parseInt(brick.style.top)) && (parseInt(tank.style.top) < (parseInt(brick.style.top) + 40))) && (((parseInt(tank.style.left) + 40) > parseInt(brick.style.left)) && (parseInt(tank.style.left) < (parseInt(brick.style.left) + 40))) || ((parseInt(tank.style.top) + 40 == boardHeight))))
+                {   
+                    x+=1;
+                    if (x == bricks.length) {
+                        tank.style.top = (parseInt(tank.style.top) + 4) + "px";
+                        shell.directionNew = 2;
+                        if (status === 0) {
+                            status = 1;
+                            tank.src = 'img/down.png';
+                        } else if (status === 1) {
+                            status = 0;
+                            tank.src = 'img/down1.png';
+                        }
+                    }
+                    
+                }
+                
+            }   // arr[x+1][y]
 
         } else if ((key === "ArrowLeft")) {
-            if (!((((parseInt(tank.style.top) + 40) > parseInt(brick.style.top)) && (parseInt(tank.style.top) < (parseInt(brick.style.top) + 40))) && (((parseInt(tank.style.left) + 40) > parseInt(brick.style.left)) && (parseInt(tank.style.left) < (parseInt(brick.style.left) + 44))))) 
-            { 
-            tank.style.left = (parseInt(tank.style.left) - 4) + "px";
-            shell.directionNew = 3;
-            if (status === 0) {
-                status = 1;
-                tank.src = 'img/left.png';
-            } else if (status === 1) {
-                status = 0;
-                tank.src = 'img/left1.png';
+            for (let i = 0; i < bricks.length; i++) {
+                brick.style.top = bricks[i].top + "px";
+                brick.style.left = bricks[i].left + "px";
+                if (!((((parseInt(tank.style.top) + 40) > parseInt(brick.style.top)) && (parseInt(tank.style.top) < (parseInt(brick.style.top) + 40))) && (((parseInt(tank.style.left) + 40) > parseInt(brick.style.left)) && (parseInt(tank.style.left) < (parseInt(brick.style.left) + 44))) || ((parseInt(tank.style.left) == 0))))
+                {
+                    x+=1;
+                    if (x == bricks.length) {
+                        tank.style.left = (parseInt(tank.style.left) - 4) + "px";
+                        shell.directionNew = 3;
+                        if (status === 0) {
+                            status = 1;
+                            tank.src = 'img/left.png';
+                        } else if (status === 1) {
+                            status = 0;
+                            tank.src = 'img/left1.png';
+                        }
+                    }
+                } // arr[x][y-1]
             }
-        } // arr[x][y-1]
-
         } else if ((key === "ArrowRight")) {
-            if (!((((parseInt(tank.style.top) + 40) > parseInt(brick.style.top)) && (parseInt(tank.style.top) < (parseInt(brick.style.top) + 40))) && (((parseInt(tank.style.left) + 44) > parseInt(brick.style.left)) && (parseInt(tank.style.left) < (parseInt(brick.style.left) + 40))))) 
-            { 
-            tank.style.left = (parseInt(tank.style.left) + 4) + "px";
-            shell.directionNew = 4;
-            if (status === 0) {
-                status = 1;
-                tank.src = 'img/right.png';
-            } else if (status === 1) {
-                status = 0;
-                tank.src = 'img/right1.png';
+            for (let i = 0; i < bricks.length; i++) {
+                brick.style.top = bricks[i].top + "px";
+                brick.style.left = bricks[i].left + "px";
+                if (!((((parseInt(tank.style.top) + 40) > parseInt(brick.style.top)) && (parseInt(tank.style.top) < (parseInt(brick.style.top) + 40))) && (((parseInt(tank.style.left) + 44) > parseInt(brick.style.left)) && (parseInt(tank.style.left) < (parseInt(brick.style.left) + 40))) || ((parseInt(tank.style.left) + 40  == boardWidth))))
+                {
+                    x+=1;
+                    if (x == bricks.length) { 
+                        tank.style.left = (parseInt(tank.style.left) + 4) + "px";
+                        shell.directionNew = 4;
+                        if (status === 0) {
+                            status = 1;
+                            tank.src = 'img/right.png';
+                        } else if (status === 1) {
+                            status = 0;
+                            tank.src = 'img/right1.png';
+                        }
+                    }
+                } // arr[x][y+1]
             }
-        } // arr[x][y+1]
-
         }
-        
-
     });
 
     function updateShall() {
         if (shell.direction == 1) {
-            shell.style.top = (parseInt(shell.style.top) - 4) + "px";
+            shell.style.top = (parseInt(shell.style.top) - 6) + "px";
         }
         if (shell.direction == 2) {
-            shell.style.top = (parseInt(shell.style.top) + 4) + "px";
+            shell.style.top = (parseInt(shell.style.top) + 6) + "px";
         }
         if (shell.direction == 3) {
-            shell.style.left = (parseInt(shell.style.left) - 4) + "px";
+            shell.style.left = (parseInt(shell.style.left) - 6) + "px";
         }
         if (shell.direction == 4) {
-            shell.style.left = (parseInt(shell.style.left) + 4) + "px";
+            shell.style.left = (parseInt(shell.style.left) + 6) + "px";
         }
+    }
+
+    function explosionShall() {
+        shell.update = 0;
+        gameBoard.removeChild(shell);
+        explosion.style.top = (parseInt(shell.style.top) - 9) + "px";
+        explosion.style.left = (parseInt(shell.style.left) - 9) + "px";
+        explosion.src = 'img/explosion1.png';
+        gameBoard.appendChild(explosion);
+        setTimeout(() => { explosion.src = 'img/explosion2.png'; explosion.style.top = (parseInt(explosion.style.top) - 2) + "px"; explosion.style.left = (parseInt(explosion.style.left) - 2) + "px"; }, 80 );
+        setTimeout(() => { explosion.src = 'img/explosion3.png'; explosion.style.top = (parseInt(explosion.style.top) - 1) + "px"; explosion.style.left = (parseInt(explosion.style.left) - 1) + "px"; }, 160 );
+        setTimeout(() => { gameBoard.removeChild(explosion); }, 240 );
+
     }
 
     function play() {
@@ -135,17 +173,13 @@ document.addEventListener("DOMContentLoaded", function() {
         updateShall();
         shell.update = 1;
         if ((parseInt(shell.style.top) < 0) || ((parseInt(shell.style.top) + 16) >= boardHeight) || (parseInt(shell.style.left) < 0) || (parseInt(shell.style.left) >= boardWidth - 16)) {
-            shell.update = 0;
-            gameBoard.removeChild(shell);
+            explosionShall();
         }
-
-        
         for (var i = 0; i < bricks.length; i++) {
             brick.style.top = bricks[i].top + "px";
             brick.style.left = bricks[i].left + "px";
             if ((((parseInt(shell.style.top) + shell.height) > parseInt(brick.style.top)) && (parseInt(shell.style.top) < (parseInt(brick.style.top) + 40))) && (((parseInt(shell.style.left) + shell.width) > parseInt(brick.style.left)) && (parseInt(shell.style.left) < (parseInt(brick.style.left) + 40)))) {
-                shell.update = 0;
-                gameBoard.removeChild(shell);
+                explosionShall();
                 console.log("1");
             }
         }
