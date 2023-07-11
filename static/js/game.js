@@ -59,107 +59,228 @@ document.addEventListener("DOMContentLoaded", function() {
     
     // Обработка клавиш для управления танком
     
-    var status = 0; 
-    document.addEventListener("keydown", function(event) {
-        let x = 0;
-        var key = event.key;
-        if ((key === "ArrowUp")) {
-            let can_move = true;
-
-            brick.forEach(element => { if (element != undefined) {
-                if (((((parseInt(tank.style.top) + 40) > parseInt(element.Pos_Y)) && (parseInt(tank.style.top) < (parseInt(element.Pos_Y) + 44))) && (((parseInt(tank.style.left) + 40) > parseInt(element.Pos_X)) && (parseInt(tank.style.left) < (parseInt(element.Pos_X) + 40))) || ((parseInt(tank.style.top) <= 0))))
-                {  
-                    if (element.CanTPass === 0)
-                       can_move = false;
+    var status = 0;
+    let keyPressed = 0;
+    document.addEventListener('keydown', (event) => {
+        if (!keyPressed) {
+            console.log("start");
+            keyPressed = setInterval(function() {
+                console.log("funcON");
+                var key = event.key;
+                
+                
+                if ((key === "ArrowUp")) {
+                    let can_move = true;
+                   
+                    brick.forEach(element => { if (element != undefined) {
+                        if (((((parseInt(tank.style.top) + 40) > parseInt(element.Pos_Y)) && (parseInt(tank.style.top) < (parseInt(element.Pos_Y) + 41))) && (((parseInt(tank.style.left) + 40) > parseInt(element.Pos_X)) && (parseInt(tank.style.left) < (parseInt(element.Pos_X) + 40))) || ((parseInt(tank.style.top) <= 0))))
+                        {  
+                            if (element.CanTPass === 0)
+                               can_move = false;
+                            
+                        } 
+                    }});
                     
-                } 
-            }});
-            
-            shell.directionNew = 1;
-            if (status === 0) {
-                status = 1;
-                tank.src = '../static/image/top.png';
-            } else if (status === 1) {
-                status = 0;
-                tank.src = '../static/image/top1.png';
-            }
+                    shell.directionNew = 1;
+                    if (status === 0) {
+                        status = 1;
+                        tank.src = '../static/image/top.png';
+                    } else if (status === 1) {
+                        status = 0;
+                        tank.src = '../static/image/top1.png';
+                    }
+        
+                    if (can_move) {
+                        tank.style.top = (parseInt(tank.style.top) - 1) + "px";
+                    } 
+                   
+                } else if ((key === "ArrowDown")) {
+                    let can_move = true;
+        
+                    brick.forEach(element => { if (element != undefined) {
+                        if (((((parseInt(tank.style.top) + 41) > parseInt(element.Pos_Y)) && (parseInt(tank.style.top) < (parseInt(element.Pos_Y) + 40))) && (((parseInt(tank.style.left) + 40) > parseInt(element.Pos_X)) && (parseInt(tank.style.left) < (parseInt(element.Pos_X) + 40))) || ((parseInt(tank.style.top) + 40 == boardHeight))))
+                        {  
+                            if (element.CanTPass === 0)
+                                can_move = false;
+                        } 
+                    }});
+        
+                    shell.directionNew = 2;
+                    if (status === 0) {
+                        status = 1;
+                        tank.src = '../static/image/down.png';
+                    } else if (status === 1) {
+                        status = 0;
+                        tank.src = '../static/image/down1.png';
+                    }
+        
+                    if (can_move) {
+                        tank.style.top = (parseInt(tank.style.top) + 1) + "px";
+                    }           
+        
+                } else if ((key === "ArrowLeft")) {
+                    let can_move = true;
+        
+                    brick.forEach(element => { if (element != undefined) {
+                        if ((((parseInt(tank.style.top) + 40) > parseInt(element.Pos_Y)) && (parseInt(tank.style.top) < (parseInt(element.Pos_Y) + 40))) && (((parseInt(tank.style.left) + 40) > parseInt(element.Pos_X)) && (parseInt(tank.style.left) < (parseInt(element.Pos_X) + 41))) || ((parseInt(tank.style.left) == 0)))
+                        {  
+                            if (element.CanTPass === 0)
+                                can_move = false;
+                        } 
+                    }});
+        
+                    shell.directionNew = 3;
+                    if (status === 0) {
+                        status = 1;
+                        tank.src = '../static/image/left.png';
+                    } else if (status === 1) {
+                        status = 0;
+                        tank.src = '../static/image/left1.png';
+                    }
+        
+                    if (can_move) {
+                        tank.style.left = (parseInt(tank.style.left) - 1) + "px";
+                    }
+                } else if ((key === "ArrowRight")) {
+                    let can_move = true;
+        
+                    brick.forEach(element => { if (element != undefined) {
+                        if (((((parseInt(tank.style.top) + 40) > parseInt(element.Pos_Y)) && (parseInt(tank.style.top) < (parseInt(element.Pos_Y) + 40))) && (((parseInt(tank.style.left) + 41) > parseInt(element.Pos_X)) && (parseInt(tank.style.left) < (parseInt(element.Pos_X) + 40))) || ((parseInt(tank.style.left) + 40  == boardWidth))))
+                        {   
+                            if (element.CanTPass === 0)
+                                can_move = false;
+                        } 
+                    }});
+        
+                    shell.directionNew = 4;
+                    if (status === 0) {
+                        status = 1;
+                        tank.src = '../static/image/right.png';
+                    } else if (status === 1) {
+                        status = 0;
+                        tank.src = '../static/image/right1.png';
+                    }
+        
+                    if (can_move) { 
+                        tank.style.left = (parseInt(tank.style.left) + 1) + "px";
+                    }
+                }
+            }, 7);
+        }
+    })
 
-            if (can_move) {
-                tank.style.top = (parseInt(tank.style.top) - 4) + "px";
-            } 
-           
-        } else if ((key === "ArrowDown")) {
-            let can_move = true;
-
-            brick.forEach(element => { if (element != undefined) {
-                if (((((parseInt(tank.style.top) + 44) > parseInt(element.Pos_Y)) && (parseInt(tank.style.top) < (parseInt(element.Pos_Y) + 40))) && (((parseInt(tank.style.left) + 40) > parseInt(element.Pos_X)) && (parseInt(tank.style.left) < (parseInt(element.Pos_X) + 40))) || ((parseInt(tank.style.top) + 40 == boardHeight))))
-                {  
-                    if (element.CanTPass === 0)
-                        can_move = false;
-                } 
-            }});
-
-            shell.directionNew = 2;
-            if (status === 0) {
-                status = 1;
-                tank.src = '../static/image/down.png';
-            } else if (status === 1) {
-                status = 0;
-                tank.src = '../static/image/down1.png';
-            }
-
-            if (can_move) {
-                tank.style.top = (parseInt(tank.style.top) + 4) + "px";
-            }           
-
-        } else if ((key === "ArrowLeft")) {
-            let can_move = true;
-
-            brick.forEach(element => { if (element != undefined) {
-                if ((((parseInt(tank.style.top) + 40) > parseInt(element.Pos_Y)) && (parseInt(tank.style.top) < (parseInt(element.Pos_Y) + 40))) && (((parseInt(tank.style.left) + 40) > parseInt(element.Pos_X)) && (parseInt(tank.style.left) < (parseInt(element.Pos_X) + 44))) || ((parseInt(tank.style.left) == 0)))
-                {  
-                    if (element.CanTPass === 0)
-                        can_move = false;
-                } 
-            }});
-
-            shell.directionNew = 3;
-            if (status === 0) {
-                status = 1;
-                tank.src = '../static/image/left.png';
-            } else if (status === 1) {
-                status = 0;
-                tank.src = '../static/image/left1.png';
-            }
-
-            if (can_move) {
-                tank.style.left = (parseInt(tank.style.left) - 4) + "px";
-            }
-        } else if ((key === "ArrowRight")) {
-            let can_move = true;
-
-            brick.forEach(element => { if (element != undefined) {
-                if (((((parseInt(tank.style.top) + 40) > parseInt(element.Pos_Y)) && (parseInt(tank.style.top) < (parseInt(element.Pos_Y) + 40))) && (((parseInt(tank.style.left) + 44) > parseInt(element.Pos_X)) && (parseInt(tank.style.left) < (parseInt(element.Pos_X) + 40))) || ((parseInt(tank.style.left) + 40  == boardWidth))))
-                {   
-                    if (element.CanTPass === 0)
-                        can_move = false;
-                } 
-            }});
-
-            shell.directionNew = 4;
-            if (status === 0) {
-                status = 1;
-                tank.src = '../static/image/right.png';
-            } else if (status === 1) {
-                status = 0;
-                tank.src = '../static/image/right1.png';
-            }
-
-            if (can_move) { 
-                tank.style.left = (parseInt(tank.style.left) + 4) + "px";
+    document.addEventListener('keyup', (event) => {
+        if (keyPressed) {
+            var key = event.key;
+            if (key == "ArrowUp" || key === "ArrowDown" || key == "ArrowRight" || key == "ArrowLeft") {
+                console.log("STOP");
+                clearInterval(keyPressed);
+                keyPressed = 0;
             }
         }
-    });
+    })
+    // document.addEventListener("keydown", function(event) {
+        
+    //     let x = 0;
+    //     var key = event.key;
+
+    //     if ((key === "ArrowUp")) {
+    //         let can_move = true;
+
+    //         brick.forEach(element => { if (element != undefined) {
+    //             if (((((parseInt(tank.style.top) + 40) > parseInt(element.Pos_Y)) && (parseInt(tank.style.top) < (parseInt(element.Pos_Y) + 44))) && (((parseInt(tank.style.left) + 40) > parseInt(element.Pos_X)) && (parseInt(tank.style.left) < (parseInt(element.Pos_X) + 40))) || ((parseInt(tank.style.top) <= 0))))
+    //             {  
+    //                 if (element.CanTPass === 0)
+    //                    can_move = false;
+                    
+    //             } 
+    //         }});
+            
+    //         shell.directionNew = 1;
+    //         if (status === 0) {
+    //             status = 1;
+    //             tank.src = '../static/image/top.png';
+    //         } else if (status === 1) {
+    //             status = 0;
+    //             tank.src = '../static/image/top1.png';
+    //         }
+
+    //         if (can_move) {
+    //             tank.style.top = (parseInt(tank.style.top) - 4) + "px";
+    //         } 
+           
+    //     } else if ((key === "ArrowDown")) {
+    //         let can_move = true;
+
+    //         brick.forEach(element => { if (element != undefined) {
+    //             if (((((parseInt(tank.style.top) + 44) > parseInt(element.Pos_Y)) && (parseInt(tank.style.top) < (parseInt(element.Pos_Y) + 40))) && (((parseInt(tank.style.left) + 40) > parseInt(element.Pos_X)) && (parseInt(tank.style.left) < (parseInt(element.Pos_X) + 40))) || ((parseInt(tank.style.top) + 40 == boardHeight))))
+    //             {  
+    //                 if (element.CanTPass === 0)
+    //                     can_move = false;
+    //             } 
+    //         }});
+
+    //         shell.directionNew = 2;
+    //         if (status === 0) {
+    //             status = 1;
+    //             tank.src = '../static/image/down.png';
+    //         } else if (status === 1) {
+    //             status = 0;
+    //             tank.src = '../static/image/down1.png';
+    //         }
+
+    //         if (can_move) {
+    //             tank.style.top = (parseInt(tank.style.top) + 4) + "px";
+    //         }           
+
+    //     } else if ((key === "ArrowLeft")) {
+    //         let can_move = true;
+
+    //         brick.forEach(element => { if (element != undefined) {
+    //             if ((((parseInt(tank.style.top) + 40) > parseInt(element.Pos_Y)) && (parseInt(tank.style.top) < (parseInt(element.Pos_Y) + 40))) && (((parseInt(tank.style.left) + 40) > parseInt(element.Pos_X)) && (parseInt(tank.style.left) < (parseInt(element.Pos_X) + 44))) || ((parseInt(tank.style.left) == 0)))
+    //             {  
+    //                 if (element.CanTPass === 0)
+    //                     can_move = false;
+    //             } 
+    //         }});
+
+    //         shell.directionNew = 3;
+    //         if (status === 0) {
+    //             status = 1;
+    //             tank.src = '../static/image/left.png';
+    //         } else if (status === 1) {
+    //             status = 0;
+    //             tank.src = '../static/image/left1.png';
+    //         }
+
+    //         if (can_move) {
+    //             tank.style.left = (parseInt(tank.style.left) - 4) + "px";
+    //         }
+    //     } else if ((key === "ArrowRight")) {
+    //         let can_move = true;
+
+    //         brick.forEach(element => { if (element != undefined) {
+    //             if (((((parseInt(tank.style.top) + 40) > parseInt(element.Pos_Y)) && (parseInt(tank.style.top) < (parseInt(element.Pos_Y) + 40))) && (((parseInt(tank.style.left) + 44) > parseInt(element.Pos_X)) && (parseInt(tank.style.left) < (parseInt(element.Pos_X) + 40))) || ((parseInt(tank.style.left) + 40  == boardWidth))))
+    //             {   
+    //                 if (element.CanTPass === 0)
+    //                     can_move = false;
+    //             } 
+    //         }});
+
+    //         shell.directionNew = 4;
+    //         if (status === 0) {
+    //             status = 1;
+    //             tank.src = '../static/image/right.png';
+    //         } else if (status === 1) {
+    //             status = 0;
+    //             tank.src = '../static/image/right1.png';
+    //         }
+
+    //         if (can_move) { 
+    //             tank.style.left = (parseInt(tank.style.left) + 4) + "px";
+    //         }
+    //     }
+    // });
 
     function updateShall() {
         if (shell.direction == 1) {
@@ -200,14 +321,14 @@ document.addEventListener("DOMContentLoaded", function() {
         for (var i = 0; i < brick.length; i++) {
             element = brick[i];
             if (element != undefined) {
-            if ((((parseInt(shell.style.top) + shell.height) > parseInt(element.Pos_Y)) && (parseInt(shell.style.top) < (parseInt(element.Pos_Y) + 40))) && (((parseInt(shell.style.left) + shell.width) > parseInt(element.Pos_X)) && (parseInt(shell.style.left) < (parseInt(element.Pos_X) + 40))) && (element.CanBPass === 0)) {
-                explosionShall();
-                if (element.IsDestructible === 1) {
-                    let removeObj = document.getElementById(i);
-                    brick[i] = undefined;
-                    removeObj.remove();
+                if ((((parseInt(shell.style.top) + shell.height) > parseInt(element.Pos_Y)) && (parseInt(shell.style.top) < (parseInt(element.Pos_Y) + 40))) && (((parseInt(shell.style.left) + shell.width) > parseInt(element.Pos_X)) && (parseInt(shell.style.left) < (parseInt(element.Pos_X) + 40))) && (element.CanBPass === 0)) {
+                    explosionShall();
+                    if (element.IsDestructible === 1) {
+                        let removeObj = document.getElementById(i);
+                        brick[i] = undefined;
+                        removeObj.remove();
+                    }
                 }
-            }
             }
         }
         if (shell.update == 1) {
