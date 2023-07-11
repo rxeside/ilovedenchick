@@ -1,8 +1,12 @@
 document.addEventListener("DOMContentLoaded", function() {
     // Создание игрового поля
-    var gameBoard = document.getElementById("game-board");
-    var boardWidth = gameBoard.clientWidth;
-    var boardHeight = gameBoard.clientHeight;
+    let gameBoard = document.getElementById("game-board");
+    console.log(innerHeight);
+    gameBoard.style.height = innerHeight * 0.8 + "px";
+    gameBoard.style.width = gameBoard.style.height;
+    let boardWidth = gameBoard.clientWidth;
+    let boardHeight = gameBoard.clientHeight;
+    let marginLeft = gameBoard.getBoundingClientRect().left // !!!!!!!!! сделать лоя топа !!!!!!!!!!!!!!!!
 
     // Создание и отображение кирпичей на поле
     const socket = new WebSocket("ws://localhost:3000/ws");
@@ -11,13 +15,14 @@ document.addEventListener("DOMContentLoaded", function() {
     socket.onmessage = function(event) {
         brick = JSON.parse(event.data);
         for (let i = 0; i < brick.length; i++) {
-            brick[i].Pos_X = brick[i].Pos_X * 40 + "px";
+            brick[i].Pos_X = marginLeft + brick[i].Pos_X * 40 + "px";
             brick[i].Pos_Y = brick[i].Pos_Y * 40 + "px";
             console.log(i);
             createNewElt(brick[i], i);
         };
 
         console.log(brick);
+        console.log(marginLeft);
     };
 
     function createNewElt(element, i) {
@@ -27,7 +32,7 @@ document.addEventListener("DOMContentLoaded", function() {
         obj.src = element.ImgURL;
 
         obj.style.top = element.Pos_Y;
-        obj.style.left = element.Pos_X;
+        obj.style.left = element.Pos_X; 
 
         gameBoard.appendChild(obj);
     }
@@ -51,7 +56,7 @@ document.addEventListener("DOMContentLoaded", function() {
     var tank = document.createElement("img");
     tank.className = "tank";
     tank.style.top = (boardHeight / 2 - 40) + "px";
-    tank.style.left = (boardWidth / 2 - 40) + "px";
+    tank.style.left = (boardWidth / 2 - 40) + marginLeft + "px";
     tank.src = '../static/image/top.png';
     
     // Добавление танка на игровое поле
@@ -63,9 +68,9 @@ document.addEventListener("DOMContentLoaded", function() {
     let keyPressed = 0;
     document.addEventListener('keydown', (event) => {
         if (!keyPressed) {
-            console.log("start");
+            //console.log("start");
             keyPressed = setInterval(function() {
-                console.log("funcON");
+                //console.log("funcON");
                 var key = event.key;
                 
                 
@@ -122,7 +127,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     let can_move = true;
         
                     brick.forEach(element => { if (element != undefined) {
-                        if ((((parseInt(tank.style.top) + 40) > parseInt(element.Pos_Y)) && (parseInt(tank.style.top) < (parseInt(element.Pos_Y) + 40))) && (((parseInt(tank.style.left) + 40) > parseInt(element.Pos_X)) && (parseInt(tank.style.left) < (parseInt(element.Pos_X) + 41))) || ((parseInt(tank.style.left) == 0)))
+                        if ((((parseInt(tank.style.top) + 40) > parseInt(element.Pos_Y)) && (parseInt(tank.style.top) < (parseInt(element.Pos_Y) + 40))) && (((parseInt(tank.style.left) + 40) > parseInt(element.Pos_X)) && (parseInt(tank.style.left) < (parseInt(element.Pos_X) + 41))) || ((parseInt(tank.style.left) <= marginLeft)))
                         {  
                             if (element.CanTPass === 0)
                                 can_move = false;
@@ -145,7 +150,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     let can_move = true;
         
                     brick.forEach(element => { if (element != undefined) {
-                        if (((((parseInt(tank.style.top) + 40) > parseInt(element.Pos_Y)) && (parseInt(tank.style.top) < (parseInt(element.Pos_Y) + 40))) && (((parseInt(tank.style.left) + 41) > parseInt(element.Pos_X)) && (parseInt(tank.style.left) < (parseInt(element.Pos_X) + 40))) || ((parseInt(tank.style.left) + 40  == boardWidth))))
+                        if (((((parseInt(tank.style.top) + 40) > parseInt(element.Pos_Y)) && (parseInt(tank.style.top) < (parseInt(element.Pos_Y) + 40))) && (((parseInt(tank.style.left) + 41) > parseInt(element.Pos_X)) && (parseInt(tank.style.left) < (parseInt(element.Pos_X) + 40))) || ((parseInt(tank.style.left) + 40  >= boardWidth + marginLeft))))
                         {   
                             if (element.CanTPass === 0)
                                 can_move = false;
@@ -173,7 +178,7 @@ document.addEventListener("DOMContentLoaded", function() {
         if (keyPressed) {
             var key = event.key;
             if (key == "ArrowUp" || key === "ArrowDown" || key == "ArrowRight" || key == "ArrowLeft") {
-                console.log("STOP");
+                //console.log("STOP");
                 clearInterval(keyPressed);
                 keyPressed = 0;
             }
@@ -314,7 +319,7 @@ document.addEventListener("DOMContentLoaded", function() {
         gameBoard.appendChild(shell);
         updateShall();
         shell.update = 1;
-        if ((parseInt(shell.style.top) < 0) || ((parseInt(shell.style.top) + 16) >= boardHeight) || (parseInt(shell.style.left) < 0) || (parseInt(shell.style.left) >= boardWidth - 16)) {
+        if ((parseInt(shell.style.top) < 0) || ((parseInt(shell.style.top) + 16) >= boardHeight) || (parseInt(shell.style.left) < marginLeft) || (parseInt(shell.style.left) >= boardWidth + marginLeft - 16)) {
             explosionShall();
         }
 
