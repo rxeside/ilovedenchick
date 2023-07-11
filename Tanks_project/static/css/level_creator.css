@@ -1,0 +1,187 @@
+*
+{
+    padding: 0;
+    margin: 0;
+}
+
+.background
+{
+    background: url(../image/fon.jpg) no-repeat;
+    width: 100%;
+    background-size: cover;
+}
+
+.level-data
+{
+    display: flex;
+    flex-direction: column;
+    /* background-color: #585858; */
+    /* background: url(../image/cfp.png); */
+    padding: 20px 0 0 20px;
+    gap: 30px;
+    opacity: 0.7;
+}
+
+.level-data__btn
+{
+    width: 40%;
+    font: 400 normal 14px/30px 'Press Start 2P';
+    border-radius: 15%;
+}
+
+.workspace{
+    display: flex;
+    /* padding-left: 15%; */
+    padding-top: 10%;
+}
+
+.name
+{
+    display: flex;
+    background-color: rgb(153, 144, 144);
+    opacity: 0.7;
+    padding: 4px;
+    border-radius: 5px;
+    width: 76%;
+}
+
+.name__title
+{
+    font: 400 normal 24px/24px 'Press Start 2P';
+}
+
+.name__input
+{
+    width: 150px;
+    height: 20px;
+}
+
+.sizes
+{
+    display: flex;
+    background-color: rgb(153, 144, 144);
+    opacity: 0.7;
+    padding: 4px 4px 4px 4px;
+    border-radius: 5px;
+    width: 66.75%;
+}
+
+.sizes__title
+{
+    font: 400 normal 24px/24px 'Press Start 2P';
+}
+
+.sizes__side
+{
+    width: 60px;
+    height: 20px;
+}
+
+.page
+{
+    display: grid;
+    grid-template-columns: 48% 52%;
+    grid-template-rows: 30% 70%;
+    max-height: 969px;
+    margin-left: 10%;
+    margin-right: 10%;
+}
+
+.field
+{
+    display: grid;
+    width: 800px;
+}
+
+.field__cell
+{
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.menu
+{
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 12%;
+    visibility: hidden;
+    flex-direction: column;
+    align-items: flex-start; 
+    justify-content: center; 
+    margin-left: 6%;
+    margin-bottom: 28%;
+    margin-right: 44%;
+    margin-top: 2%;
+    padding: 2%;
+    background-color: rgb(56, 102, 100);
+    opacity: 0.5;
+    border-radius: 5%;
+}
+
+.menu a
+{
+    font: 400 normal 18px/18px 'Press Start 2P';
+    color: rgb(255, 255, 255);
+}
+
+.menu a:hover
+{
+    background-color: gray;
+}
+
+.is_active
+{
+    background-color: dimgray;
+}
+
+.message
+{
+    font: 400 normal 16px/25px 'Press Start 2P';
+    visibility: hidden;
+}
+
+.success
+{
+    color: lawngreen;
+    visibility: visible;
+}
+
+.error
+{
+    color: red;
+    visibility: visible;
+}
+
+
+
+/* #Brick
+{
+    font: 400 normal 18px/18px 'Press Start 2P';
+    color: rgb(255, 255, 255);
+}
+
+#None
+{
+    font: 400 normal 18px/18px 'Press Start 2P';
+    color: rgb(255, 255, 255);
+}
+
+#Steel
+{
+    font: 400 normal 18px/18px 'Press Start 2P';
+    color: rgb(255, 255, 255);
+}
+
+#Forest
+{
+    font: 400 normal 18px/18px 'Press Start 2P';
+    color: rgb(255, 255, 255);
+}
+
+#Water
+{
+    font: 400 normal 18px/18px 'Press Start 2P';
+    color: rgb(255, 255, 255);
+} */
