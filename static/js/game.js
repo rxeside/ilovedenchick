@@ -6,7 +6,8 @@ document.addEventListener("DOMContentLoaded", function() {
     gameBoard.style.width = gameBoard.style.height;
     let boardWidth = gameBoard.clientWidth;
     let boardHeight = gameBoard.clientHeight;
-    let marginLeft = gameBoard.getBoundingClientRect().left // !!!!!!!!! сделать лоя топа !!!!!!!!!!!!!!!!
+    let marginLeft = gameBoard.getBoundingClientRect().left; // !!!!!!!!! сделать лоя топа !!!!!!!!!!!!!!!!
+    let marginTop = gameBoard.getBoundingClientRect().right;
 
     // Создание и отображение кирпичей на поле
     const socket = new WebSocket("ws://localhost:3000/ws");
@@ -16,13 +17,14 @@ document.addEventListener("DOMContentLoaded", function() {
         brick = JSON.parse(event.data);
         for (let i = 0; i < brick.length; i++) {
             brick[i].Pos_X = marginLeft + brick[i].Pos_X * 40 + "px";
-            brick[i].Pos_Y = brick[i].Pos_Y * 40 + "px";
+            brick[i].Pos_Y = marginTop + brick[i].Pos_Y * 40 + "px";
             console.log(i);
             createNewElt(brick[i], i);
         };
 
         console.log(brick);
         console.log(marginLeft);
+        console.log(marginTop);
     };
 
     function createNewElt(element, i) {
@@ -55,7 +57,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // Создание танка
     var tank = document.createElement("img");
     tank.className = "tank";
-    tank.style.top = (boardHeight / 2 - 40) + "px";
+    tank.style.top = (boardHeight / 2 - 40) + marginTop + "px";
     tank.style.left = (boardWidth / 2 - 40) + marginLeft + "px";
     tank.src = '../static/image/top.png';
     
@@ -78,7 +80,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     let can_move = true;
                    
                     brick.forEach(element => { if (element != undefined) {
-                        if (((((parseInt(tank.style.top) + 40) > parseInt(element.Pos_Y)) && (parseInt(tank.style.top) < (parseInt(element.Pos_Y) + 41))) && (((parseInt(tank.style.left) + 40) > parseInt(element.Pos_X)) && (parseInt(tank.style.left) < (parseInt(element.Pos_X) + 40))) || ((parseInt(tank.style.top) <= 0))))
+                        if (((((parseInt(tank.style.top) + 40) > parseInt(element.Pos_Y)) && (parseInt(tank.style.top) < (parseInt(element.Pos_Y) + 41))) && (((parseInt(tank.style.left) + 40) > parseInt(element.Pos_X)) && (parseInt(tank.style.left) < (parseInt(element.Pos_X) + 40))) || ((parseInt(tank.style.top) <= marginTop))))
                         {  
                             if (element.CanTPass === 0)
                                can_move = false;
@@ -103,7 +105,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     let can_move = true;
         
                     brick.forEach(element => { if (element != undefined) {
-                        if (((((parseInt(tank.style.top) + 41) > parseInt(element.Pos_Y)) && (parseInt(tank.style.top) < (parseInt(element.Pos_Y) + 40))) && (((parseInt(tank.style.left) + 40) > parseInt(element.Pos_X)) && (parseInt(tank.style.left) < (parseInt(element.Pos_X) + 40))) || ((parseInt(tank.style.top) + 40 == boardHeight))))
+                        if (((((parseInt(tank.style.top) + 41) > parseInt(element.Pos_Y)) && (parseInt(tank.style.top) < (parseInt(element.Pos_Y) + 40))) && (((parseInt(tank.style.left) + 40) > parseInt(element.Pos_X)) && (parseInt(tank.style.left) < (parseInt(element.Pos_X) + 40))) || ((parseInt(tank.style.top) + 40 == boardHeight + marginTop))))
                         {  
                             if (element.CanTPass === 0)
                                 can_move = false;
@@ -319,7 +321,7 @@ document.addEventListener("DOMContentLoaded", function() {
         gameBoard.appendChild(shell);
         updateShall();
         shell.update = 1;
-        if ((parseInt(shell.style.top) < 0) || ((parseInt(shell.style.top) + 16) >= boardHeight) || (parseInt(shell.style.left) < marginLeft) || (parseInt(shell.style.left) >= boardWidth + marginLeft - 16)) {
+        if ((parseInt(shell.style.top) < marginTop) || ((parseInt(shell.style.top) + 16) >= boardHeight + marginTop) || (parseInt(shell.style.left) < marginLeft) || (parseInt(shell.style.left) >= boardWidth + marginLeft - 16)) {
             explosionShall();
         }
 
