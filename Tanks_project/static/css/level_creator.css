@@ -8,6 +8,7 @@
 {
     background: url(../image/fon.jpg) no-repeat;
     width: 100%;
+    min-height: 969px;
     background-size: cover;
 }
 
