@@ -30,11 +30,12 @@
 
 .modes__btn
 {
+    text-align: center;
     width: 65%;
     font: 400 normal 55px/30px 'Press Start 2P';
-    padding: 2%;
+    padding: 2% 0;
     color: rgb(160, 66, 23);
     background-color: rgb(179, 118, 89);
     border-radius: 20px;
-    /* opacity: 0.6; */
+    text-decoration: none;
 }
