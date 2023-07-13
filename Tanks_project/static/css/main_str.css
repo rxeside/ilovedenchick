@@ -8,11 +8,33 @@
 {
     background: url(../image/main_str_fon.jpg) no-repeat;
     width: 100%;
+    min-height: 969px;
     background-size: cover;
 }
 
 .title{
-    font: 400 normal 90px/30px 'Press Start 2P';
-    color: rgb(230, 79, 9);
+    font: 400 normal 102px/30px 'Press Start 2P';
+    color: rgb(255, 81, 0);
     display: flex;
+    padding: 9% 14%;
+}
+
+.modes
+{
+    display: flex;
+    flex-direction: column;
+    gap: 55px;
+    margin-left: 23%;
+    margin-top: 1%;
+}
+
+.modes__btn
+{
+    width: 65%;
+    font: 400 normal 55px/30px 'Press Start 2P';
+    padding: 2%;
+    color: rgb(160, 66, 23);
+    background-color: rgb(179, 118, 89);
+    border-radius: 20px;
+    /* opacity: 0.6; */
 }
