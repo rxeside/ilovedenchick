@@ -15,10 +15,8 @@
 {
     display: flex;
     flex-direction: column;
-    /* background-color: #585858; */
-    /* background: url(../image/cfp.png); */
-    padding: 20px 0 0 20px;
-    gap: 30px;
+    padding: 14% 0 0 20px;
+    gap: 36px;
     opacity: 0.7;
 }
 
@@ -75,13 +73,14 @@
 {
     width: 60px;
     height: 20px;
+    font: 400 normal 13px/25px 'Press Start 2P';
 }
 
 .page
 {
     display: grid;
     grid-template-columns: 48% 52%;
-    grid-template-rows: 30% 70%;
+    grid-template-rows: 25% 40% 35%;
     max-height: 969px;
     margin-left: 10%;
     margin-right: 10%;
@@ -110,14 +109,20 @@
     flex-direction: column;
     align-items: flex-start; 
     justify-content: center; 
-    margin-left: 6%;
-    margin-bottom: 28%;
-    margin-right: 44%;
-    margin-top: 2%;
+    margin: 14% 44% 0 3%;
     padding: 2%;
     background-color: rgb(56, 102, 100);
     opacity: 0.5;
     border-radius: 5%;
+}
+
+.choice
+{
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0 0 20px;
+    gap: 30px;
+    opacity: 0.7;
 }
 
 .menu a
@@ -128,12 +133,12 @@
 
 .menu a:hover
 {
-    background-color: gray;
+    color: rgb(33, 230, 16);
 }
 
 .is_active
 {
-    background-color: dimgray;
+    text-decoration: underline;
 }
 
 .message
@@ -154,34 +159,18 @@
     visibility: visible;
 }
 
-
-
-/* #Brick
+.save
 {
-    font: 400 normal 18px/18px 'Press Start 2P';
-    color: rgb(255, 255, 255);
+    margin-top: 8%;
+    background-color: rgb(153, 250, 190);
 }
 
-#None
+.delet
 {
-    font: 400 normal 18px/18px 'Press Start 2P';
-    color: rgb(255, 255, 255);
+    background-color: rgb(189, 89, 89);
 }
 
-#Steel
+.name__input
 {
-    font: 400 normal 18px/18px 'Press Start 2P';
-    color: rgb(255, 255, 255);
+    font: 400 normal 13px/25px 'Press Start 2P';
 }
-
-#Forest
-{
-    font: 400 normal 18px/18px 'Press Start 2P';
-    color: rgb(255, 255, 255);
-}
-
-#Water
-{
-    font: 400 normal 18px/18px 'Press Start 2P';
-    color: rgb(255, 255, 255);
-} */
