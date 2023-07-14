@@ -34,7 +34,13 @@ func main() {
 	dbx := sqlx.NewDb(db, dbDriverName)
 
 	mux := mux.NewRouter()
-	mux.HandleFunc("/test", test(dbx))
+	mux.HandleFunc("/ws", handler)
+
+	mux.HandleFunc("/level/{levelID}", level(dbx))
+	mux.HandleFunc("/create_level", createLevel)
+
+	mux.HandleFunc("/api/save_level", saveLevel(dbx)).Methods(http.MethodPost)
+	mux.HandleFunc("/api/save_obj", saveObj(dbx)).Methods(http.MethodPost)
 
 	mux.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 
