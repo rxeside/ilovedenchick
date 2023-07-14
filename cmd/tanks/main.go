@@ -35,6 +35,7 @@ func main() {
 
 	mux := mux.NewRouter()
 	mux.HandleFunc("/ws", handler)
+
 	mux.HandleFunc("/level/{levelID}", level(dbx))
 	mux.HandleFunc("/create_level", createLevel)
 

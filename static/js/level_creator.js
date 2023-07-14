@@ -1,6 +1,5 @@
 const l_Name = document.getElementById('level_Name'); 
-    l_Wight = document.getElementById('level_Width'); 
-    l_Height = document.getElementById('level_Height');
+    l_side = document.getElementById('level_side'); 
     l_field = document.getElementById('level_field');
     cell_menu = document.getElementById('cell_menu');
     message = document.getElementById('message');
@@ -10,8 +9,8 @@ let Obj_on_level = [];
 
 const level = {
     name: "",
-    wight: "",
-    height: ""
+    side: "",
+    author: "User"
 };
 
 //При изменении поля name, wight или height мы меняем значения level
@@ -19,25 +18,20 @@ l_Name.onchange = function() {
     level.name = l_Name.value;
 }
 
-l_Wight.onchange = function() {
-    level.wight = l_Wight.value;
-}
-
-l_Height.onchange = function() {
-    level.height = l_Height.value;
+l_side.onchange = function() {
+    level.side = l_side.value;
 }
 
 //Функция обновление поля
 function updateField()
 {
-    if ((level.height != null) && (level.wight != null))
+    if ((level.side != null))
     {
         //Задаём нашему полю столбцы и строки
-        l_field.style.gridTemplateColumns = "repeat(" + level.wight + ", 1fr)"
-        l_field.style.gridTemplateRows = "repeat(" + level.height + ", 1fr)"
-
+        l_field.style.gridTemplateColumns = "repeat(" + level.side + ", 1fr)";
+        l_field.style.gridTemplateRows = "repeat(" + level.side + ", 1fr)";
         //Создание элементов поля
-        for (let i = 0; i < level.height * level.wight; i++)
+        for (let i = 0; i < level.side ** 2; i++)
         {
             const newElement = document.createElement('img');
             newElement.id = i;
@@ -64,7 +58,8 @@ function NewSelect(id)
 let CurrentCell = {
     name: null,
     isDestructible: null,
-    canSkip: null,
+    canTpass: null,
+    can_B_pass: null,
     imgURL: null,
     x: null,
     y: null
@@ -83,7 +78,8 @@ function addNewCell(id)
     let NewCell = {
         name: null,
         isDestructible: null,
-        canSkip: null,
+        canTpass: null,
+        canBpass: null,
         imgURL: null,
         x: null,
         y: null
@@ -152,28 +148,32 @@ function editcell(id)
     if (selectedType !== "None")
     {
         CurrentCell.name = selectedType;
-        CurrentCell.x = id % level.wight;
-        CurrentCell.y = Math.floor(id/level.wight);
+        CurrentCell.x = id % level.side;
+        CurrentCell.y = Math.floor(id/level.side);
     
         switch (selectedType) {
             case 'Brick':
                 CurrentCell.isDestructible = 1;
-                CurrentCell.canSkip = 0;
+                CurrentCell.canTpass = 0;
+                CurrentCell.canBpass = 0;
                 CurrentCell.imgURL = "../static/image/brick.png";
                 break;
             case 'Steel':
                 CurrentCell.isDestructible = 0;
-                CurrentCell.canSkip = 0;
+                CurrentCell.canTpass = 0;
+                CurrentCell.canBpass = 0;
                 CurrentCell.imgURL = "../static/image/steel.png";
                 break;
             case 'Forest':
                 CurrentCell.isDestructible = 0;
-                CurrentCell.canSkip = 1;
+                CurrentCell.canTpass = 1;
+                CurrentCell.canBpass = 1;
                 CurrentCell.imgURL = "../static/image/forest.png";
                 break;
             case 'Water':
                 CurrentCell.isDestructible = 0;
-                CurrentCell.canSkip = 0;
+                CurrentCell.canTpass = 0;
+                CurrentCell.canBpass = 1;
                 CurrentCell.imgURL = "../static/image/water.png";
                 break;
         }
@@ -221,7 +221,7 @@ function sendObjdata()
 {
     let is_success = true
 
-    for (let i = 0; i < level.height * level.wight; i++)
+    for (let i = 0; i < level.side ** 2; i++)
     {
         if (Obj_on_level[i] !== undefined)
         {
