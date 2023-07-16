@@ -19,11 +19,13 @@ const (
 
 func main() {
 	cfg := mysql.Config{
-		User:   "root",
-		Passwd: "P@ssw0rd",
+		User: "root",
+		// Passwd: "P@ssw0rd",
+		Passwd: "098poi123qweA.",
 		Net:    "tcp",
 		Addr:   "localhost:3306",
-		DBName: "tanki_online",
+		DBName: "tanks",
+		// DBName: "tanki_online",
 	}
 
 	db, err := sql.Open("mysql", cfg.FormatDSN())
@@ -38,6 +40,7 @@ func main() {
 
 	mux.HandleFunc("/level/{levelID}", level(dbx))
 	mux.HandleFunc("/create_level", createLevel)
+	mux.HandleFunc("/main", mainMenu)
 
 	mux.HandleFunc("/api/save_level", saveLevel(dbx)).Methods(http.MethodPost)
 	mux.HandleFunc("/api/save_obj", saveObj(dbx)).Methods(http.MethodPost)

@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
@@ -35,14 +37,26 @@ type IDdata struct {
 }
 
 type tanktype struct {
-	ID int
-	X  float64
-	Y  float64
+	ID        int
+	X         float64
+	Y         float64
+	Direction string
+	Distance  float64
+}
+
+type roomData struct {
+	NumOfPlayers int
+	Level        leveldata
+	Objects      []*objdata
+	Tanks        map[*websocket.Conn]*tanktype
 }
 
 var currLevel leveldata
+var Objects []*objdata
 
-var objects []*objdata
+var rooms []*roomData
+
+const currRoom = 1
 
 func level(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -53,13 +67,15 @@ func level(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 			log.Println(err.Error())
 		}
 
+		// rooms[currRoom].Level, err = getLevelByID(db, levelID)
 		currLevel, err = getLevelByID(db, levelID)
 		if err != nil {
 			http.Error(w, "Error with getting a level by ID", 500)
 			log.Println(err.Error())
 		}
 
-		objects, err = getObjByID(db, levelID)
+		// rooms[currRoom].Objects, err = getObjByID(db, levelID)
+		Objects, err = getObjByID(db, levelID)
 		if err != nil {
 			http.Error(w, "Error with getting an object by ID", 500)
 			log.Println(err.Error())
@@ -138,13 +154,15 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-// var broadcast = make(chan []byte)
+var clients = make(map[*websocket.Conn]bool)
 
 // Функция handler является обработчиком HTTP запросов.
+
 func handler(w http.ResponseWriter, r *http.Request) {
 	var tank tanktype
 	var levelSide float64
 	var sideValue float64
+	var step float64
 
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -152,143 +170,136 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// rooms[currRoom].NumOfPlayers += 1
+	// rooms[currRoom].Tanks[conn].ID = rooms[currRoom].NumOfPlayers
+	// tank = rooms[currRoom].Tanks[conn]
+	clients[conn] = true
+
+	ticker := time.NewTicker(50 * time.Millisecond)
+
+	// err = conn.WriteJSON(rooms[currRoom].Level)
+	err = conn.WriteJSON(currLevel)
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
+
+	go func() {
+		for {
+			_, m, err := conn.ReadMessage()
+			if err != nil {
+				log.Println(err.Error())
+				return
+			}
+
+			message := string(m)
+			readMessageFromCleints(conn, ticker, &tank, message, &levelSide, &sideValue, &step)
+		}
+	}()
+
 	for {
-		_, m, err := conn.ReadMessage()
+		select {
+		case <-ticker.C:
+			sendMessageForCleints(&tank)
+			// ticker = time.NewTicker(time.Second)
+		}
+	}
+}
+
+func sendMessageForCleints(tank *tanktype) {
+	// for client := range rooms[currRoom].Tanks {
+	// 	err := client.WriteMessage(websocket.TextMessage, []byte("Ans from server"))
+	// 	if err != nil {
+	// 		log.Println(err.Error())
+	// 		delete(rooms[currRoom].Tanks, client)
+	// 		rooms[currRoom].NumOfPlayers -= 1
+	// 		return
+	// 	}
+	// }
+
+	for client := range clients {
+		err := client.WriteJSON(tank)
+		if err != nil {
+			log.Println(err)
+			delete(clients, client)
+		}
+	}
+}
+
+func readMessageFromCleints(conn *websocket.Conn, ticker *time.Ticker, tank *tanktype, message string, levelSide *float64, sideValue *float64, step *float64) {
+	var err error
+
+	switch message {
+	case "level":
+		*levelSide, err = getFloatFromSocket(conn)
 		if err != nil {
 			log.Println(err.Error())
 			return
 		}
 
-		message := string(m[:])
+		*sideValue = *levelSide / float64(currLevel.Side)
+		// sideValue = levelSide / float64(rooms[currRoom].Level.Side)
+		*step = *sideValue / 50
+		fmt.Println(*step)
 
-		switch message {
-		case "level":
-			err = conn.WriteJSON(currLevel)
-			if err != nil {
-				log.Println(err.Error())
-				return
-			}
-
-			levelSide, err = getFloatFromSocket(conn)
-			if err != nil {
-				log.Println(err.Error())
-				return
-			}
-
-			sideValue = levelSide / float64(currLevel.Side)
-
-			for _, value := range objects {
-				value.Pos_X = value.Pos_X * sideValue
-				value.Pos_Y = value.Pos_Y * sideValue
-			}
-
-			tank.X = levelSide/2 - sideValue
-			tank.Y = levelSide/2 - sideValue
-
-			err = conn.WriteJSON(objects)
-			if err != nil {
-				log.Println(err.Error())
-				return
-			}
-		case "moving":
-			newX, err := getFloatFromSocket(conn)
-			if err != nil {
-				log.Println(err.Error())
-				return
-			}
-
-			newY, err := getFloatFromSocket(conn)
-			if err != nil {
-				log.Println(err.Error())
-				return
-			}
-
-			tank.X = newX
-			tank.Y = newY
-
-			err = conn.WriteJSON(tank)
-			if err != nil {
-				log.Println(err.Error())
-				return
-			}
-		case "dir":
-			_, m, err = conn.ReadMessage()
-			if err != nil {
-				log.Println(err.Error())
-				return
-			}
-			dir := string(m)
-
-			findDistance(conn, &tank, dir, levelSide, sideValue)
-		case "f":
-			findDistance(conn, &tank, "1", levelSide, sideValue)
-			findDistance(conn, &tank, "2", levelSide, sideValue)
-			findDistance(conn, &tank, "3", levelSide, sideValue)
-			findDistance(conn, &tank, "4", levelSide, sideValue)
+		// for _, value := range rooms[currRoom].Objects {
+		for _, value := range Objects {
+			value.Pos_X = value.Pos_X * *sideValue
+			value.Pos_Y = value.Pos_Y * *sideValue
 		}
-	}
-}
 
-func findDistance(conn *websocket.Conn, tank *tanktype, dir string, levelside float64, sideValue float64) {
-	var min float64
-	switch dir {
-	case "1":
-		min = tank.Y
-	case "2":
-		min = levelside - tank.X - sideValue*0.95
-	case "3":
-		min = tank.X
-	case "4":
-		min = sideValue - tank.X - sideValue*0.95
-	}
-	var minO objdata
+		tank.X = *levelSide/2 - *sideValue
+		tank.Y = *levelSide/2 - *sideValue
 
-	for _, value := range objects {
-		if isCollision(tank, value, dir, sideValue) {
-			var distance float64
-			switch dir {
-			case "1":
-				distance = tank.Y - value.Pos_Y - sideValue*0.95
-			case "2":
-				distance = value.Pos_Y - tank.Y - sideValue
-			case "3":
-				distance = tank.X - value.Pos_Y - sideValue
-			case "4":
-				distance = value.Pos_Y - tank.X - sideValue*0.95
-			}
-
-			if distance < min {
-				min = distance
-				minO = *value
-			}
+		err = conn.WriteJSON(Objects)
+		// err = conn.WriteJSON(rooms[currRoom].Objects)
+		if err != nil {
+			log.Println(err.Error())
+			return
 		}
-	}
+	case "moving":
+		newX, err := getFloatFromSocket(conn)
+		if err != nil {
+			log.Println(err.Error())
+			return
+		}
 
-	err := conn.WriteJSON(minO)
-	if err != nil {
-		log.Println(err.Error())
+		newY, err := getFloatFromSocket(conn)
+		if err != nil {
+			log.Println(err.Error())
+			return
+		}
+
+		tank.X = newX
+		tank.Y = newY
+
+		err = conn.WriteJSON(tank)
+		if err != nil {
+			log.Println(err.Error())
+			return
+		}
+	case "dir":
+		_, m, err := conn.ReadMessage()
+		if err != nil {
+			log.Println(err.Error())
+			return
+		}
+		dir := string(m)
+		tank.Direction = dir
+
+		findDistance(conn, tank, dir, *levelSide, *sideValue)
+
+		moveTank(tank, *step)
+	case "f":
+		findDistance(conn, tank, "1", *levelSide, *sideValue)
+		findDistance(conn, tank, "2", *levelSide, *sideValue)
+		findDistance(conn, tank, "3", *levelSide, *sideValue)
+		findDistance(conn, tank, "4", *levelSide, *sideValue)
+	case "Close":
+		conn.Close()
+		ticker.Stop()
 		return
 	}
-
-	err = conn.WriteJSON(tank.X)
-	if err != nil {
-		log.Println(err.Error())
-		return
-	}
-
-	err = conn.WriteJSON(sideValue)
-	if err != nil {
-		log.Println(err.Error())
-		return
-	}
-
-	err = conn.WriteJSON(min)
-	if err != nil {
-		log.Println(err.Error())
-		return
-	}
-
-	return
 }
 
 func getFloatFromSocket(conn *websocket.Conn) (float64, error) {
@@ -304,6 +315,111 @@ func getFloatFromSocket(conn *websocket.Conn) (float64, error) {
 	}
 
 	return value, nil
+}
+
+func moveTank(tank *tanktype, step float64) {
+	ticker := time.NewTicker(time.Millisecond)
+
+	for range ticker.C {
+		calculateCoordinates(tank, step)
+		tank.Distance -= step
+
+		if tank.Distance <= step {
+			// calculateCoordinates(tank, tank.Distance)
+			tank.Distance = 0
+			ticker.Stop()
+			return
+		}
+	}
+}
+
+func calculateCoordinates(tank *tanktype, step float64) {
+	switch tank.Direction {
+	case "1":
+		tank.Y -= step
+	case "2":
+		tank.Y += step
+	case "3":
+		tank.X -= step
+	case "4":
+		tank.X += step
+	}
+}
+
+func findDistance(conn *websocket.Conn, tank *tanktype, dir string, levelside float64, sideValue float64) {
+
+	min := calculateStartDistance(tank, dir, levelside, sideValue)
+	// var minO objdata
+
+	// for _, value := range rooms[1].Objects {
+	for _, value := range Objects {
+		if isCollision(tank, value, dir, sideValue) {
+			distance := calculateDistance(tank, value, dir, sideValue)
+
+			if distance < min {
+				min = distance
+				// minO = *value
+			}
+		}
+	}
+
+	// err := conn.WriteJSON(minO)
+	// if err != nil {
+	// 	log.Println(err.Error())
+	// 	return
+	// }
+
+	// err = conn.WriteJSON(tank.X)
+	// if err != nil {
+	// 	log.Println(err.Error())
+	// 	return
+	// }
+
+	// err = conn.WriteJSON(dir)
+	// if err != nil {
+	// 	log.Println(err.Error())
+	// 	return
+	// }
+
+	// err := conn.WriteJSON(min)
+	// if err != nil {
+	// 	log.Println(err.Error())
+	// 	return
+	// }
+
+	tank.Distance = min
+
+	return
+}
+
+func calculateStartDistance(tank *tanktype, dir string, levelside float64, sideValue float64) float64 {
+	switch dir {
+	case "1":
+		return tank.Y
+	case "2":
+		return levelside - tank.Y - sideValue*0.95
+	case "3":
+		return tank.X
+	case "4":
+		return levelside - tank.X - sideValue*0.95
+	}
+
+	return 0
+}
+
+func calculateDistance(tank *tanktype, obj *objdata, dir string, sideValue float64) float64 {
+	switch dir {
+	case "1":
+		return tank.Y - obj.Pos_Y - sideValue
+	case "2":
+		return obj.Pos_Y - tank.Y - sideValue*0.95
+	case "3":
+		return tank.X - obj.Pos_X - sideValue
+	case "4":
+		return obj.Pos_X - tank.X - sideValue*0.95
+	}
+
+	return 0
 }
 
 func isCollision(tank *tanktype, object *objdata, dir string, sideValue float64) bool {

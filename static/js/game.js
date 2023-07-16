@@ -11,29 +11,34 @@ document.addEventListener("DOMContentLoaded", function() {
     let brick;
     let level;
     let sideValue;
-    const step = 0.5;
+    let step = 0.4;
 
     // Создание и отображение кирпичей на поле
     const socket = new WebSocket("ws://localhost:3000/ws");
 
     socket.onopen = function() {
         console.log("Connected");
-        socket.send("level");
-        socket.onmessage = function(event) {
-            level = JSON.parse(event.data);
-    
-            sideValue = boardSide / level.Side;
-            tank.style.height = sideValue * 0.95 + "px";
-            tank.style.width = sideValue * 0.95 + "px";
+    }
 
-            newAns();
-        };
+    socket.onmessage = function(event) {
+        level = JSON.parse(event.data);
+
+        sideValue = boardSide / level.Side;
+        step = sideValue / 85;
+        console.log(step);
+        tank.style.height = sideValue * 0.95 + "px";
+        tank.style.width = sideValue * 0.95 + "px";
+        tank.style.top = (boardSide / 2 - sideValue) + "px";
+        tank.style.left = (boardSide / 2 - sideValue) + "px";
+
+        getObjects();
+    };
+
+    function getObjects() {
+        socket.send("level");
         socket.send(boardSide);
         socket.send(marginLeft);
         socket.send(marginTop);
-    }
-
-    function newAns() {
         socket.onmessage = function(event) {
             brick = JSON.parse(event.data);
             for (let i = 0; i < brick.length; i++) {
@@ -41,7 +46,20 @@ document.addEventListener("DOMContentLoaded", function() {
                 brick[i].Pos_Y = brick[i].Pos_Y + "px";
                 createNewElt(brick[i], i);
             };
+            answerFromServer();
         };
+    }
+
+    function answerFromServer() {
+        socket.onmessage = function(event) {
+            let message = JSON.parse(event.data);
+            // console.log(message);
+            tank.style.top = message.Y + "px";
+            tank.style.left = message.X + "px";
+
+            distance = message.Distance;
+            console.log(distance);
+        }; 
     }
     
     function createNewElt(element, i) {
@@ -76,8 +94,6 @@ document.addEventListener("DOMContentLoaded", function() {
     var tank = document.createElement("img");
 
     tank.className = "tank";
-    tank.style.top = (boardSide / 2 - 40) + "px";
-    tank.style.left = (boardSide / 2 - 40) + "px";
     tank.src = '../static/image/top.png';
     
     // Добавление танка на игровое поле
@@ -93,96 +109,104 @@ document.addEventListener("DOMContentLoaded", function() {
     document.addEventListener("keydown", function(event) {
         let key = event.key;
 
+        // if (key == "g") {
+        //     socket.send("f");
+
+        //     socket.onmessage = function(event) {
+        //         let message = JSON.parse(event.data);
+
+        //         console.log(message);
+        //     }
+        // }
+
         if (key == "g") {
-            socket.send("f");
-
-            socket.onmessage = function(event) {
-                let message = JSON.parse(event.data);
-
-                console.log(message);
-            }
+            socket.send("Close");
+            console.log("Close");
         }
 
-        if (!is_move) {
+        // if (!is_move) {
             switch (key) {
                 case "ArrowUp":
                     tank.direction = 1;
                     sendDir(tank.direction);
-                    moveTank();
+                    // moveTank();
                     break;
                 case "ArrowDown":
                     tank.direction = 2;
                     sendDir(tank.direction);
-                    moveTank();
+                    // moveTank();
                     break;
                 case "ArrowLeft":
                     tank.direction = 3;
                     sendDir(tank.direction);
-                    moveTank();
+                    // moveTank();
                     break;
                 case "ArrowRight":
                     tank.direction = 4;
                     sendDir(tank.direction);
-                    moveTank();
+                    // moveTank();
                     break;
-            }
-        }
-    });
-
-    document.addEventListener("keyup", function() {
-        is_move = false;
-        distance = 0;
-        socket.send("moving");
-        socket.send(parseFloat(tank.style.top));
-        socket.send(parseFloat(tank.style.left));
-
-        socket.onmessage = function(event) {
-            message = JSON.parse(event.data);
-            // console.log(message);
-        }
-    });
-
-    function moveTank() {
-        is_move = true
-        let completed = 0;
-        let moving = setInterval(function() {
-            distance -= step;
-            completed += step;
-            switch (tank.direction) {
-                case 1:
-                    tank.style.top = parseFloat(tank.style.top) - step + "px";
-                    break;
-                case 2:
-                    tank.style.top = parseFloat(tank.style.top) + step + "px";
-                    break;
-                case 3:
-                    tank.style.left = parseFloat(tank.style.left) - step + "px";
-                    break;
-                case 4:
-                    tank.style.left = parseFloat(tank.style.left) + step + "px";
-                    break;
-            }
-
-            if ((distance <= step) || (!is_move)) {
-                clearInterval(moving)
-            }
-
-            // if (completed % (step * 10) == 0) {
-            //     socket.send("moving");
-            //     socket.send(parseFloat(tank.style.top));
-            //     socket.send(parseFloat(tank.style.left));
             // }
-        }, 5);
-    }
+        }
+    });
+
+    // document.addEventListener("keyup", function() {
+    //     is_move = false;
+    //     distance = 0;
+    //     socket.send("moving");
+    //     socket.send(parseFloat(tank.style.top));
+    //     socket.send(parseFloat(tank.style.left));
+
+    //     socket.onmessage = function(event) {
+    //         message = JSON.parse(event.data);
+    //         console.log(message);
+    //     }
+    // });
+
+    // function moveTank() {
+    //     let completed = 0;
+    //     let moving = setInterval(function() {
+    //         console.log(distance);
+    //         if ((distance <= step) || (!is_move)) {
+    //             clearInterval(moving);
+    //             console.log("That's all");
+    //         }
+
+    //         distance -= step;
+    //         completed += step;
+    //         switch (tank.direction) {
+    //             case 1:
+    //                 tank.style.top = parseFloat(tank.style.top) - step + "px";
+    //                 break;
+    //             case 2:
+    //                 tank.style.top = parseFloat(tank.style.top) + step + "px";
+    //                 break;
+    //             case 3:
+    //                 tank.style.left = parseFloat(tank.style.left) - step + "px";
+    //                 break;
+    //             case 4:
+    //                 tank.style.left = parseFloat(tank.style.left) + step + "px";
+    //                 break;
+    //         }
+
+    //         // if (completed % (step * 10) == 0) {
+    //         //     socket.send("moving");
+    //         //     socket.send(parseFloat(tank.style.top));
+    //         //     socket.send(parseFloat(tank.style.left));
+    //         // }
+    //     }, 5);
+    // }
     function sendDir(dir)
     {
+        is_move = true;
         socket.send("dir");
         socket.send(dir)
 
-        socket.onmessage = function(event) {
-            message = JSON.parse(event.data);
-            console.log(message);
-        }
+        // socket.onmessage = function(event) {
+        //     distance = JSON.parse(event.data);
+        //     console.log(distance);
+        //     moveTank();
+        // }
     }
 
     // document.addEventListener('keydown', (event) => {
@@ -190,7 +214,17 @@ document.addEventListener("DOMContentLoaded", function() {
     //         keyPressed = setInterval(function() {
     //             let key = event.key;
     //             moveTank(key);
-    //         }, 5);
+    //         }, 1);
+    //     }
+    // })
+
+    // document.addEventListener('keyup', (event) => {
+    //     if (keyPressed) {
+    //         var key = event.key;
+    //         if (key == "ArrowUp" || key === "ArrowDown" || key == "ArrowRight" || key == "ArrowLeft") {
+    //             clearInterval(keyPressed);
+    //             keyPressed = 0;
+    //         }
     //     }
     // })
     
@@ -293,16 +327,6 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         }
     }
-
-    // document.addEventListener('keyup', (event) => {
-    //     if (keyPressed) {
-    //         var key = event.key;
-    //         if (key == "ArrowUp" || key === "ArrowDown" || key == "ArrowRight" || key == "ArrowLeft") {
-    //             clearInterval(keyPressed);
-    //             keyPressed = 0;
-    //         }
-    //     }
-    // })
 
     function updateShall() {
         if (shell.direction == 1) {
