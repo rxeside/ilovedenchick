@@ -58,7 +58,7 @@ document.addEventListener("DOMContentLoaded", function() {
             tank.style.left = message.X + "px";
 
             distance = message.Distance;
-            console.log(distance);
+            // console.log(distance);
         }; 
     }
     
@@ -119,12 +119,12 @@ document.addEventListener("DOMContentLoaded", function() {
         //     }
         // }
 
-        if (key == "g") {
+        if ((key == "escape") || (key == "c")) {
             socket.send("Close");
             console.log("Close");
         }
 
-        // if (!is_move) {
+        if (!is_move) {
             switch (key) {
                 case "ArrowUp":
                     tank.direction = 1;
@@ -146,22 +146,27 @@ document.addEventListener("DOMContentLoaded", function() {
                     sendDir(tank.direction);
                     // moveTank();
                     break;
-            // }
+            }
         }
     });
 
-    // document.addEventListener("keyup", function() {
-    //     is_move = false;
-    //     distance = 0;
-    //     socket.send("moving");
-    //     socket.send(parseFloat(tank.style.top));
-    //     socket.send(parseFloat(tank.style.left));
+    document.addEventListener("keyup", function(event) {
+        
+        if((is_move == true) && ((event.key == "ArrowUp") || (event.key == "ArrowDown") || (event.key == "ArrowLeft") || (event.key == "ArrowRight"))) {
+            
+            is_move = false;
+            distance = 0;
+            socket.send("stopMoving");
 
-    //     socket.onmessage = function(event) {
-    //         message = JSON.parse(event.data);
-    //         console.log(message);
-    //     }
-    // });
+        }
+        // socket.send(parseFloat(tank.style.top));
+        // socket.send(parseFloat(tank.style.left));
+
+        // socket.onmessage = function(event) {
+        //     message = JSON.parse(event.data);
+        //     console.log(message);
+        // }
+    });
 
     // function moveTank() {
     //     let completed = 0;
@@ -199,7 +204,7 @@ document.addEventListener("DOMContentLoaded", function() {
     function sendDir(dir)
     {
         is_move = true;
-        socket.send("dir");
+        socket.send("move");
         socket.send(dir)
 
         // socket.onmessage = function(event) {

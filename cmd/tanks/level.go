@@ -175,14 +175,14 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	// tank = rooms[currRoom].Tanks[conn]
 	clients[conn] = true
 
-	ticker := time.NewTicker(50 * time.Millisecond)
-
 	// err = conn.WriteJSON(rooms[currRoom].Level)
 	err = conn.WriteJSON(currLevel)
 	if err != nil {
 		log.Println(err.Error())
 		return
 	}
+
+	var ticker *time.Ticker
 
 	go func() {
 		for {
@@ -196,6 +196,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			readMessageFromCleints(conn, ticker, &tank, message, &levelSide, &sideValue, &step)
 		}
 	}()
+
+	time.Sleep(100 * time.Millisecond)
+	ticker = time.NewTicker(50 * time.Millisecond)
 
 	for {
 		select {
@@ -257,28 +260,7 @@ func readMessageFromCleints(conn *websocket.Conn, ticker *time.Ticker, tank *tan
 			log.Println(err.Error())
 			return
 		}
-	case "moving":
-		newX, err := getFloatFromSocket(conn)
-		if err != nil {
-			log.Println(err.Error())
-			return
-		}
-
-		newY, err := getFloatFromSocket(conn)
-		if err != nil {
-			log.Println(err.Error())
-			return
-		}
-
-		tank.X = newX
-		tank.Y = newY
-
-		err = conn.WriteJSON(tank)
-		if err != nil {
-			log.Println(err.Error())
-			return
-		}
-	case "dir":
+	case "move":
 		_, m, err := conn.ReadMessage()
 		if err != nil {
 			log.Println(err.Error())
@@ -289,12 +271,11 @@ func readMessageFromCleints(conn *websocket.Conn, ticker *time.Ticker, tank *tan
 
 		findDistance(conn, tank, dir, *levelSide, *sideValue)
 
-		moveTank(tank, *step)
-	case "f":
-		findDistance(conn, tank, "1", *levelSide, *sideValue)
-		findDistance(conn, tank, "2", *levelSide, *sideValue)
-		findDistance(conn, tank, "3", *levelSide, *sideValue)
-		findDistance(conn, tank, "4", *levelSide, *sideValue)
+		go func() {
+			moveTank(conn, tank, *step)
+		}()
+	case "stopMoving":
+		tank.Distance = 0
 	case "Close":
 		conn.Close()
 		ticker.Stop()
@@ -317,19 +298,19 @@ func getFloatFromSocket(conn *websocket.Conn) (float64, error) {
 	return value, nil
 }
 
-func moveTank(tank *tanktype, step float64) {
+func moveTank(conn *websocket.Conn, tank *tanktype, step float64) {
 	ticker := time.NewTicker(time.Millisecond)
 
 	for range ticker.C {
-		calculateCoordinates(tank, step)
-		tank.Distance -= step
-
 		if tank.Distance <= step {
 			// calculateCoordinates(tank, tank.Distance)
 			tank.Distance = 0
 			ticker.Stop()
 			return
 		}
+
+		calculateCoordinates(tank, step)
+		tank.Distance -= step
 	}
 }
 
