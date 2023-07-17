@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tank Battle</title>
+    <link href="../static/css/level.css" rel="stylesheet">
+    <style>
+        *{
+            margin: 0;
+        }
+
+        #game-board {
+            /* margin: auto; */
+            position: absolute;
+            /* background-color: #ddd; */
+            background: url(../static/image/zemlyaNew.png);
+            box-shadow: 15px 15px 25px rgba(0, 0, 0, 0.411), -15px -15px 25px rgba(0, 0, 0, 0.411), 15px -15px 25px rgba(0, 0, 0, 0.411), -15px 15px 25px rgba(0, 0, 0, 0.411);
+        }
+
+        .brick {
+            width: 40px;
+            height: 40px;
+            position: absolute;
+        }
+        
+        .tank {
+            width: 40px;
+            height: 40px;
+            position: absolute;
+        }
+
+        .shell {
+            width: 12px;
+            height: 14px;
+            position: absolute;
+        }
+
+        .explosion {
+            position: absolute;
+        }
+    </style>
+</head>
+<body>
+    <div class="background"> 
+        <div id="game-board"></div>
+    </div>
+    <script src="../static/js/game.js"></script>
+</body>
+</html>
