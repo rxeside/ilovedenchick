@@ -28,6 +28,8 @@ document.addEventListener("DOMContentLoaded", function() {
             sideValue = boardSide / level.Side;
             tank.style.height = sideValue * 0.95 + "px";
             tank.style.width = sideValue * 0.95 + "px";
+            bot.style.height = sideValue * 0.95 + "px";
+            bot.style.width = sideValue * 0.95 + "px";
             console.log(sideValue);
             shell.style.height = sideValue * 0.3 + "px";
             shell.style.width = sideValue * 0.25 + "px";
@@ -76,7 +78,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     //Создание снаряда
-    var shell = document.createElement("img");
+    let shell = document.createElement("img");
     shell.className = "shell";
     shell.src = "../static/image/ShellTop.png";
     shell.direction = 1;
@@ -85,21 +87,226 @@ document.addEventListener("DOMContentLoaded", function() {
     
 
     //Создание взрыва
-    var explosion = document.createElement("img");
+    let explosion = document.createElement("img");
     explosion.className = "explosion";
     explosion.src = '../static/image/explosion1.png'
     
     // Создание танка
-    var tank = document.createElement("img");
+    let tank = document.createElement("img");
 
     tank.className = "tank";
     tank.style.top = (boardSide / 2 - 40) + "px";
     tank.style.left = (boardSide / 2 - 40) + "px";
     tank.src = '../static/image/top.png';
-    
+
+
     // Добавление танка на игровое поле
     gameBoard.appendChild(tank);
+
+
+    // Создание ботов
+    let bot = document.createElement("img");
+    bot.className = "bot1";
+    bot.style.top = (boardSide / 4 - 40) + "px";
+    bot.style.left = (boardSide / 2 - 40) + "px";
+    bot.src = '../static/image/botTop.png';
+    gameBoard.appendChild(bot);
+    let botMovement = 0;
+
+    let botShell = document.createElement("img");
+    botShell.className = "botShell";
+    botShell.src = "../static/image/ShellTop.png";
+    botShell.direction = 1;
+    botShell.directionNew = 1;
+    botShell.update = 0;
     
+    // Обработка движения бота
+    function updateBot() {
+        let action = generateRandomAction();
+        console.log("action: ", action);
+        let direction;
+        if (action == 'move') {
+            clearInterval(botMovement);
+            botMovement = 0;
+            direction = getRandomDirection();
+            console.log("direction: ", direction);
+            botMovement = setInterval(function() {
+                if (direction == 'up') {
+                  
+                        let can_move = true;
+                       
+                        brick.forEach(element => { if (element != undefined) {
+                            if (((((parseFloat(bot.style.top) + parseFloat(bot.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(bot.style.top) < (parseFloat(element.Pos_Y) + parseFloat(bot.style.width) + step))) && (((parseFloat(bot.style.left) + parseFloat(bot.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(bot.style.left) < (parseFloat(element.Pos_X) + parseFloat(bot.style.width)))) || ((parseFloat(bot.style.top) <= 0))))
+                            {  
+                                if (element.CanTPass === 0)
+                                   can_move = false;    
+                                
+                            } 
+                        }});
+                        
+                        botShell.directionNew = 1;
+                        if (status === 0) {
+                            status = 1;
+                            bot.src = '../static/image/botTop.png';
+                        } else if (status === 1) {
+                            status = 0;
+                            bot.src = '../static/image/botTop1.png';
+                        }
+                
+                        if (can_move) {
+                            bot.style.top = (parseFloat(bot.style.top) - step) + "px";
+                        }      
+            
+                        
+                    
+                } else if (direction == 'down') {
+                        
+                        let can_move = true;
+                
+                        brick.forEach(element => { if (element != undefined) {
+                            if (((((parseFloat(bot.style.top) + parseFloat(bot.style.width) + step) > parseFloat(element.Pos_Y)) && (parseFloat(bot.style.top) < (parseFloat(element.Pos_Y) + parseFloat(bot.style.width)))) && (((parseFloat(bot.style.left) + parseFloat(bot.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(bot.style.left) < (parseFloat(element.Pos_X) + parseFloat(bot.style.width)))) || ((parseFloat(bot.style.top) + parseFloat(bot.style.width) >= boardSide))))
+                            {  
+                                if (element.CanTPass === 0)
+                                    can_move = false;
+                            } 
+                        }});
+                
+                        botShell.directionNew = 2;
+                        if (status === 0) {
+                            status = 1;
+                            bot.src = '../static/image/botDown.png';
+                        } else if (status === 1) {
+                            status = 0;
+                            bot.src = '../static/image/botDown1.png';
+                        }
+                
+                        if (can_move) {
+                            bot.style.top = (parseFloat(bot.style.top) + step) + "px";
+                        }           
+                } else if (direction == 'left') {
+                    let can_move = true;
+    
+                    brick.forEach(element => { if (element != undefined) {
+                        if ((((parseFloat(bot.style.top) + parseFloat(bot.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(bot.style.top) < (parseFloat(element.Pos_Y) + parseFloat(bot.style.width)))) && (((parseFloat(bot.style.left) + parseFloat(bot.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(bot.style.left) < (parseFloat(element.Pos_X) + parseFloat(bot.style.width) +  step))) || ((parseFloat(bot.style.left) <= 0)))
+                        {  
+                            if (element.CanTPass === 0)
+                                can_move = false;
+                        } 
+                    }});
+            
+                    botShell.directionNew = 3;
+                    if (status === 0) {
+                        status = 1;
+                        bot.src = '../static/image/botLeft.png';
+                    } else if (status === 1) {
+                        status = 0;
+                        bot.src = '../static/image/botLeft1.png';
+                    }
+            
+                    if (can_move) {
+                        bot.style.left = (parseFloat(bot.style.left) - step) + "px";
+                    }
+                } else if (direction == 'right') {
+                    let can_move = true;
+    
+                    brick.forEach(element => { if (element != undefined) {
+                        if (((((parseFloat(bot.style.top) + parseFloat(bot.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(bot.style.top) < (parseFloat(element.Pos_Y) + parseFloat(bot.style.width)))) && (((parseFloat(bot.style.left) + parseFloat(bot.style.width) +  step) > parseFloat(element.Pos_X)) && (parseFloat(bot.style.left) < (parseFloat(element.Pos_X) + parseFloat(bot.style.width)))) || ((parseFloat(bot.style.left) + parseFloat(bot.style.width) >= boardSide))))
+                        {   
+                            if (element.CanTPass === 0)
+                                can_move = false;
+                        } 
+                    }});
+            
+                    botShell.directionNew = 4;
+                    if (status === 0) {
+                        status = 1;
+                        bot.src = '../static/image/botRight.png';
+                    } else if (status === 1) { 
+                        status = 0;
+                        bot.src = '../static/image/botRight1.png';
+                    }
+            
+                    if (can_move) { 
+                        bot.style.left = (parseFloat(bot.style.left) + step) + "px";
+                    }
+                }
+            }, speed);
+            
+        } 
+        // else if (action == 'shoot') {
+        //     botShotDirection();
+        // }
+        
+        
+        
+        
+
+        
+    }
+
+    function startBot() {
+        // Обновляем состояние игры каждые 2 секунд
+        setInterval(updateBot, 2000);
+    }
+
+    startBot();
+
+    // function botShotDirection() {
+    //     if (botShell.update == 0) {
+    //         botShell.direction = botShell.directionNew;
+    //         if (botShell.direction == 1) {
+    //             botShell.src = "../static/image/ShellTop.png";
+    //             botShell.style.top = (parseInt(bot.style.top) - parseInt(botShell.style.height) * 0.5) + "px";
+    //             botShell.style.left = (parseInt(bot.style.left) + parseInt(bot.style.width) * 0.5 - parseInt(botShell.style.width) * 0.5) + "px";
+    //         }
+    //         if (botShell.direction == 2) {
+    //             botShell.src = "../static/image/ShellDown.png";
+    //             botShell.style.top = (parseInt(bot.style.top) + parseInt(bot.style.height) - parseInt(botShell.style.height) * 0.5) + "px";
+    //             botShell.style.left = (parseInt(bot.style.left) + parseInt(bot.style.width) * 0.5 - parseInt(botShell.style.width) * 0.5) + "px";
+    //         }
+    //         if (botShell.direction == 3) {
+    //             botShell.src = "../static/image/ShellLeft.png";
+    //             botShell.style.top = (parseInt(bot.style.top) + parseInt(bot.style.height) * 0.5 - parseInt(botShell.style.height) * 0.5) + "px";
+    //             botShell.style.left = (parseInt(bot.style.left) - parseInt(bot.style.width) * 0.5) + "px";
+    //         }
+    //         if (botShell.direction == 4) {
+    //             botShell.src = "../static/image/ShellRight.png";
+    //             botShell.style.top = (parseInt(bot.style.top) + parseInt(bot.style.height) * 0.5 - parseInt(botShell.style.height) * 0.5) + "px";
+    //             botShell.style.left = (parseInt(bot.style.left) + parseInt(bot.style.width) - parseInt(botShell.style.width) * 0.5) + "px";
+    //         }
+    //         botShooting();
+    //     } 
+    // }
+
+    // function botShooting() {
+    //     gameBoard.appendChild(botShell);
+    //     updateShall();
+    //     botShell.update = 1;
+    //     console.log("bot's shot");
+    //     if ((parseInt(botShell.style.top) < 0) || ((parseInt(botShell.style.top) + 16) >= boardSide) || (parseInt(botShell.style.left) < 0) || (parseInt(botShell.style.left) >= boardSide - 16)) {
+    //         explosionShall();
+    //     }
+
+    //     for (var i = 0; i < brick.length; i++) {
+    //         element = brick[i];
+    //         if (element != undefined) {
+    //             if ((((parseInt(botShell.style.top) + botShell.height) > parseInt(element.Pos_Y)) && (parseInt(botShell.style.top) < (parseInt(element.Pos_Y) + 40))) && (((parseInt(botShell.style.left) + botShell.width) > parseInt(element.Pos_X)) && (parseInt(botShell.style.left) < (parseInt(element.Pos_X) + 40))) && (element.CanBPass === 0)) {
+    //                 explosionShall();
+    //                 if (element.IsDestructible === 1) {
+    //                     let removeObj = document.getElementById(i);
+    //                     brick[i] = undefined;
+    //                     removeObj.remove();
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     if (botShell.update == 1) {
+    //         requestAnimationFrame(botShooting);
+    //     }
+    // }
+
+
+
     // Обработка клавиш для управления танком
     
     let status = 0;
@@ -314,5 +521,17 @@ document.addEventListener("DOMContentLoaded", function() {
             shooting();
         } 
     });
+
+    // Функция для генерации случайного направления
+    function getRandomDirection() {
+        const directions = ['up', 'down', 'left', 'right'];
+        return directions[Math.floor(Math.random() * directions.length)];
+      }
+      
+      // Функция для генерации случайного действия
+      function generateRandomAction() {
+        const actions = ['move', 'shoot'];
+        return actions[Math.floor(Math.random() * actions.length)];
+      }
 
 });
