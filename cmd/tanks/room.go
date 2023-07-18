@@ -13,6 +13,10 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+type levelPage struct {
+	RoomKey int
+}
+
 type leveldata struct {
 	Id          string `db:"id"`
 	Name        string `db:"name"`
@@ -32,31 +36,88 @@ type objdata struct {
 	Pos_Y          float64 `db:"pos_y"`
 }
 
-type IDdata struct {
-	ID int `db:"id"`
-}
-
 type tanktype struct {
-	ID        int
 	X         float64
 	Y         float64
 	Direction string
 	Distance  float64
+	IsChanged bool
+	status    string
+	Conn      websocket.Conn
 }
 
-type roomData struct {
+type roomdata struct {
+	ID           int
 	NumOfPlayers int
 	Level        leveldata
 	Objects      []*objdata
-	Tanks        map[*websocket.Conn]*tanktype
+	Tanks        []*tanktype
+	Status       string
 }
 
 var currLevel leveldata
 var Objects []*objdata
 
-var rooms []*roomData
+var rooms = make([]*roomdata, 0)
 
-const currRoom = 1
+func roomIsRunning(key int) {
+	var currRoom roomdata
+	for _, value := range rooms {
+		if value.ID == key {
+			currRoom = *value
+		}
+	}
+
+	ticker := time.NewTicker(time.Second) //(33 * time.Millisecond)
+
+	for {
+		select {
+		case <-ticker.C:
+			sendMessageForCleints(currRoom.Tanks)
+		}
+	}
+}
+
+func sendMessageForCleints(tanks []*tanktype) {
+
+	for _, value := range tanks { //Доделать удаление игрока из массива танков
+		if value.IsChanged {
+			value.IsChanged = false
+			err := value.Conn.WriteJSON(value)
+			if err != nil {
+				log.Println(err)
+				// delete(tanks, client)
+			}
+		}
+	}
+}
+
+func roomPage(w http.ResponseWriter, r *http.Request) {
+	roomKeystr := mux.Vars(r)["roomKey"]
+	roomKey, err := strconv.Atoi(roomKeystr)
+	if err != nil {
+		http.Error(w, "Err with roomKey", 500)
+		log.Println(err.Error())
+	}
+
+	ts, err := template.ParseFiles("pages/level.html")
+	if err != nil {
+		http.Error(w, "Internal Server Error", 500)
+		log.Println(err.Error())
+		return
+	}
+
+	data := levelPage{
+		RoomKey: roomKey,
+	}
+
+	err = ts.Execute(w, data)
+	if err != nil {
+		http.Error(w, "Internal Server Error", 500)
+		log.Println(err.Error())
+		return
+	}
+}
 
 func level(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -154,12 +215,28 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-var clients = make(map[*websocket.Conn]bool)
+func wsConnection(w http.ResponseWriter, r *http.Request) {
+	roomKeystr := mux.Vars(r)["roomKey"]
+	roomKey, err := strconv.Atoi(roomKeystr)
+	if err != nil {
+		http.Error(w, "Err with roomKey", 500)
+		log.Println(err.Error())
+	}
 
-// Функция handler является обработчиком HTTP запросов.
+	var currRoom roomdata
+	for _, value := range rooms {
+		if roomKey == value.ID {
+			currRoom = *value
+		}
+	}
+	fmt.Println("Finded")
 
-func handler(w http.ResponseWriter, r *http.Request) {
+	fmt.Printf("currRoom: %v\n", currRoom)
+
 	var tank tanktype
+
+	currRoom.Tanks = append(currRoom.Tanks, &tank)
+	currRoom.NumOfPlayers = len(currRoom.Tanks)
 	var levelSide float64
 	var sideValue float64
 	var step float64
@@ -169,67 +246,72 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		log.Println(err.Error())
 		return
 	}
+	tank.Conn = *conn
 
-	// rooms[currRoom].NumOfPlayers += 1
-	// rooms[currRoom].Tanks[conn].ID = rooms[currRoom].NumOfPlayers
-	// tank = rooms[currRoom].Tanks[conn]
-	clients[conn] = true
-
-	// err = conn.WriteJSON(rooms[currRoom].Level)
-	err = conn.WriteJSON(currLevel)
+	fmt.Printf("currRoom.Level: %v\n", currRoom.Level)
+	err = conn.WriteJSON(currRoom.Level)
 	if err != nil {
 		log.Println(err.Error())
 		return
 	}
 
-	var ticker *time.Ticker
-
-	go func() {
-		for {
-			_, m, err := conn.ReadMessage()
-			if err != nil {
-				log.Println(err.Error())
-				return
-			}
-
-			message := string(m)
-			readMessageFromCleints(conn, ticker, &tank, message, &levelSide, &sideValue, &step)
-		}
-	}()
-
-	time.Sleep(100 * time.Millisecond)
-	ticker = time.NewTicker(50 * time.Millisecond)
+	_, m, err := conn.ReadMessage()
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
 
 	for {
-		select {
-		case <-ticker.C:
-			sendMessageForCleints(&tank)
-			// ticker = time.NewTicker(time.Second)
-		}
+		message := string(m)
+		readMessageFromCleints(conn, &currRoom, &tank, message, &levelSide, &sideValue, &step)
 	}
 }
 
-func sendMessageForCleints(tank *tanktype) {
-	// for client := range rooms[currRoom].Tanks {
-	// 	err := client.WriteMessage(websocket.TextMessage, []byte("Ans from server"))
-	// 	if err != nil {
-	// 		log.Println(err.Error())
-	// 		delete(rooms[currRoom].Tanks, client)
-	// 		rooms[currRoom].NumOfPlayers -= 1
-	// 		return
-	// 	}
-	// }
+var clients = make(map[*websocket.Conn]bool)
 
-	for client := range clients {
-		err := client.WriteJSON(tank)
-		if err != nil {
-			log.Println(err)
-			delete(clients, client)
-		}
-	}
-}
+// Функция handler является обработчиком HTTP запросов.
 
-func readMessageFromCleints(conn *websocket.Conn, ticker *time.Ticker, tank *tanktype, message string, levelSide *float64, sideValue *float64, step *float64) {
+// func handler(w http.ResponseWriter, r *http.Request) {
+// 	// var tank tanktype
+// 	// var levelSide float64
+// 	// var sideValue float64
+// 	// var step float64
+
+// 	conn, err := upgrader.Upgrade(w, r, nil)
+// 	if err != nil {
+// 		log.Println(err.Error())
+// 		return
+// 	}
+
+// 	// rooms[currRoom].NumOfPlayers += 1
+// 	// rooms[currRoom].Tanks[conn].ID = rooms[currRoom].NumOfPlayers
+// 	// tank = rooms[currRoom].Tanks[conn]
+// 	clients[conn] = true
+
+// 	err = conn.WriteJSON(rooms[currRoom].Level)
+// 	err = conn.WriteJSON(currLevel)
+// 	if err != nil {
+// 		log.Println(err.Error())
+// 		return
+// 	}
+
+// 	var ticker *time.Ticker
+
+// 	go func() {
+// 		for {
+// 			_, m, err := conn.ReadMessage()
+// 			if err != nil {
+// 				log.Println(err.Error())
+// 				return
+// 			}
+
+// 			message := string(m)
+// 			readMessageFromCleints(conn, ticker, &tank, message, &levelSide, &sideValue, &step)
+// 		}
+// 	}()
+// }
+
+func readMessageFromCleints(conn *websocket.Conn, currRoom *roomdata, tank *tanktype, message string, levelSide *float64, sideValue *float64, step *float64) {
 	var err error
 
 	switch message {
@@ -240,15 +322,24 @@ func readMessageFromCleints(conn *websocket.Conn, ticker *time.Ticker, tank *tan
 			return
 		}
 
-		*sideValue = *levelSide / float64(currLevel.Side)
-		// sideValue = levelSide / float64(rooms[currRoom].Level.Side)
-		*step = *sideValue / 50
+		// *sideValue = *levelSide / float64(currLevel.Side)
+		*sideValue = *levelSide / float64(currRoom.Level.Side)
+		*step = *sideValue / 5
 		fmt.Println(*step)
 
-		// for _, value := range rooms[currRoom].Objects {
-		for _, value := range Objects {
-			value.Pos_X = value.Pos_X * *sideValue
-			value.Pos_Y = value.Pos_Y * *sideValue
+		var Objects []*objdata
+		for _, value := range currRoom.Objects {
+			// for _, value := range Objects {
+			var newObj objdata
+			newObj.ID = value.ID
+			newObj.Name = value.Name
+			newObj.IsDestructible = value.IsDestructible
+			newObj.CanTPass = value.CanTPass
+			newObj.CanBPass = value.CanBPass
+			newObj.ImgURL = value.ImgURL
+			newObj.Pos_X = value.Pos_X * *sideValue
+			newObj.Pos_Y = value.Pos_Y * *sideValue
+			Objects = append(Objects, &newObj)
 		}
 
 		tank.X = *levelSide/2 - *sideValue
@@ -272,13 +363,21 @@ func readMessageFromCleints(conn *websocket.Conn, ticker *time.Ticker, tank *tan
 		findDistance(conn, tank, dir, *levelSide, *sideValue)
 
 		go func() {
-			moveTank(conn, tank, *step)
+			moveTank(tank, *step)
 		}()
 	case "stopMoving":
+		partOfWay, err := getFloatFromSocket(conn)
+		if err != nil {
+			log.Println(err.Error())
+			return
+		}
+
+		calculateCoordinates(tank, partOfWay)
+
 		tank.Distance = 0
+		tank.IsChanged = true
 	case "Close":
 		conn.Close()
-		ticker.Stop()
 		return
 	}
 }
@@ -298,12 +397,12 @@ func getFloatFromSocket(conn *websocket.Conn) (float64, error) {
 	return value, nil
 }
 
-func moveTank(conn *websocket.Conn, tank *tanktype, step float64) {
-	ticker := time.NewTicker(time.Millisecond)
+func moveTank(tank *tanktype, step float64) {
+	ticker := time.NewTicker(100 * time.Millisecond)
 
 	for range ticker.C {
 		if tank.Distance <= step {
-			// calculateCoordinates(tank, tank.Distance)
+			calculateCoordinates(tank, tank.Distance-(step*0.1))
 			tank.Distance = 0
 			ticker.Stop()
 			return
@@ -330,7 +429,6 @@ func calculateCoordinates(tank *tanktype, step float64) {
 func findDistance(conn *websocket.Conn, tank *tanktype, dir string, levelside float64, sideValue float64) {
 
 	min := calculateStartDistance(tank, dir, levelside, sideValue)
-	// var minO objdata
 
 	// for _, value := range rooms[1].Objects {
 	for _, value := range Objects {
@@ -339,36 +437,12 @@ func findDistance(conn *websocket.Conn, tank *tanktype, dir string, levelside fl
 
 			if distance < min {
 				min = distance
-				// minO = *value
 			}
 		}
 	}
 
-	// err := conn.WriteJSON(minO)
-	// if err != nil {
-	// 	log.Println(err.Error())
-	// 	return
-	// }
-
-	// err = conn.WriteJSON(tank.X)
-	// if err != nil {
-	// 	log.Println(err.Error())
-	// 	return
-	// }
-
-	// err = conn.WriteJSON(dir)
-	// if err != nil {
-	// 	log.Println(err.Error())
-	// 	return
-	// }
-
-	// err := conn.WriteJSON(min)
-	// if err != nil {
-	// 	log.Println(err.Error())
-	// 	return
-	// }
-
 	tank.Distance = min
+	tank.IsChanged = true
 
 	return
 }

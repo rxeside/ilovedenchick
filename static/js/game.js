@@ -12,19 +12,20 @@ document.addEventListener("DOMContentLoaded", function() {
     let level;
     let sideValue;
     let step = 0.4;
-
+    const room = document.getElementById('room');
     // Создание и отображение кирпичей на поле
-    const socket = new WebSocket("ws://localhost:3000/ws");
+    const socket = new WebSocket("ws://localhost:3000/ws/" + room.textContent);
 
     socket.onopen = function() {
         console.log("Connected");
     }
 
     socket.onmessage = function(event) {
+        console.log(level);
         level = JSON.parse(event.data);
 
         sideValue = boardSide / level.Side;
-        step = sideValue / 85;
+        step = sideValue / 50;
         console.log(step);
         tank.style.height = sideValue * 0.95 + "px";
         tank.style.width = sideValue * 0.95 + "px";
@@ -50,15 +51,23 @@ document.addEventListener("DOMContentLoaded", function() {
         };
     }
 
+    let updateCoordinates = false;
+
     function answerFromServer() {
         socket.onmessage = function(event) {
             let message = JSON.parse(event.data);
-            // console.log(message);
-            tank.style.top = message.Y + "px";
-            tank.style.left = message.X + "px";
 
+            startDistance = message.Distance
             distance = message.Distance;
-            // console.log(distance);
+
+            if (updateCoordinates) {
+                tank.style.top = message.Y + "px";
+                tank.style.left = message.X + "px";
+                updateCoordinates = false;
+            }
+
+            console.log(message);
+            // console.log(parseFloat(tank.style.left));
         }; 
     }
     
@@ -102,24 +111,13 @@ document.addEventListener("DOMContentLoaded", function() {
     // Обработка клавиш для управления танком
     
     let status = 0;
-    let keyPressed = 0;
     let distance = 0; 
     let is_move = false;
 
     document.addEventListener("keydown", function(event) {
         let key = event.key;
 
-        // if (key == "g") {
-        //     socket.send("f");
-
-        //     socket.onmessage = function(event) {
-        //         let message = JSON.parse(event.data);
-
-        //         console.log(message);
-        //     }
-        // }
-
-        if ((key == "escape") || (key == "c")) {
+        if (key == "c") {
             socket.send("Close");
             console.log("Close");
         }
@@ -128,23 +126,23 @@ document.addEventListener("DOMContentLoaded", function() {
             switch (key) {
                 case "ArrowUp":
                     tank.direction = 1;
-                    sendDir(tank.direction);
-                    // moveTank();
+                    stopMove();
+                    movingTank();
                     break;
                 case "ArrowDown":
                     tank.direction = 2;
-                    sendDir(tank.direction);
-                    // moveTank();
+                    stopMove();
+                    movingTank();
                     break;
                 case "ArrowLeft":
                     tank.direction = 3;
-                    sendDir(tank.direction);
-                    // moveTank();
+                    stopMove();
+                    movingTank();
                     break;
                 case "ArrowRight":
                     tank.direction = 4;
-                    sendDir(tank.direction);
-                    // moveTank();
+                    stopMove();
+                    movingTank();
                     break;
             }
         }
@@ -152,184 +150,195 @@ document.addEventListener("DOMContentLoaded", function() {
 
     document.addEventListener("keyup", function(event) {
         
-        if((is_move == true) && ((event.key == "ArrowUp") || (event.key == "ArrowDown") || (event.key == "ArrowLeft") || (event.key == "ArrowRight"))) {
-            
-            is_move = false;
-            distance = 0;
-            socket.send("stopMoving");
-
+        if (is_move) {
+            switch (event.key) {
+                case "ArrowUp":
+                    if (tank.direction === 1) {
+                        stopMove();
+                    }
+                    break;
+                case "ArrowDown":
+                    if (tank.direction === 2) {
+                        stopMove();
+                    }
+                    break;
+                case "ArrowLeft":
+                    if (tank.direction === 3) {
+                        stopMove();
+                    }
+                    break;
+                case "ArrowRight":
+                    if (tank.direction === 4) {
+                        stopMove();
+                    }
+                    break;  
+            }
         }
-        // socket.send(parseFloat(tank.style.top));
-        // socket.send(parseFloat(tank.style.left));
-
-        // socket.onmessage = function(event) {
-        //     message = JSON.parse(event.data);
-        //     console.log(message);
-        // }
     });
 
-    // function moveTank() {
-    //     let completed = 0;
-    //     let moving = setInterval(function() {
-    //         console.log(distance);
-    //         if ((distance <= step) || (!is_move)) {
-    //             clearInterval(moving);
-    //             console.log("That's all");
-    //         }
+    function stopMove() {
+        console.log("Stop");
+        socket.send("stopMoving");
+        updateCoordinates = true;
+        if (distance > 0) {
+            let partOfWay = (startDistance - distance) % (step * 10);//Часть пути которое проедет клиент, но сервер не обработает
+            // console.log(tank);
+            // console.log(partOfWay);
+            socket.send(partOfWay);
+        }
+        else {
+            socket.send(0);
+        }
+        is_move = false;
+        distance = 0;
+    }
 
-    //         distance -= step;
-    //         completed += step;
-    //         switch (tank.direction) {
-    //             case 1:
-    //                 tank.style.top = parseFloat(tank.style.top) - step + "px";
-    //                 break;
-    //             case 2:
-    //                 tank.style.top = parseFloat(tank.style.top) + step + "px";
-    //                 break;
-    //             case 3:
-    //                 tank.style.left = parseFloat(tank.style.left) - step + "px";
-    //                 break;
-    //             case 4:
-    //                 tank.style.left = parseFloat(tank.style.left) + step + "px";
-    //                 break;
-    //         }
+    function movingTank() {
+        console.log("Move1");
+        sendDir();
+        is_move = true;
 
-    //         // if (completed % (step * 10) == 0) {
-    //         //     socket.send("moving");
-    //         //     socket.send(parseFloat(tank.style.top));
-    //         //     socket.send(parseFloat(tank.style.left));
-    //         // }
-    //     }, 5);
-    // }
-    function sendDir(dir)
+        let moveTimerID = setInterval(function() {
+            changAnimation();
+
+            if (is_move) {
+                if (distance !== 0) 
+                {
+                    moveByDistance();
+                } 
+                else 
+                {
+                    // moveByCoordinates();
+                }
+            } 
+            else 
+            {
+                clearInterval(moveTimerID);
+            }
+        }, 10);
+    }
+
+    function sendDir()
     {
         is_move = true;
         socket.send("move");
-        socket.send(dir)
-
-        // socket.onmessage = function(event) {
-        //     distance = JSON.parse(event.data);
-        //     console.log(distance);
-        //     moveTank();
-        // }
+        socket.send(tank.direction)
     }
 
-    // document.addEventListener('keydown', (event) => {
-    //     if (!keyPressed) {
-    //         keyPressed = setInterval(function() {
-    //             let key = event.key;
-    //             moveTank(key);
-    //         }, 1);
-    //     }
-    // })
-
-    // document.addEventListener('keyup', (event) => {
-    //     if (keyPressed) {
-    //         var key = event.key;
-    //         if (key == "ArrowUp" || key === "ArrowDown" || key == "ArrowRight" || key == "ArrowLeft") {
-    //             clearInterval(keyPressed);
-    //             keyPressed = 0;
-    //         }
-    //     }
-    // })
-    
-    function oldmoveTank(key) {
+    function moveByDistance() {
+        if (distance <= step) {
+            return;
+        }
         
-        if ((key === "ArrowUp")) {
-            let can_move = true;
-           
-            brick.forEach(element => { if (element != undefined) {
-                if (((((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(tank.style.top) < (parseFloat(element.Pos_Y) + parseFloat(tank.style.width) + step))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(tank.style.left) < (parseFloat(element.Pos_X) + parseFloat(tank.style.width)))) || ((parseFloat(tank.style.top) <= 0))))
-                {  
-                    if (element.CanTPass === 0)
-                       can_move = false;
-                    
-                } 
-            }});
-            
-            tank.direction = 1;
-            if (status === 0) {
-                status = 1;
-                tank.src = '../static/image/top.png';
-            } else if (status === 1) {
-                status = 0;
-                tank.src = '../static/image/top1.png';
-            }
+        distance -= step;
+        switch (tank.direction) {
+            case 1:
+                tank.style.top = parseFloat(tank.style.top) - step + "px";
+                break;
+            case 2:
+                tank.style.top = parseFloat(tank.style.top) + step + "px";
+                break;
+            case 3:
+                tank.style.left = parseFloat(tank.style.left) - step + "px";
+                break;
+            case 4:
+                tank.style.left = parseFloat(tank.style.left) + step + "px";
+                break;
+        }
+
+    }
     
-            if (can_move) {
+    function moveByCoordinates() {
+    
+        switch (tank.direction) {
+            case 1:
+                brick.forEach(element => { if (element != undefined) {
+                    if (element.CanTPass === 0) {
+                        if (((((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(tank.style.top) < (parseFloat(element.Pos_Y) + parseFloat(tank.style.width) + step))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(tank.style.left) < (parseFloat(element.Pos_X) + parseFloat(tank.style.width)))) || ((parseFloat(tank.style.top) <= 0))))
+                        {  
+                           return;
+                        } 
+                    }
+                }});
                 tank.style.top = (parseFloat(tank.style.top) - step) + "px";
-            } 
-           
-        } else if ((key === "ArrowDown")) {
-            let can_move = true;
-    
-            brick.forEach(element => { if (element != undefined) {
-                if (((((parseFloat(tank.style.top) + parseFloat(tank.style.width) +  step) > parseFloat(element.Pos_Y)) && (parseFloat(tank.style.top) < (parseFloat(element.Pos_Y) + parseFloat(tank.style.width)))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(tank.style.left) < (parseFloat(element.Pos_X) + parseFloat(tank.style.width)))) || ((parseFloat(tank.style.top) + parseFloat(tank.style.width) >= boardSide))))
-                {  
-                    if (element.CanTPass === 0)
-                        can_move = false;
-                } 
-            }});
-    
-            tank.direction = 2;
-            if (status === 0) {
-                status = 1;
-                tank.src = '../static/image/down.png';
-            } else if (status === 1) {
-                status = 0;
-                tank.src = '../static/image/down1.png';
-            }
-    
-            if (can_move) {
-                tank.style.top = (parseFloat(tank.style.top) + step) + "px";
-            }           
-    
-        } else if ((key === "ArrowLeft")) {
-            let can_move = true;
-    
-            brick.forEach(element => { if (element != undefined) {
-                if ((((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(tank.style.top) < (parseFloat(element.Pos_Y) + parseFloat(tank.style.width)))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(tank.style.left) < (parseFloat(element.Pos_X) + parseFloat(tank.style.width) +  step))) || ((parseFloat(tank.style.left) <= 0)))
-                {  
-                    if (element.CanTPass === 0)
-                        can_move = false;
-                } 
-            }});
-    
-            tank.direction = 3;
-            if (status === 0) {
-                status = 1;
-                tank.src = '../static/image/left.png';
-            } else if (status === 1) {
-                status = 0;
-                tank.src = '../static/image/left1.png';
-            }
-    
-            if (can_move) {
+               break;
+            case 2:
+                brick.forEach(element => { if (element != undefined) {
+                    if (element.CanTPass === 0) {
+                        if (((((parseFloat(tank.style.top) + parseFloat(tank.style.width) +  step) > parseFloat(element.Pos_Y)) && (parseFloat(tank.style.top) < (parseFloat(element.Pos_Y) + parseFloat(tank.style.width)))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(tank.style.left) < (parseFloat(element.Pos_X) + parseFloat(tank.style.width)))) || ((parseFloat(tank.style.top) + parseFloat(tank.style.width) >= boardSide))))
+                        {  
+                            return;
+                        } 
+                    }
+                }});
+            
+                tank.style.top = (parseFloat(tank.style.top) + step) + "px"; 
+                break;
+            case 3:
+                brick.forEach(element => { if (element != undefined) {
+                    if (element.CanTPass === 0) {
+                        if ((((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(tank.style.top) < (parseFloat(element.Pos_Y) + parseFloat(tank.style.width)))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(tank.style.left) < (parseFloat(element.Pos_X) + parseFloat(tank.style.width) +  step))) || ((parseFloat(tank.style.left) <= 0)))
+                        {  
+                            return;
+                        } 
+                    }
+                }});
+            
                 tank.style.left = (parseFloat(tank.style.left) - step) + "px";
-            }
-        } else if ((key === "ArrowRight")) {
-            let can_move = true;
-    
-            brick.forEach(element => { if (element != undefined) {
-                if (((((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(tank.style.top) < (parseFloat(element.Pos_Y) + parseFloat(tank.style.width)))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width) +  step) > parseFloat(element.Pos_X)) && (parseFloat(tank.style.left) < (parseFloat(element.Pos_X) + parseFloat(tank.style.width)))) || ((parseFloat(tank.style.left) + parseFloat(tank.style.width) >= boardSide))))
-                {   
-                    if (element.CanTPass === 0)
-                        can_move = false;
-                } 
-            }});
-    
-            tank.direction = 4;
-            if (status === 0) {
-                status = 1;
-                tank.src = '../static/image/right.png';
-            } else if (status === 1) {
-                status = 0;
-                tank.src = '../static/image/right1.png';
-            }
-    
-            if (can_move) { 
+            case 4:
+                brick.forEach(element => { if (element != undefined) {
+                    if (element.CanTPass === 0) {
+                        if (((((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(tank.style.top) < (parseFloat(element.Pos_Y) + parseFloat(tank.style.width)))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width) +  step) > parseFloat(element.Pos_X)) && (parseFloat(tank.style.left) < (parseFloat(element.Pos_X) + parseFloat(tank.style.width)))) || ((parseFloat(tank.style.left) + parseFloat(tank.style.width) >= boardSide))))
+                        {   
+                            return;
+                        } 
+                    }
+                }});
+            
                 tank.style.left = (parseFloat(tank.style.left) + step) + "px";
-            }
+                break;
+        }
+        
+    }
+
+    function changAnimation() {
+        switch (tank.direction) {
+            case 1:
+                if (status === 0) {
+                    status = 1;
+                    tank.src = '../static/image/top.png';
+                } else if (status === 1) {
+                    status = 0;
+                    tank.src = '../static/image/top1.png';
+                }
+                break;
+            case 2:
+                if (status === 0) {
+                    status = 1;
+                    tank.src = '../static/image/down.png';
+                } else if (status === 1) {
+                    status = 0;
+                    tank.src = '../static/image/down1.png';
+                }
+                break;
+            case 3:
+                if (status === 0) {
+                    status = 1;
+                    tank.src = '../static/image/left.png';
+                } else if (status === 1) {
+                    status = 0;
+                    tank.src = '../static/image/left1.png';
+                }
+                break;
+            case 4:
+                if (status === 0) {
+                    status = 1;
+                    tank.src = '../static/image/right.png';
+                } else if (status === 1) {
+                    status = 0;
+                    tank.src = '../static/image/right1.png';
+                }
+                break;
         }
     }
 
