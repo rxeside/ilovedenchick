@@ -98,6 +98,7 @@ document.addEventListener("DOMContentLoaded", function() {
     tank.style.top = (boardSide / 2 - 40) + "px";
     tank.style.left = (boardSide / 2 - 40) + "px";
     tank.src = '../static/image/top.png';
+    let status = 0;
 
 
     // Добавление танка на игровое поле
@@ -119,6 +120,7 @@ document.addEventListener("DOMContentLoaded", function() {
     botShell.direction = 1;
     botShell.directionNew = 1;
     botShell.update = 0;
+    botSkinStatus = 0;
     
     // Обработка движения бота
     function updateBot() {
@@ -145,11 +147,11 @@ document.addEventListener("DOMContentLoaded", function() {
                         }});
                         
                         botShell.directionNew = 1;
-                        if (status === 0) {
-                            status = 1;
+                        if (botSkinStatus === 0) {
+                            botSkinStatus = 1;
                             bot.src = '../static/image/botTop.png';
-                        } else if (status === 1) {
-                            status = 0;
+                        } else if (botSkinStatus === 1) {
+                            botSkinStatus = 0;
                             bot.src = '../static/image/botTop1.png';
                         }
                 
@@ -172,11 +174,11 @@ document.addEventListener("DOMContentLoaded", function() {
                         }});
                 
                         botShell.directionNew = 2;
-                        if (status === 0) {
-                            status = 1;
+                        if (botSkinStatus === 0) {
+                            botSkinStatus = 1;
                             bot.src = '../static/image/botDown.png';
-                        } else if (status === 1) {
-                            status = 0;
+                        } else if (botSkinStatus === 1) {
+                            botSkinStatus = 0;
                             bot.src = '../static/image/botDown1.png';
                         }
                 
@@ -195,11 +197,11 @@ document.addEventListener("DOMContentLoaded", function() {
                     }});
             
                     botShell.directionNew = 3;
-                    if (status === 0) {
-                        status = 1;
+                    if (botSkinStatus === 0) {
+                        botSkinStatus = 1;
                         bot.src = '../static/image/botLeft.png';
                     } else if (status === 1) {
-                        status = 0;
+                        botSkinStatus = 0;
                         bot.src = '../static/image/botLeft1.png';
                     }
             
@@ -218,11 +220,11 @@ document.addEventListener("DOMContentLoaded", function() {
                     }});
             
                     botShell.directionNew = 4;
-                    if (status === 0) {
-                        status = 1;
+                    if (botSkinStatus === 0) {
+                        botSkinStatus = 1;
                         bot.src = '../static/image/botRight.png';
-                    } else if (status === 1) { 
-                        status = 0;
+                    } else if (botSkinStatus === 1) { 
+                        botSkinStatus = 0;
                         bot.src = '../static/image/botRight1.png';
                     }
             
@@ -309,7 +311,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Обработка клавиш для управления танком
     
-    let status = 0;
+    
     let keyPressed = 0;
     
     document.addEventListener('keydown', (event) => {
@@ -329,7 +331,7 @@ document.addEventListener("DOMContentLoaded", function() {
             let can_move = true;
            
             brick.forEach(element => { if (element != undefined) {
-                if (((((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(tank.style.top) < (parseFloat(element.Pos_Y) + parseFloat(tank.style.width) + step))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(tank.style.left) < (parseFloat(element.Pos_X) + parseFloat(tank.style.width)))) || ((parseFloat(tank.style.top) <= 0))))
+                if (((parseFloat(tank.style.top) > parseFloat(bot.style.top)) && (parseFloat(tank.style.top) < parseFloat(bot.style.top) + parseFloat(bot.style.height)) && (parseFloat(tank.style.left) + parseFloat(tank.style.width) > parseFloat(bot.style.left)) && (parseFloat(tank.style.left) < parseFloat(bot.style.left) + parseFloat(bot.style.width))) || (((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(tank.style.top) < (parseFloat(element.Pos_Y) + parseFloat(tank.style.width) + step))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(tank.style.left) < (parseFloat(element.Pos_X) + parseFloat(tank.style.width)))) || ((parseFloat(tank.style.top) <= 0)))
                 {  
                     if (element.CanTPass === 0)
                        can_move = false;
@@ -354,7 +356,7 @@ document.addEventListener("DOMContentLoaded", function() {
             let can_move = true;
     
             brick.forEach(element => { if (element != undefined) {
-                if (((((parseFloat(tank.style.top) + parseFloat(tank.style.width) + step) > parseFloat(element.Pos_Y)) && (parseFloat(tank.style.top) < (parseFloat(element.Pos_Y) + parseFloat(tank.style.width)))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(tank.style.left) < (parseFloat(element.Pos_X) + parseFloat(tank.style.width)))) || ((parseFloat(tank.style.top) + parseFloat(tank.style.width) >= boardSide))))
+                if (((parseFloat(tank.style.top) + parseFloat(tank.style.height) < parseFloat(bot.style.top) + parseFloat(bot.style.height)) && (parseFloat(tank.style.top) + parseFloat(tank.style.height) > parseFloat(bot.style.top)) && (parseFloat(tank.style.left) + parseFloat(tank.style.width) > parseFloat(bot.style.left)) && (parseFloat(tank.style.left) < parseFloat(bot.style.left) + parseFloat(bot.style.width))) || (((parseFloat(tank.style.top) + parseFloat(tank.style.width) + step) > parseFloat(element.Pos_Y)) && (parseFloat(tank.style.top) < (parseFloat(element.Pos_Y) + parseFloat(tank.style.width)))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(tank.style.left) < (parseFloat(element.Pos_X) + parseFloat(tank.style.width)))) || ((parseFloat(tank.style.top) + parseFloat(tank.style.width) >= boardSide)))
                 {  
                     if (element.CanTPass === 0)
                         can_move = false;
@@ -401,7 +403,7 @@ document.addEventListener("DOMContentLoaded", function() {
             let can_move = true;
     
             brick.forEach(element => { if (element != undefined) {
-                if (((((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(tank.style.top) < (parseFloat(element.Pos_Y) + parseFloat(tank.style.width)))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width) +  step) > parseFloat(element.Pos_X)) && (parseFloat(tank.style.left) < (parseFloat(element.Pos_X) + parseFloat(tank.style.width)))) || ((parseFloat(tank.style.left) + parseFloat(tank.style.width) >= boardSide))))
+                if ((((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(tank.style.top) < (parseFloat(element.Pos_Y) + parseFloat(tank.style.width)))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width) +  step) > parseFloat(element.Pos_X)) && (parseFloat(tank.style.left) < (parseFloat(element.Pos_X) + parseFloat(tank.style.width)))) || ((parseFloat(tank.style.left) + parseFloat(tank.style.width) >= boardSide)))
                 {   
                     if (element.CanTPass === 0)
                         can_move = false;
