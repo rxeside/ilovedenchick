@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", function() {
+    
     // Создание игрового поля
     let gameBoard = document.getElementById("game-board");
     gameBoard.style.height = innerHeight * 0.8 + "px";
@@ -15,8 +16,6 @@ document.addEventListener("DOMContentLoaded", function() {
     let step = 0.5;
     let speed = 0.5;
      
-
-
     // Создание и отображение кирпичей на поле
     const socket = new WebSocket("ws://localhost:3000/ws");
 
@@ -33,8 +32,12 @@ document.addEventListener("DOMContentLoaded", function() {
             console.log(sideValue);
             shell.style.height = sideValue * 0.3 + "px";
             shell.style.width = sideValue * 0.25 + "px";
+            botShell.style.height = sideValue * 0.3 + "px";
+            botShell.style.width = sideValue * 0.25 + "px";
             explosion.style.height = sideValue * 0.7 + "px";
             explosion.style.width = sideValue * 0.7 + "px";
+            botShotExplosion.style.height = sideValue * 0.7 + "px";
+            botShotExplosion.style.width = sideValue * 0.7 + "px";
      
             if (sideValue > 60) {
                 step = 1;
@@ -85,21 +88,20 @@ document.addEventListener("DOMContentLoaded", function() {
     shell.directionNew = 1;
     shell.update = 0;
     
-
     //Создание взрыва
     let explosion = document.createElement("img");
     explosion.className = "explosion";
-    explosion.src = '../static/image/explosion1.png'
+    explosion.src = '../static/image/explosion1.png';
     
     // Создание танка
     let tank = document.createElement("img");
-
     tank.className = "tank";
     tank.style.top = (boardSide / 2 - 40) + "px";
     tank.style.left = (boardSide / 2 - 40) + "px";
     tank.src = '../static/image/top.png';
     let status = 0;
-
+    let dead = false;
+    let hit = 0;
 
     // Добавление танка на игровое поле
     gameBoard.appendChild(tank);
@@ -113,7 +115,6 @@ document.addEventListener("DOMContentLoaded", function() {
     bot.src = '../static/image/botTop.png';
     gameBoard.appendChild(bot);
     let botMovement = 0;
-
     let botShell = document.createElement("img");
     botShell.className = "botShell";
     botShell.src = "../static/image/ShellTop.png";
@@ -121,9 +122,15 @@ document.addEventListener("DOMContentLoaded", function() {
     botShell.directionNew = 1;
     botShell.update = 0;
     botSkinStatus = 0;
+    let botShotExplosion = document.createElement("img");
+    botShotExplosion.className = "botShotExplosion";
+    botShotExplosion.src = '../static/image/explosion1.png';
     
     // Обработка движения бота
     function updateBot() {
+        if (bot == undefined) {
+            return;
+        }
         let action = generateRandomAction();
         console.log("action: ", action);
         let direction;
@@ -133,16 +140,16 @@ document.addEventListener("DOMContentLoaded", function() {
             direction = getRandomDirection();
             console.log("direction: ", direction);
             botMovement = setInterval(function() {
-                if (direction == 'up') {
-                  
+                if (direction == 'up') {                    
                         let can_move = true;
-                       
+                        if (bot == undefined) {
+                            return;
+                        }
                         brick.forEach(element => { if (element != undefined) {
-                            if (((((parseFloat(bot.style.top) + parseFloat(bot.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(bot.style.top) < (parseFloat(element.Pos_Y) + parseFloat(bot.style.width) + step))) && (((parseFloat(bot.style.left) + parseFloat(bot.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(bot.style.left) < (parseFloat(element.Pos_X) + parseFloat(bot.style.width)))) || ((parseFloat(bot.style.top) <= 0))))
+                            if (((parseFloat(tank.style.top) + parseFloat(tank.style.height) < parseFloat(bot.style.top) + parseFloat(bot.style.height)) && (parseFloat(tank.style.top) + parseFloat(tank.style.height) + step > parseFloat(bot.style.top)) && (parseFloat(tank.style.left) + parseFloat(tank.style.width) > parseFloat(bot.style.left)) && (parseFloat(tank.style.left) < parseFloat(bot.style.left) + parseFloat(bot.style.width))) || (((parseFloat(bot.style.top) + parseFloat(bot.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(bot.style.top) < (parseFloat(element.Pos_Y) + parseFloat(bot.style.width) + step))) && (((parseFloat(bot.style.left) + parseFloat(bot.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(bot.style.left) < (parseFloat(element.Pos_X) + parseFloat(bot.style.width)))) || ((parseFloat(bot.style.top) <= 0)))
                             {  
                                 if (element.CanTPass === 0)
-                                   can_move = false;    
-                                
+                                   can_move = false;                        
                             } 
                         }});
                         
@@ -153,20 +160,17 @@ document.addEventListener("DOMContentLoaded", function() {
                         } else if (botSkinStatus === 1) {
                             botSkinStatus = 0;
                             bot.src = '../static/image/botTop1.png';
-                        }
-                
+                        }        
                         if (can_move) {
                             bot.style.top = (parseFloat(bot.style.top) - step) + "px";
-                        }      
-            
-                        
-                    
-                } else if (direction == 'down') {
-                        
+                        }                          
+                } else if (direction == 'down') {                      
                         let can_move = true;
-                
+                        if (bot == undefined) {
+                            return;
+                        }
                         brick.forEach(element => { if (element != undefined) {
-                            if (((((parseFloat(bot.style.top) + parseFloat(bot.style.width) + step) > parseFloat(element.Pos_Y)) && (parseFloat(bot.style.top) < (parseFloat(element.Pos_Y) + parseFloat(bot.style.width)))) && (((parseFloat(bot.style.left) + parseFloat(bot.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(bot.style.left) < (parseFloat(element.Pos_X) + parseFloat(bot.style.width)))) || ((parseFloat(bot.style.top) + parseFloat(bot.style.width) >= boardSide))))
+                            if (((parseFloat(tank.style.top) > parseFloat(bot.style.top)) && (parseFloat(tank.style.top) - step < parseFloat(bot.style.top) + parseFloat(bot.style.height)) && (parseFloat(tank.style.left) + parseFloat(tank.style.width) > parseFloat(bot.style.left)) && (parseFloat(tank.style.left) < parseFloat(bot.style.left) + parseFloat(bot.style.width))) ||   (((parseFloat(bot.style.top) + parseFloat(bot.style.width) + step) > parseFloat(element.Pos_Y)) && (parseFloat(bot.style.top) < (parseFloat(element.Pos_Y) + parseFloat(bot.style.width)))) && (((parseFloat(bot.style.left) + parseFloat(bot.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(bot.style.left) < (parseFloat(element.Pos_X) + parseFloat(bot.style.width)))) || ((parseFloat(bot.style.top) + parseFloat(bot.style.width) >= boardSide)))
                             {  
                                 if (element.CanTPass === 0)
                                     can_move = false;
@@ -181,15 +185,16 @@ document.addEventListener("DOMContentLoaded", function() {
                             botSkinStatus = 0;
                             bot.src = '../static/image/botDown1.png';
                         }
-                
                         if (can_move) {
                             bot.style.top = (parseFloat(bot.style.top) + step) + "px";
                         }           
                 } else if (direction == 'left') {
                     let can_move = true;
-    
+                    if (bot == undefined) {
+                        return;
+                    }
                     brick.forEach(element => { if (element != undefined) {
-                        if ((((parseFloat(bot.style.top) + parseFloat(bot.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(bot.style.top) < (parseFloat(element.Pos_Y) + parseFloat(bot.style.width)))) && (((parseFloat(bot.style.left) + parseFloat(bot.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(bot.style.left) < (parseFloat(element.Pos_X) + parseFloat(bot.style.width) +  step))) || ((parseFloat(bot.style.left) <= 0)))
+                        if ((((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(bot.style.top)) && (parseFloat(tank.style.top) < (parseFloat(bot.style.top) + parseFloat(bot.style.height)))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width) +  step) > parseFloat(bot.style.left)) && (parseFloat(tank.style.left) < (parseFloat(bot.style.left) + parseFloat(bot.style.width)))) || (((parseFloat(bot.style.top) + parseFloat(bot.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(bot.style.top) < (parseFloat(element.Pos_Y) + parseFloat(bot.style.width)))) && (((parseFloat(bot.style.left) + parseFloat(bot.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(bot.style.left) < (parseFloat(element.Pos_X) + parseFloat(bot.style.width) +  step))) || ((parseFloat(bot.style.left) <= 0)))
                         {  
                             if (element.CanTPass === 0)
                                 can_move = false;
@@ -204,21 +209,22 @@ document.addEventListener("DOMContentLoaded", function() {
                         botSkinStatus = 0;
                         bot.src = '../static/image/botLeft1.png';
                     }
-            
                     if (can_move) {
                         bot.style.left = (parseFloat(bot.style.left) - step) + "px";
                     }
                 } else if (direction == 'right') {
                     let can_move = true;
-    
+                    if (bot == undefined) {
+                        return;
+                    }
                     brick.forEach(element => { if (element != undefined) {
-                        if (((((parseFloat(bot.style.top) + parseFloat(bot.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(bot.style.top) < (parseFloat(element.Pos_Y) + parseFloat(bot.style.width)))) && (((parseFloat(bot.style.left) + parseFloat(bot.style.width) +  step) > parseFloat(element.Pos_X)) && (parseFloat(bot.style.left) < (parseFloat(element.Pos_X) + parseFloat(bot.style.width)))) || ((parseFloat(bot.style.left) + parseFloat(bot.style.width) >= boardSide))))
+                        if ((((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(bot.style.top)) && (parseFloat(tank.style.top) < (parseFloat(bot.style.top) + parseFloat(tank.style.width)))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width)) > parseFloat(bot.style.left)) && (parseFloat(tank.style.left) < (parseFloat(bot.style.left) + parseFloat(tank.style.width) + step))) || (((parseFloat(bot.style.top) + parseFloat(bot.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(bot.style.top) < (parseFloat(element.Pos_Y) + parseFloat(bot.style.width)))) && (((parseFloat(bot.style.left) + parseFloat(bot.style.width) +  step) > parseFloat(element.Pos_X)) && (parseFloat(bot.style.left) < (parseFloat(element.Pos_X) + parseFloat(bot.style.width)))) || ((parseFloat(bot.style.left) + parseFloat(bot.style.width) >= boardSide)))
                         {   
                             if (element.CanTPass === 0)
                                 can_move = false;
                         } 
                     }});
-            
+
                     botShell.directionNew = 4;
                     if (botSkinStatus === 0) {
                         botSkinStatus = 1;
@@ -227,93 +233,130 @@ document.addEventListener("DOMContentLoaded", function() {
                         botSkinStatus = 0;
                         bot.src = '../static/image/botRight1.png';
                     }
-            
                     if (can_move) { 
                         bot.style.left = (parseFloat(bot.style.left) + step) + "px";
                     }
                 }
-            }, speed);
-            
+            }, speed);       
         } 
-        // else if (action == 'shoot') {
-        //     botShotDirection();
-        // }
-        
-        
-        
-        
-
-        
+        else if (action == 'shoot') {
+            botShotDirection();
+        }  
     }
 
     function startBot() {
         // Обновляем состояние игры каждые 2 секунд
-        setInterval(updateBot, 2000);
-    }
+        if (bot != undefined)
+            setInterval(updateBot, 2000);
 
+    }
     startBot();
 
-    // function botShotDirection() {
-    //     if (botShell.update == 0) {
-    //         botShell.direction = botShell.directionNew;
-    //         if (botShell.direction == 1) {
-    //             botShell.src = "../static/image/ShellTop.png";
-    //             botShell.style.top = (parseInt(bot.style.top) - parseInt(botShell.style.height) * 0.5) + "px";
-    //             botShell.style.left = (parseInt(bot.style.left) + parseInt(bot.style.width) * 0.5 - parseInt(botShell.style.width) * 0.5) + "px";
-    //         }
-    //         if (botShell.direction == 2) {
-    //             botShell.src = "../static/image/ShellDown.png";
-    //             botShell.style.top = (parseInt(bot.style.top) + parseInt(bot.style.height) - parseInt(botShell.style.height) * 0.5) + "px";
-    //             botShell.style.left = (parseInt(bot.style.left) + parseInt(bot.style.width) * 0.5 - parseInt(botShell.style.width) * 0.5) + "px";
-    //         }
-    //         if (botShell.direction == 3) {
-    //             botShell.src = "../static/image/ShellLeft.png";
-    //             botShell.style.top = (parseInt(bot.style.top) + parseInt(bot.style.height) * 0.5 - parseInt(botShell.style.height) * 0.5) + "px";
-    //             botShell.style.left = (parseInt(bot.style.left) - parseInt(bot.style.width) * 0.5) + "px";
-    //         }
-    //         if (botShell.direction == 4) {
-    //             botShell.src = "../static/image/ShellRight.png";
-    //             botShell.style.top = (parseInt(bot.style.top) + parseInt(bot.style.height) * 0.5 - parseInt(botShell.style.height) * 0.5) + "px";
-    //             botShell.style.left = (parseInt(bot.style.left) + parseInt(bot.style.width) - parseInt(botShell.style.width) * 0.5) + "px";
-    //         }
-    //         botShooting();
-    //     } 
-    // }
+    function botShotDirection() {
+        if (botShell.update == 0) {
+            botShell.direction = botShell.directionNew;
+            if (botShell.direction == 1) {
+                botShell.src = "../static/image/ShellTop.png";
+                botShell.style.top = (parseInt(bot.style.top) - parseInt(botShell.style.height) * 0.5) + "px";
+                botShell.style.left = (parseInt(bot.style.left) + parseInt(bot.style.width) * 0.5 - parseInt(botShell.style.width) * 0.5) + "px";
+            }
+            if (botShell.direction == 2) {
+                botShell.src = "../static/image/ShellDown.png";
+                botShell.style.top = (parseInt(bot.style.top) + parseInt(bot.style.height) - parseInt(botShell.style.height) * 0.5) + "px";
+                botShell.style.left = (parseInt(bot.style.left) + parseInt(bot.style.width) * 0.5 - parseInt(botShell.style.width) * 0.5) + "px";
+            }
+            if (botShell.direction == 3) {
+                botShell.src = "../static/image/ShellLeft.png";
+                botShell.style.top = (parseInt(bot.style.top) + parseInt(bot.style.height) * 0.5 - parseInt(botShell.style.height) * 0.5) + "px";
+                botShell.style.left = (parseInt(bot.style.left) - parseInt(bot.style.width) * 0.5) + "px";
+            }
+            if (botShell.direction == 4) {
+                botShell.src = "../static/image/ShellRight.png";
+                botShell.style.top = (parseInt(bot.style.top) + parseInt(bot.style.height) * 0.5 - parseInt(botShell.style.height) * 0.5) + "px";
+                botShell.style.left = (parseInt(bot.style.left) + parseInt(bot.style.width) - parseInt(botShell.style.width) * 0.5) + "px";
+            }
+            botShooting();
+        } 
+    }
 
-    // function botShooting() {
-    //     gameBoard.appendChild(botShell);
-    //     updateShall();
-    //     botShell.update = 1;
-    //     console.log("bot's shot");
-    //     if ((parseInt(botShell.style.top) < 0) || ((parseInt(botShell.style.top) + 16) >= boardSide) || (parseInt(botShell.style.left) < 0) || (parseInt(botShell.style.left) >= boardSide - 16)) {
-    //         explosionShall();
-    //     }
+    function botShooting() {
+        gameBoard.appendChild(botShell);
+        updateBotShall();
+        botShell.update = 1;
+        console.log("bot's shot");
+        if ((parseInt(botShell.style.top) < 0) || ((parseInt(botShell.style.top) + 16) >= boardSide) || (parseInt(botShell.style.left) < 0) || (parseInt(botShell.style.left) >= boardSide - 16)) {
+            explosionBotShall();
+        }
 
-    //     for (var i = 0; i < brick.length; i++) {
-    //         element = brick[i];
-    //         if (element != undefined) {
-    //             if ((((parseInt(botShell.style.top) + botShell.height) > parseInt(element.Pos_Y)) && (parseInt(botShell.style.top) < (parseInt(element.Pos_Y) + 40))) && (((parseInt(botShell.style.left) + botShell.width) > parseInt(element.Pos_X)) && (parseInt(botShell.style.left) < (parseInt(element.Pos_X) + 40))) && (element.CanBPass === 0)) {
-    //                 explosionShall();
-    //                 if (element.IsDestructible === 1) {
-    //                     let removeObj = document.getElementById(i);
-    //                     brick[i] = undefined;
-    //                     removeObj.remove();
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     if (botShell.update == 1) {
-    //         requestAnimationFrame(botShooting);
-    //     }
-    // }
+        
+        if ((((parseInt(botShell.style.top) + botShell.height) > parseInt(tank.style.top)) && (parseInt(botShell.style.top) < (parseInt(tank.style.top) + sideValue))) && (((parseInt(botShell.style.left) + botShell.width) > parseInt(tank.style.left)) && (parseInt(botShell.style.left) < (parseInt(tank.style.left) + sideValue)))) {
+            explosionBotShall();
+            hit += 1;
+            if (hit == 1)  {
+                dead = true;
+                console.log("GAME OVER");
+                tank.remove();
+                setTimeout (()=> {location.reload();}, 2000);
 
+            }    
+        }
+        
+
+        for (var i = 0; i < brick.length; i++) {
+            element = brick[i];
+            if (element != undefined) {
+                if ((((parseInt(botShell.style.top) + botShell.height) > parseInt(element.Pos_Y)) && (parseInt(botShell.style.top) < (parseInt(element.Pos_Y) + 40))) && (((parseInt(botShell.style.left) + botShell.width) > parseInt(element.Pos_X)) && (parseInt(botShell.style.left) < (parseInt(element.Pos_X) + 40))) && (element.CanBPass === 0)) {
+                    explosionBotShall();
+                    if (element.IsDestructible === 1) {
+                        let removeObj = document.getElementById(i);
+                        brick[i] = undefined;
+                        removeObj.remove();
+                    }
+                }
+            }
+        }
+        if (botShell.update == 1) {
+            requestAnimationFrame(botShooting);
+        }
+    }
+
+
+    function updateBotShall() {
+        let botShellSpeed = sideValue/7;
+
+        if (botShell.direction == 1) {
+            botShell.style.top = (parseInt(botShell.style.top) - botShellSpeed) + "px";
+        }
+        if (botShell.direction == 2) {
+            botShell.style.top = (parseInt(botShell.style.top) + botShellSpeed) + "px";
+        }
+        if (botShell.direction == 3) {
+            botShell.style.left = (parseInt(botShell.style.left) - botShellSpeed) + "px";
+        }
+        if (botShell.direction == 4) {
+            botShell.style.left = (parseInt(botShell.style.left) + botShellSpeed) + "px";
+        }
+        
+    }
+
+
+    function explosionBotShall() {
+        botShell.update = 0;
+        botShellPlacement = sideValue/5;
+        gameBoard.removeChild(botShell);
+        botShotExplosion.style.top = (parseInt(botShell.style.top) - botShellPlacement) + "px";
+        botShotExplosion.style.left = (parseInt(botShell.style.left) - botShellPlacement) + "px";
+        botShotExplosion.src = '../static/image/explosion1.png';
+        gameBoard.appendChild(botShotExplosion);
+        setTimeout(() => { botShotExplosion.src = '../static/image/explosion2.png'; botShotExplosion.style.top = (parseInt(botShotExplosion.style.top) - 2) + "px"; botShotExplosion.style.left = (parseInt(botShotExplosion.style.left) - 2) + "px"; }, 80 );
+        setTimeout(() => { botShotExplosion.src = '../static/image/explosion3.png'; botShotExplosion.style.top = (parseInt(botShotExplosion.style.top) - 1) + "px"; botShotExplosion.style.left = (parseInt(botShotExplosion.style.left) - 1) + "px"; }, 160 );
+        setTimeout(() => { gameBoard.removeChild(botShotExplosion); }, 240);
+
+    }
 
 
     // Обработка клавиш для управления танком
-    
-    
     let keyPressed = 0;
-    
     document.addEventListener('keydown', (event) => {
         if (!keyPressed) {
             keyPressed = setInterval(function() {
@@ -327,11 +370,19 @@ document.addEventListener("DOMContentLoaded", function() {
     })
     
     function moveTank(key) {
+        if (dead == true)
+            return;
         if ((key === "ArrowUp")) {
             let can_move = true;
            
+            if (bot != undefined) {
+                if (((parseFloat(tank.style.top) > parseFloat(bot.style.top)) && (parseFloat(tank.style.top) < parseFloat(bot.style.top) + parseFloat(bot.style.height) + step) && (parseFloat(tank.style.left) + parseFloat(tank.style.width) > parseFloat(bot.style.left)) && (parseFloat(tank.style.left) < parseFloat(bot.style.left) + parseFloat(bot.style.width)))) {
+                    can_move = false;
+                }
+            }
+
             brick.forEach(element => { if (element != undefined) {
-                if (((parseFloat(tank.style.top) > parseFloat(bot.style.top)) && (parseFloat(tank.style.top) < parseFloat(bot.style.top) + parseFloat(bot.style.height)) && (parseFloat(tank.style.left) + parseFloat(tank.style.width) > parseFloat(bot.style.left)) && (parseFloat(tank.style.left) < parseFloat(bot.style.left) + parseFloat(bot.style.width))) || (((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(tank.style.top) < (parseFloat(element.Pos_Y) + parseFloat(tank.style.width) + step))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(tank.style.left) < (parseFloat(element.Pos_X) + parseFloat(tank.style.width)))) || ((parseFloat(tank.style.top) <= 0)))
+                if ((((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(tank.style.top) < (parseFloat(element.Pos_Y) + parseFloat(tank.style.width) + step))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(tank.style.left) < (parseFloat(element.Pos_X) + parseFloat(tank.style.width)))) || ((parseFloat(tank.style.top) <= 0)))
                 {  
                     if (element.CanTPass === 0)
                        can_move = false;
@@ -355,8 +406,14 @@ document.addEventListener("DOMContentLoaded", function() {
         } else if ((key === "ArrowDown")) {
             let can_move = true;
     
+            if (bot != undefined) {
+                if (((parseFloat(tank.style.top) + parseFloat(tank.style.height) < parseFloat(bot.style.top) + parseFloat(bot.style.height)) && (parseFloat(tank.style.top) + parseFloat(tank.style.height) > parseFloat(bot.style.top)- step) && (parseFloat(tank.style.left) + parseFloat(tank.style.width) > parseFloat(bot.style.left)) && (parseFloat(tank.style.left) < parseFloat(bot.style.left) + parseFloat(bot.style.width)))) {
+                    can_move = false;
+                }
+            }
+
             brick.forEach(element => { if (element != undefined) {
-                if (((parseFloat(tank.style.top) + parseFloat(tank.style.height) < parseFloat(bot.style.top) + parseFloat(bot.style.height)) && (parseFloat(tank.style.top) + parseFloat(tank.style.height) > parseFloat(bot.style.top)) && (parseFloat(tank.style.left) + parseFloat(tank.style.width) > parseFloat(bot.style.left)) && (parseFloat(tank.style.left) < parseFloat(bot.style.left) + parseFloat(bot.style.width))) || (((parseFloat(tank.style.top) + parseFloat(tank.style.width) + step) > parseFloat(element.Pos_Y)) && (parseFloat(tank.style.top) < (parseFloat(element.Pos_Y) + parseFloat(tank.style.width)))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(tank.style.left) < (parseFloat(element.Pos_X) + parseFloat(tank.style.width)))) || ((parseFloat(tank.style.top) + parseFloat(tank.style.width) >= boardSide)))
+                if ((((parseFloat(tank.style.top) + parseFloat(tank.style.width) + step) > parseFloat(element.Pos_Y)) && (parseFloat(tank.style.top) < (parseFloat(element.Pos_Y) + parseFloat(tank.style.width)))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(tank.style.left) < (parseFloat(element.Pos_X) + parseFloat(tank.style.width)))) || ((parseFloat(tank.style.top) + parseFloat(tank.style.width) >= boardSide)))
                 {  
                     if (element.CanTPass === 0)
                         can_move = false;
@@ -379,6 +436,12 @@ document.addEventListener("DOMContentLoaded", function() {
         } else if ((key === "ArrowLeft")) {
             let can_move = true;
     
+            if (bot != undefined) {
+                if ((((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(bot.style.top)) && (parseFloat(tank.style.top) < (parseFloat(bot.style.top) + parseFloat(tank.style.width)))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width)) > parseFloat(bot.style.left)) && (parseFloat(tank.style.left) < (parseFloat(bot.style.left) + parseFloat(tank.style.width) + step)))) {
+                    can_move = false;
+                }
+            }
+
             brick.forEach(element => { if (element != undefined) {
                 if ((((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(tank.style.top) < (parseFloat(element.Pos_Y) + parseFloat(tank.style.width)))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(tank.style.left) < (parseFloat(element.Pos_X) + parseFloat(tank.style.width) +  step))) || ((parseFloat(tank.style.left) <= 0)))
                 {  
@@ -402,6 +465,12 @@ document.addEventListener("DOMContentLoaded", function() {
         } else if ((key === "ArrowRight")) {
             let can_move = true;
     
+            if (bot != undefined) {
+                if ((((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(bot.style.top)) && (parseFloat(tank.style.top) < (parseFloat(bot.style.top) + parseFloat(bot.style.height)))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width) +  step) > parseFloat(bot.style.left)) && (parseFloat(tank.style.left) < (parseFloat(bot.style.left) + parseFloat(bot.style.width))))) {
+                    can_move = false;
+                }
+            }
+
             brick.forEach(element => { if (element != undefined) {
                 if ((((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(tank.style.top) < (parseFloat(element.Pos_Y) + parseFloat(tank.style.width)))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width) +  step) > parseFloat(element.Pos_X)) && (parseFloat(tank.style.left) < (parseFloat(element.Pos_X) + parseFloat(tank.style.width)))) || ((parseFloat(tank.style.left) + parseFloat(tank.style.width) >= boardSide)))
                 {   
@@ -456,7 +525,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function explosionShall() {
         shell.update = 0;
-        shellPlacement = sideValue/5;
+        shellPlacement = sideValue/5;   
         gameBoard.removeChild(shell);
         explosion.style.top = (parseInt(shell.style.top) - shellPlacement) + "px";
         explosion.style.left = (parseInt(shell.style.left) - shellPlacement) + "px";
@@ -469,24 +538,39 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function shooting() {
+        if (dead == true)
+            return;
         gameBoard.appendChild(shell);
         updateShall();
         shell.update = 1;
         console.log("shot");
-        if ((parseInt(shell.style.top) < 0) || ((parseInt(shell.style.top) + 16) >= boardSide) || (parseInt(shell.style.left) < 0) || (parseInt(shell.style.left) >= boardSide - 16)) {
-            explosionShall();
+        
+            if ((parseInt(shell.style.top) < 0) || ((parseInt(shell.style.top) + 16) >= boardSide) || (parseInt(shell.style.left) < 0) || (parseInt(shell.style.left) >= boardSide - 16)) {
+                explosionShall();
+            }
+        
+
+        if (bot != undefined) {
+            if ((((parseInt(shell.style.top) + shell.height) > parseInt(bot.style.top)) && (parseInt(shell.style.top) < (parseInt(bot.style.top) + sideValue))) && (((parseInt(shell.style.left) + shell.width) > parseInt(bot.style.left)) && (parseInt(shell.style.left) < (parseInt(bot.style.left) + sideValue)))) {
+                explosionShall();
+                bot.remove();
+                bot = undefined;
+                console.log(bot);
+            }
         }
+        
 
         for (var i = 0; i < brick.length; i++) {
             element = brick[i];
             if (element != undefined) {
-                if ((((parseInt(shell.style.top) + shell.height) > parseInt(element.Pos_Y)) && (parseInt(shell.style.top) < (parseInt(element.Pos_Y) + 40))) && (((parseInt(shell.style.left) + shell.width) > parseInt(element.Pos_X)) && (parseInt(shell.style.left) < (parseInt(element.Pos_X) + 40))) && (element.CanBPass === 0)) {
+                if ((((parseInt(shell.style.top) + shell.height) > parseInt(element.Pos_Y)) && (parseInt(shell.style.top) < (parseInt(element.Pos_Y) + sideValue))) && (((parseInt(shell.style.left) + shell.width) > parseInt(element.Pos_X)) && (parseInt(shell.style.left) < (parseInt(element.Pos_X) + sideValue))) && (element.CanBPass === 0)) {
                     explosionShall();
                     if (element.IsDestructible === 1) {
                         let removeObj = document.getElementById(i);
                         brick[i] = undefined;
                         removeObj.remove();
                     }
+
                 }
             }
         }
@@ -520,6 +604,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 shell.style.top = (parseInt(tank.style.top) + parseInt(tank.style.height) * 0.5 - parseInt(shell.style.height) * 0.5) + "px";
                 shell.style.left = (parseInt(tank.style.left) + parseInt(tank.style.width) - parseInt(shell.style.width) * 0.5) + "px";
             }
+
             shooting();
         } 
     });
@@ -535,5 +620,4 @@ document.addEventListener("DOMContentLoaded", function() {
         const actions = ['move', 'shoot'];
         return actions[Math.floor(Math.random() * actions.length)];
       }
-
 });
