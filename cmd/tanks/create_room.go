@@ -9,6 +9,7 @@ import (
 	"math/rand"
 	"net/http"
 
+	"github.com/gorilla/websocket"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -57,7 +58,7 @@ func createNewRoom(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 		var NewRoom roomdata
 		NewRoom.NumOfPlayers = 0
 		NewRoom.ID = int(rand.Int31())
-		NewRoom.Tanks = make([]*tanktype, 0)
+		NewRoom.Tanks = make(map[*websocket.Conn]*tanktype)
 
 		NewRoom.Level, err = getLevelByID(db, levelID)
 		if err != nil {

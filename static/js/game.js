@@ -21,12 +21,10 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     socket.onmessage = function(event) {
-        console.log(level);
         level = JSON.parse(event.data);
 
         sideValue = boardSide / level.Side;
         step = sideValue / 50;
-        console.log(step);
         tank.style.height = sideValue * 0.95 + "px";
         tank.style.width = sideValue * 0.95 + "px";
         tank.style.top = (boardSide / 2 - sideValue) + "px";
@@ -177,7 +175,6 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     function stopMove() {
-        console.log("Stop");
         socket.send("stopMoving");
         updateCoordinates = true;
         if (distance > 0) {
@@ -194,7 +191,6 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function movingTank() {
-        console.log("Move1");
         sendDir();
         is_move = true;
 

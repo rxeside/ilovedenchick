@@ -8,7 +8,7 @@ createBtn.onclick = function() {
 }
 
 deleteBtn.onclick = function() {
-    if (numOfRoomFeild.value !== "") {
+    if (key.value !== "") {
         deleteCurrRoom();
     }
 }
