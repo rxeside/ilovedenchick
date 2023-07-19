@@ -56,8 +56,9 @@ func createNewRoom(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 		levelID := req.LevelID
 
 		var NewRoom roomdata
-		NewRoom.NumOfPlayers = 0
-		NewRoom.ID = int(rand.Int31())
+		NewRoom.LastID = 0
+		// NewRoom.ID = int(rand.Int31())
+		key := int(rand.Int31())
 		NewRoom.Tanks = make(map[*websocket.Conn]*tanktype)
 
 		NewRoom.Level, err = getLevelByID(db, levelID)
@@ -73,10 +74,10 @@ func createNewRoom(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 		}
 		NewRoom.Status = "IdlePlayers"
 
-		rooms = append(rooms, &NewRoom)
-		log.Printf("%q\n", rooms)
+		rooms[key] = &NewRoom
+		fmt.Printf("key: %v\n", key)
 
-		roomIsRunning(NewRoom.ID)
+		roomIsRunning(key)
 
 		return
 	}
@@ -101,28 +102,30 @@ func deleteRoom(w http.ResponseWriter, r *http.Request) {
 
 	roomId := roomDelete.ID
 	fmt.Println(roomId)
-	roomIndex := -1
 
-	for index, value := range rooms {
-		if value.ID == roomId {
-			roomIndex = index
-		}
-	}
+	rooms[roomId].Status = "Remove"
+	// roomIndex := -1
 
-	if roomIndex != -1 {
-		if len(rooms) == 1 {
-			rooms = nil
-			fmt.Println("Nil")
-		} else {
+	// for index, value := range rooms {
+	// 	if value.ID == roomId {
+	// 		roomIndex = index
+	// 	}
+	// }
 
-			if roomIndex+1 > len(rooms) {
-				fmt.Println("Overflow")
-			} else {
-				fmt.Println("Cut")
-				rooms = append(rooms[:roomIndex], rooms[roomIndex+1:]...)
-			}
-		}
-	}
+	// if roomIndex != -1 {
+	// 	if len(rooms) == 1 {
+	// 		rooms = nil
+	// 		fmt.Println("Nil")
+	// 	} else {
+
+	// 		if roomIndex+1 > len(rooms) {
+	// 			fmt.Println("Overflow")
+	// 		} else {
+	// 			fmt.Println("Cut")
+	// 			rooms = append(rooms[:roomIndex], rooms[roomIndex+1:]...)
+	// 		}
+	// 	}
+	// }
 
 	log.Printf("%q\n", rooms)
 	return

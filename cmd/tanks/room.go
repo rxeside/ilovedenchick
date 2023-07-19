@@ -43,66 +43,67 @@ type tanktype struct {
 	Direction string
 	Distance  float64
 	IsChanged bool
-	status    string
+	Status    string
 }
 
 type roomdata struct {
-	ID           int
-	NumOfPlayers int
-	Level        leveldata
-	Objects      []*objdata
-	Tanks        map[*websocket.Conn]*tanktype
-	Status       string
+	// Key     int
+	LastID  int
+	Level   leveldata
+	Objects []*objdata
+	Tanks   map[*websocket.Conn]*tanktype
+	Status  string
 }
 
 var currLevel leveldata
 var Objects []*objdata
 
-var rooms = make([]*roomdata, 0)
+var rooms = make(map[int]*roomdata)
 
 func roomIsRunning(key int) {
-	var currRoom *roomdata
-	for _, value := range rooms {
-		if value.ID == key {
-			currRoom = value
-		}
-	}
+	currRoom := rooms[key]
 
-	ticker := time.NewTicker(time.Second) //(33 * time.Millisecond)
+	ticker := time.NewTicker(33 * time.Millisecond)
 
 	go func() {
 		for {
 			select {
 			case <-ticker.C:
-				fmt.Printf("len(currRoom.Tanks): %v\n", len(currRoom.Tanks))
-				if len(currRoom.Tanks) > 0 {
-					sendMessageForCleints(currRoom.Tanks)
+				// fmt.Printf("len(currRoom.Tanks): %v\n", len(currRoom.Tanks))
+				if currRoom.Status == "Remove" {
+					delete(rooms, key)
+					fmt.Println("Del")
+					return
+				} else {
+					if len(currRoom.Tanks) > 0 {
+						sendMessageForCleints(currRoom.Tanks)
+					}
 				}
 			}
 		}
 	}()
+
+	fmt.Println("Exit")
+	return
 }
 
 func sendMessageForCleints(tanks map[*websocket.Conn]*tanktype) {
+	var tanksForSend []*tanktype
+	for _, value := range tanks {
+		newTank := *value
 
-	for conn, value := range tanks { //Доделать удаление игрока из массива танков
-		fmt.Println("Зашли")
-		// if value.IsChanged {
-		value.IsChanged = false
-		err := conn.WriteJSON(value)
-		if err != nil {
-			log.Println(err)
-			delete(tanks, conn)
-			// if len(tanks) == 1 {
-			// 	tanks = nil
-			// 	fmt.Println("Сюда")
-			// } else {
-			// 	tanks = append(tanks[:index], tanks[index+1:]...)
-			// 	fmt.Println("Туда")
-			// }
+		tanksForSend = append(tanksForSend, &newTank)
+	}
 
+	for conn, value := range tanks {
+		if value.Status != "Load" {
+			value.IsChanged = false
+			err := conn.WriteJSON(tanksForSend)
+			if err != nil {
+				log.Println(err)
+				delete(tanks, conn)
+			}
 		}
-		// }
 	}
 }
 
@@ -112,6 +113,12 @@ func roomPage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "Err with roomKey", 500)
 		log.Println(err.Error())
+	}
+
+	_, ok := rooms[roomKey]
+	if !ok {
+		http.Error(w, "Room Not Found", 500)
+		return
 	}
 
 	ts, err := template.ParseFiles("pages/level.html")
@@ -237,23 +244,21 @@ func wsConnection(w http.ResponseWriter, r *http.Request) {
 		log.Println(err.Error())
 	}
 
-	var currRoom *roomdata
-	for _, value := range rooms {
-		if roomKey == value.ID {
-			currRoom = value
-		}
-	}
+	currRoom := rooms[roomKey]
 	fmt.Println("Finded")
 
 	fmt.Printf("currRoom: %v\n", currRoom)
 
 	var tank tanktype
 
-	currRoom.NumOfPlayers = len(currRoom.Tanks)
-	currRoom.Status = "Is_Player"
+	currRoom.Status = "Load"
+	currRoom.LastID++
+	tank.ID = currRoom.LastID
+	tank.Status = "Load"
 	var levelSide float64
 	var sideValue float64
 	var step float64
+	var Objects []*objdata
 
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -276,11 +281,11 @@ func wsConnection(w http.ResponseWriter, r *http.Request) {
 		}
 
 		message := string(m)
-		readMessageFromCleints(conn, currRoom, &tank, message, &levelSide, &sideValue, &step)
+		readMessageFromCleints(conn, currRoom, &Objects, &tank, message, &levelSide, &sideValue, &step)
 	}
 }
 
-var clients = make(map[*websocket.Conn]bool)
+// var clients = make(map[*websocket.Conn]bool)
 
 // Функция handler является обработчиком HTTP запросов.
 
@@ -324,7 +329,7 @@ var clients = make(map[*websocket.Conn]bool)
 // 	}()
 // }
 
-func readMessageFromCleints(conn *websocket.Conn, currRoom *roomdata, tank *tanktype, message string, levelSide *float64, sideValue *float64, step *float64) {
+func readMessageFromCleints(conn *websocket.Conn, currRoom *roomdata, Objects *[]*objdata, tank *tanktype, message string, levelSide *float64, sideValue *float64, step *float64) {
 	var err error
 
 	switch message {
@@ -339,7 +344,6 @@ func readMessageFromCleints(conn *websocket.Conn, currRoom *roomdata, tank *tank
 		*sideValue = *levelSide / float64(currRoom.Level.Side)
 		*step = *sideValue / 5
 
-		var Objects []*objdata
 		for _, value := range currRoom.Objects {
 			// for _, value := range Objects {
 			var newObj objdata
@@ -351,14 +355,29 @@ func readMessageFromCleints(conn *websocket.Conn, currRoom *roomdata, tank *tank
 			newObj.ImgURL = value.ImgURL
 			newObj.Pos_X = value.Pos_X * *sideValue
 			newObj.Pos_Y = value.Pos_Y * *sideValue
-			Objects = append(Objects, &newObj)
+			*Objects = append(*Objects, &newObj)
 		}
 
 		tank.X = *levelSide/2 - *sideValue
 		tank.Y = *levelSide/2 - *sideValue
 
-		err = conn.WriteJSON(Objects)
+		err = conn.WriteJSON(*Objects)
 		// err = conn.WriteJSON(rooms[currRoom].Objects)
+		if err != nil {
+			log.Println(err.Error())
+			return
+		}
+
+		tank.Status = "CanPlay"
+	case "tanks":
+		var Tanks []*tanktype
+		for _, value := range currRoom.Tanks {
+			newTank := *value
+
+			Tanks = append(Tanks, &newTank)
+		}
+
+		err = conn.WriteJSON(Tanks)
 		if err != nil {
 			log.Println(err.Error())
 			return
@@ -372,22 +391,22 @@ func readMessageFromCleints(conn *websocket.Conn, currRoom *roomdata, tank *tank
 		dir := string(m)
 		tank.Direction = dir
 
-		findDistance(conn, tank, dir, *levelSide, *sideValue)
+		findDistance(conn, *Objects, tank, dir, *levelSide, *sideValue)
 
 		go func() {
 			moveTank(tank, *step)
 		}()
 	case "stopMoving":
-		partOfWay, err := getFloatFromSocket(conn)
-		if err != nil {
-			log.Println(err.Error())
-			return
-		}
+		// partOfWay, err := getFloatFromSocket(conn)
+		// if err != nil {
+		// 	log.Println(err.Error())
+		// 	return
+		// }
 
-		calculateCoordinates(tank, partOfWay)
+		// calculateCoordinates(tank, partOfWay)
 
 		tank.Distance = 0
-		tank.IsChanged = true
+		// tank.IsChanged = true
 	case "Close":
 		conn.Close()
 		return
@@ -413,7 +432,12 @@ func moveTank(tank *tanktype, step float64) {
 	ticker := time.NewTicker(100 * time.Millisecond)
 
 	for range ticker.C {
-		if tank.Distance <= step {
+		if tank.Distance == 0 {
+			ticker.Stop()
+			return
+		}
+
+		if (tank.Distance <= step) && (tank.Distance < 0) {
 			calculateCoordinates(tank, tank.Distance-(step*0.1))
 			tank.Distance = 0
 			ticker.Stop()
@@ -438,7 +462,7 @@ func calculateCoordinates(tank *tanktype, step float64) {
 	}
 }
 
-func findDistance(conn *websocket.Conn, tank *tanktype, dir string, levelside float64, sideValue float64) {
+func findDistance(conn *websocket.Conn, Objects []*objdata, tank *tanktype, dir string, levelside float64, sideValue float64) {
 
 	min := calculateStartDistance(tank, dir, levelside, sideValue)
 

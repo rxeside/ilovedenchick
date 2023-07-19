@@ -9,9 +9,11 @@ document.addEventListener("DOMContentLoaded", function() {
     gameBoard.style.top = marginTop / 2 + "px";
     gameBoard.style.left = marginLeft + "px";
     let brick;
+    let tanks = [];
     let level;
     let sideValue;
     let step = 0.4;
+    let numOfTanks = 0;
     const room = document.getElementById('room');
     // Создание и отображение кирпичей на поле
     const socket = new WebSocket("ws://localhost:3000/ws/" + room.textContent);
@@ -25,10 +27,10 @@ document.addEventListener("DOMContentLoaded", function() {
 
         sideValue = boardSide / level.Side;
         step = sideValue / 50;
-        tank.style.height = sideValue * 0.95 + "px";
-        tank.style.width = sideValue * 0.95 + "px";
-        tank.style.top = (boardSide / 2 - sideValue) + "px";
-        tank.style.left = (boardSide / 2 - sideValue) + "px";
+        // tank.style.height = sideValue * 0.95 + "px";
+        // tank.style.width = sideValue * 0.95 + "px";
+        // tank.style.top = (boardSide / 2 - sideValue) + "px";
+        // tank.style.left = (boardSide / 2 - sideValue) + "px";
 
         getObjects();
     };
@@ -46,27 +48,130 @@ document.addEventListener("DOMContentLoaded", function() {
                 createNewElt(brick[i], i);
             };
             answerFromServer();
+            // getTanks();
         };
     }
 
-    let updateCoordinates = false;
+    // function getTanks() {
+    //     socket.send("tanks");
+    //     socket.onmessage = function(event) {
+    //         let State = JSON.parse(event.data);
+    //         updateTanks(State);
+    //         answerFromServer();
+    //     }
+    // }
+
+    // let tank
+    let updateCoordinates = true;
 
     function answerFromServer() {
         socket.onmessage = function(event) {
-            let message = JSON.parse(event.data);
+            let newState = JSON.parse(event.data);
+            // console.log(newState);
 
-            startDistance = message.Distance
-            distance = message.Distance;
+            updateTanks(newState);
+            // startDistance = message.Distance
+            // distance = message.Distance;
 
-            if (updateCoordinates) {
-                tank.style.top = message.Y + "px";
-                tank.style.left = message.X + "px";
-                updateCoordinates = false;
-            }
 
-            console.log(message);
+            // if (message.length > numOfTanks) {
+            //     for (let i = numOfTanks; i < array.length; ++i) {
+            //         const newTank = document.createElement("img");
+            //         newTank.id = "tank" + message[];
+            //         newTank.className = "tank";
+            //         newTank.src = "../static/image/top.png";
+            //         newTank.style.top = element.Y + "px";
+            //         newTank.style.left = element.X + "px";
+
+            //         numOfTanks++;
+
+            //         gameBoard.appendChild(newTank);
+            //     }
+            // }
+
+            // if (updateCoordinates) {
+            //     console.log("tank" + message.ID);
+            //     let tank = document.getElementById("tank" + message.ID);
+            //     // if (tank === undefined) {
+            //     //     let creaeteTank = document.createElement('img');
+            //     //     creaeteTank.id = "tank" + message.ID
+            //     //     creaeteTank.className = "tank";
+            //     //     tank.src = "../static/image/top.png";
+            //     //     creaeteTank = gameBoard.appendChild(creaeteTank);
+            //     //     tank = getElementById("tank" + message.ID);
+            //     // }
+            //     tank.style.top = message.Y + "px";
+            //     tank.style.left = message.X + "px";
+            //     updateCoordinates = false;
+            // }
+
             // console.log(parseFloat(tank.style.left));
         }; 
+    }
+
+    function updateTanks(newstate){
+        for(key in newstate) {
+            // console.log(newstate[key]);
+            let index = -1;
+            if (tanks !== undefined) {
+                index = tanks.findIndex((tank) => tank.ID === newstate[key].ID);
+            }
+
+            if (index === -1) {
+                createNewTank(newstate[key]);
+                tanks.push(newstate[key]);
+            } else {
+                tanks[index].X = newstate[key].X;
+                tanks[index].Y = newstate[key].Y;
+                tanks[index].Direction = newstate[key].Direction;
+                tanks[index].Distance = newstate[key].Distance;
+            }
+        };
+
+        // console.log("<---->");
+
+        if (tanks !== undefined) {
+            for (key in tanks) {
+                index = newstate.findIndex((element) => element.ID === tanks[key].ID)
+
+                if (index === -1) {
+                    const removeTank = document.getElementById("tank" + tanks[key].ID);
+
+                    tanks.splice(key, 1);
+                    removeTank.remove();
+                }
+            }
+        }
+
+        for (key in tanks) {
+            // console.log(currTank);
+            let currTank = document.getElementById("tank" + tanks[key].ID);
+
+            if(tanks[key].Distance === 0) {
+                // console.log("Coordinates");
+                currTank.classList.remove("moving");
+                currTank.style.top = tanks[key].Y + "px";
+                currTank.style.left = tanks[key].X + "px";
+            } else {
+                if (!currTank.classList.contains("moving")) {
+                    currTank.classList.add("moving");
+                    moveByDistance(tanks[key]);
+                } else {
+                    changeAnimation(currTank, tanks[key].Direction);
+                }
+            }
+        }
+    }
+
+    function createNewTank(element) {
+        const newTank = document.createElement("img");
+        newTank.id = "tank" + element.ID;
+        newTank.className = "tank";
+        newTank.src = "../static/image/top.png";
+        newTank.style.top = element.Y + "px";
+        newTank.style.left = element.X + "px";
+
+        gameBoard.appendChild(newTank);
     }
     
     function createNewElt(element, i) {
@@ -98,18 +203,19 @@ document.addEventListener("DOMContentLoaded", function() {
     explosion.src = '../static/image/explosion1.png'
     
     // Создание танка
-    var tank = document.createElement("img");
+    // var tank = document.createElement("img");
 
-    tank.className = "tank";
-    tank.src = '../static/image/top.png';
+    // tank.className = "tank";
+    // tank.src = '../static/image/top.png';
     
     // Добавление танка на игровое поле
-    gameBoard.appendChild(tank);
+    // gameBoard.appendChild(tank);
     
     // Обработка клавиш для управления танком
     
     let status = 0;
     let distance = 0; 
+    let direction = 1
     let is_move = false;
 
     document.addEventListener("keydown", function(event) {
@@ -123,23 +229,23 @@ document.addEventListener("DOMContentLoaded", function() {
         if (!is_move) {
             switch (key) {
                 case "ArrowUp":
-                    tank.direction = 1;
-                    stopMove();
+                    direction = 1;
+                    // stopMove();
                     movingTank();
                     break;
                 case "ArrowDown":
-                    tank.direction = 2;
-                    stopMove();
+                    direction = 2;
+                    // stopMove();
                     movingTank();
                     break;
                 case "ArrowLeft":
-                    tank.direction = 3;
-                    stopMove();
+                    direction = 3;
+                    // stopMove();
                     movingTank();
                     break;
                 case "ArrowRight":
-                    tank.direction = 4;
-                    stopMove();
+                    direction = 4;
+                    // stopMove();
                     movingTank();
                     break;
             }
@@ -151,22 +257,22 @@ document.addEventListener("DOMContentLoaded", function() {
         if (is_move) {
             switch (event.key) {
                 case "ArrowUp":
-                    if (tank.direction === 1) {
+                    if (direction == 1) {
                         stopMove();
                     }
                     break;
                 case "ArrowDown":
-                    if (tank.direction === 2) {
+                    if (direction == 2) {
                         stopMove();
                     }
                     break;
                 case "ArrowLeft":
-                    if (tank.direction === 3) {
+                    if (direction == 3) {
                         stopMove();
                     }
                     break;
                 case "ArrowRight":
-                    if (tank.direction === 4) {
+                    if (direction == 4) {
                         stopMove();
                     }
                     break;  
@@ -176,77 +282,83 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function stopMove() {
         socket.send("stopMoving");
-        updateCoordinates = true;
-        if (distance > 0) {
-            let partOfWay = (startDistance - distance) % (step * 10);//Часть пути которое проедет клиент, но сервер не обработает
+        // updateCoordinates = true;
+        // if (distance > 0) {
+            // let partOfWay = (startDistance - distance) % (step * 10);//Часть пути которое проедет клиент, но сервер не обработает
             // console.log(tank);
             // console.log(partOfWay);
-            socket.send(partOfWay);
-        }
-        else {
-            socket.send(0);
-        }
+            // socket.send(partOfWay);
+        // }
+        // else {
+        // }
+        // socket.send(0);
         is_move = false;
         distance = 0;
     }
 
     function movingTank() {
         sendDir();
-        is_move = true;
+        // is_move = true;
 
-        let moveTimerID = setInterval(function() {
-            changAnimation();
+        // let moveTimerID = setInterval(function() {
+            // changAnimation();
 
-            if (is_move) {
-                if (distance !== 0) 
-                {
-                    moveByDistance();
-                } 
-                else 
-                {
-                    // moveByCoordinates();
-                }
-            } 
-            else 
-            {
-                clearInterval(moveTimerID);
-            }
-        }, 10);
+        //     if (is_move) {
+        //         if (distance !== 0) 
+        //         {
+                    // moveByDistance();
+        //         } 
+        //         else 
+        //         {
+        //             // moveByCoordinates();
+        //         }
+        //     } 
+        //     else 
+        //     {
+        //         clearInterval(moveTimerID);
+        //     }
+        // }, 10);
     }
 
     function sendDir()
     {
         is_move = true;
         socket.send("move");
-        socket.send(tank.direction)
+        socket.send(direction);
     }
 
-    function moveByDistance() {
-        if (distance <= step) {
-            return;
-        }
-        
-        distance -= step;
-        switch (tank.direction) {
-            case 1:
-                tank.style.top = parseFloat(tank.style.top) - step + "px";
-                break;
-            case 2:
-                tank.style.top = parseFloat(tank.style.top) + step + "px";
-                break;
-            case 3:
-                tank.style.left = parseFloat(tank.style.left) - step + "px";
-                break;
-            case 4:
-                tank.style.left = parseFloat(tank.style.left) + step + "px";
-                break;
-        }
+    function moveByDistance(currTank) {
+        let tankElement = document.getElementById("tank" + tanks[key].ID);
+        // distance = currTank.Distance;
+        direction = currTank.Direction;
+        let status = 0;
+        let moveTimerID = setInterval(function(){
+            if (currTank.Distance <= step) {
+                clearInterval(moveTimerID);
+            }
+
+            currTank.Distance -= step;
+            switch (direction) {
+                case "1":
+                    tankElement.style.top = parseFloat(tankElement.style.top) - step + "px";
+                    break;
+                case "2":
+                    tankElement.style.top = parseFloat(tankElement.style.top) + step + "px";
+                    break;
+                case "3":
+                    tankElement.style.left = parseFloat(tankElement.style.left) - step + "px";
+                    break;
+                case "4":
+                    tankElement.style.left = parseFloat(tankElement.style.left) + step + "px";
+                    break;
+            }
+        }, 10)
 
     }
     
     function moveByCoordinates() {
     
-        switch (tank.direction) {
+        switch (direction) {
             case 1:
                 brick.forEach(element => { if (element != undefined) {
                     if (element.CanTPass === 0) {
@@ -297,42 +409,34 @@ document.addEventListener("DOMContentLoaded", function() {
         
     }
 
-    function changAnimation() {
-        switch (tank.direction) {
-            case 1:
-                if (status === 0) {
-                    status = 1;
-                    tank.src = '../static/image/top.png';
-                } else if (status === 1) {
-                    status = 0;
-                    tank.src = '../static/image/top1.png';
+    function changeAnimation(currTank, dir) {
+        switch (dir) {
+            case "1":
+                if (currTank.src.includes("top1")) {
+                    currTank.src = '../static/image/top.png';
+                } else {
+                    currTank.src = '../static/image/top1.png';
                 }
                 break;
-            case 2:
-                if (status === 0) {
-                    status = 1;
-                    tank.src = '../static/image/down.png';
-                } else if (status === 1) {
-                    status = 0;
-                    tank.src = '../static/image/down1.png';
+            case "2":
+                if (currTank.src.includes("down1")) {
+                    currTank.src = '../static/image/down.png';
+                } else {
+                    currTank.src = '../static/image/down1.png';
                 }
                 break;
-            case 3:
-                if (status === 0) {
-                    status = 1;
-                    tank.src = '../static/image/left.png';
-                } else if (status === 1) {
-                    status = 0;
-                    tank.src = '../static/image/left1.png';
+            case "3":
+                if (currTank.src.includes("left1")) {
+                    currTank.src = '../static/image/left.png';
+                } else {
+                    currTank.src = '../static/image/left1.png';
                 }
                 break;
-            case 4:
-                if (status === 0) {
-                    status = 1;
-                    tank.src = '../static/image/right.png';
-                } else if (status === 1) {
-                    status = 0;
-                    tank.src = '../static/image/right1.png';
+            case "4":
+                if (currTank.src.includes("right1")) {
+                    currTank.src = '../static/image/right.png';
+                } else {
+                    currTank.src = '../static/image/right1.png';
                 }
                 break;
         }
@@ -396,7 +500,7 @@ document.addEventListener("DOMContentLoaded", function() {
     document.addEventListener("keydown", function(event) {
         var shot = event.code;
         if ((shot == "KeyZ" || shot == "Enter") && (shell.update == 0)){
-            shell.direction = tank.direction;
+            shell.direction = direction;
             if (shell.direction == 1) {
                 shell.src = "../static/image/ShellTop.png";
                 shell.style.top = (parseInt(tank.style.top) - 6) + "px";
