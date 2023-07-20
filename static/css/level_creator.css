@@ -2,25 +2,59 @@
 {
     padding: 0;
     margin: 0;
+    overflow-y: hidden;
+}
+
+.left
+{
+    padding-top: 5%;
+}
+
+.background
+{
+    /* background: url(../image/fon_new.jpg) no-repeat;
+    width: 100%;
+    min-height: 969px;
+    background-size: cover; */
+    width: 100%;
+    height: 100%;
+    position: absolute;
 }
 
 .level-data
 {
     display: flex;
     flex-direction: column;
-    padding: 2% 0 2% 5%;
-    gap: 30px;
+    padding: 6% 0 0 20px;
+    gap: 36px;
+    opacity: 0.7;
 }
 
 .level-data__btn
 {
-    width: 10%;
-    font: 400 normal 12px/30px 'Press Start 2P';
+    width: 50%;
+    font: 400 normal 14px/30px 'Press Start 2P';
+    border-radius: 10px;
+    /* box-shadow: 8px 8px 8px rgba(0, 0, 0, 0.432); */
+}
+
+.workspace{
+    display: flex;
+    /* padding-left: 15%; */
+    padding-top: 10%;
+    max-width: 800px;
+    max-height: 800px;
 }
 
 .name
 {
     display: flex;
+    background-color: rgb(170, 103, 59);
+    opacity: 0.7;
+    padding: 4px;
+    border-radius: 5px;
+    width: 72%;
+    box-shadow: 5px 5px 10px rgba(255, 102, 0, 0.288), -5px -5px 10px rgba(255, 102, 0, 0.288), 5px -5px 10px rgba(255, 102, 0, 0.288), -5px 5px 10px rgba(255, 102, 0, 0.288);
 }
 
 .name__title
@@ -28,16 +62,49 @@
     font: 400 normal 24px/24px 'Press Start 2P';
 }
 
+.name__input
+{
+    width: 150px;
+    height: 20px;
+}
+
+.sizes
+{
+    display: flex;
+    background-color: rgb(170, 103, 59);
+    opacity: 0.7;
+    padding: 4px 4px 4px 4px;
+    border-radius: 5px;
+    width: 63%;
+    box-shadow: 5px 5px 10px rgba(255, 102, 0, 0.288), -5px -5px 10px rgba(255, 102, 0, 0.288), 5px -5px 10px rgba(255, 102, 0, 0.288), -5px 5px 10px rgba(255, 102, 0, 0.288);
+}
+
 .sizes__title
 {
-    margin: 1% 0;
-    font: 400 normal 16px/24px 'Press Start 2P';
+    font: 400 normal 24px/24px 'Press Start 2P';
+}
+
+.sizes__side
+{
+    width: 60px;
+    height: 20px;
+    font: 400 normal 13px/25px 'Press Start 2P';
+}
+
+.page
+{
+    display: grid;
+    grid-template-columns: 48% 52%;
+    /* grid-template-rows: 25% 35% 30%; */
+    max-height: 969px;
+    margin-left: 8%;
+    margin-right: 8%;
 }
 
 .field
 {
     display: grid;
-    width: 50%;
+    width: 800px;
 }
 
 .field__cell
@@ -52,26 +119,42 @@
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    gap: 5%;
+    gap: 30px;
     visibility: hidden;
     flex-direction: column;
+    align-items: flex-start; 
+    justify-content: center; 
+    margin: 10% 44% 0 3%;
+    padding: 2%;
+    background-color: rgb(56, 102, 100);
+    opacity: 0.5;
+    border-radius: 5%;
+    box-shadow: 10px 10px 20px rgba(0, 255, 213, 0.288), -10px -10px 20px rgba(0, 255, 213, 0.288), 10px -10px 20px rgba(0, 255, 213, 0.288), -10px 10px 20px rgba(0, 255, 213, 0.288);
+}
+
+.choice
+{
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0 0 20px;
+    gap: 30px;
+    opacity: 0.7;
 }
 
 .menu a
 {
-    text-decoration: none;
-    font: 400 normal 15px/20px 'Press Start 2P';
-    padding: 5px 10px;
+    font: 400 normal 18px/18px 'Press Start 2P';
+    color: rgb(255, 255, 255);
 }
 
 .menu a:hover
 {
-    background-color: gray;
+    color: rgb(33, 230, 16);
 }
 
 .is_active
 {
-    background-color: dimgray;
+    text-decoration: underline;
 }
 
 .message
@@ -90,4 +173,20 @@
 {
     color: red;
     visibility: visible;
+}
+
+.save
+{
+    margin-top: 8%;
+    background-color: rgb(4, 119, 71);
+}
+
+.delet
+{
+    background-color: rgb(177, 67, 67);
+}
+
+.name__input
+{
+    font: 400 normal 13px/25px 'Press Start 2P';
 }

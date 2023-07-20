@@ -1,36 +1,62 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="ru">
-        <title>Создание уровня</title>
-        <link href="../static/css/level_creator.css" rel="stylesheet">
-        <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-        <script defer src="../static/js/level_creator.js"></script>
-    </head>
-    <body style="background-color: silver;">
-        <div class="level-data">
-            <div class="name">
-                <h1 class="name__title">Название уровня:</h1>
-                <input class="name__input" id="level_Name" type="text">
+
+<head>
+    <meta charset="ru">
+    <title>Создание уровня</title>
+    <link href="../static/css/level_creator.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <script defer src="../static/js/level_creator.js"></script>
+</head>
+
+<body>
+    <img class="background" src="../static/image/fon_new.jpg" alt="Фон крч">
+    <div class="page">
+        <div class="left">
+            <div class="level-data">
+                <div class="name">
+                    <h1 class="name__title">Название уровня:</h1>
+                    <input class="name__input" id="level_Name" type="text">
+                </div>
+                <div class="sizes">
+                    <p class="sizes__title">Велечина стороны:</p>
+                    <input class="sizes__side" id="level_side" type="number">
+                </div>
+                <button class="level-data__btn" onclick="updateField()">Создать карту</button>
             </div>
-            <div class="sizes">
-                <p class="sizes__title">Велечина стороны</p>
-                <input class="sizes__side" id="level_side" type="number">
-            </div>
-            <button class="level-data__btn" onclick="updateField()">Создать карту</button>
-            <button class="level-data__btn" onclick="sendLeveldata()">Сохранить уровень</button>
-            <p id="message" class="message">Message</p>
-        </div>
-        <div style="display: flex; align-items: flex-start; justify-content: center; gap: 20px; padding-bottom: 5%;">
             <div id="cell_menu" class="menu">
-                <a id="None" onclick="selectType('None')">None</a>
-                <a id="Brick" onclick="selectType('Brick')">Brick</a>
-                <a id="Steel" onclick="selectType('Steel')">Steel</a>
-                <a id="Forest" onclick="selectType('Forest')">Forest</a>
-                <a id="Water" onclick="selectType('Water')">Water</a>
+                <div>
+                    <img src="../static/image/grey.png">
+                    <a id="None" onclick="selectType('None')">Удалить блок</a>
+                </div>
+                <div>
+                    <img src="../static/image/brick.png">
+                    <a id="Brick" onclick="selectType('Brick')">Взять крипичи</a>
+                </div>
+                <div>
+                    <img src="../static/image/steel.png">
+                    <a id="Steel" onclick="selectType('Steel')">Взять металл</a>
+                </div>
+                <div>
+                    <img src="../static/image/forest.png">
+                    <a id="Forest" onclick="selectType('Forest')">Посадить кусты</a>
+                </div>
+                <div>
+                    <img src="../static/image/water.png">
+                    <a id="Water" onclick="selectType('Water')">Выкопать пруд</a>
+                </div>
             </div>
+            <div class="choice">
+                <button class="save level-data__btn" onclick="sendLeveldata()">Сохранить уровень</button>
+                <button class="delet level-data__btn">Удалить уровень</button>
+                <p id="message" class="message">Message</p>
+            </div>
+        </div>
+        <div class="workspace">
             <div id="level_field" class="field">
             </div>
         </div>
-    </body>
+    </div>
+</body>
+
 </html>
