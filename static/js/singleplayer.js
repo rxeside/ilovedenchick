@@ -94,6 +94,10 @@ document.addEventListener("DOMContentLoaded", function () {
         obj.id = i;
         obj.classList.add('brick');
         obj.src = element.ImgURL;
+        if (element.CanTPass == 1) {
+            obj.style.zIndex = "3";
+        }
+
 
         obj.style.top = element.Pos_Y;
         obj.style.left = element.Pos_X;

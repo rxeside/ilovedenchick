@@ -60,6 +60,7 @@ func createNewRoom(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 		// NewRoom.ID = int(rand.Int31())
 		key := int(rand.Int31())
 		NewRoom.Tanks = make(map[*websocket.Conn]*tanktype)
+		NewRoom.Bullets = make(map[int]*bullettype)
 
 		NewRoom.Level, err = getLevelByID(db, levelID)
 		if err != nil {
