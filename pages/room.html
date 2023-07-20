@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tank Battle</title>
+    <style>
+        *{
+            margin: 0;
+        }
+
+        #game-board {
+            /* margin: auto; */
+            position: absolute;
+            background-color: #ddd;
+        }
+
+        .brick {
+            width: 40px;
+            height: 40px;
+            position: absolute;
+        }
+        
+        .tank {
+            width: 40px;
+            height: 40px;
+            position: absolute;
+        }
+
+        .shell {
+            width: 12px;
+            height: 14px;
+            position: absolute;
+        }
+
+        .explosion {
+            position: absolute;
+        }
+    </style>
+</head>
+<body>
+    <p id="room" style="position: absolute; visibility: hidden;">{{ .RoomKey }}</p>
+    <div id="game-board"></div>
+    
+    <script src="../static/js/multiplayer.js"></script>
+</body>
+</html>

@@ -12,6 +12,10 @@ import (
 
 var levelID int
 
+type IDdata struct {
+	ID int `db:"id"`
+}
+
 type saveLevelRequest struct {
 	Name   string `json:"name"`
 	Side   string `json:"side"`
