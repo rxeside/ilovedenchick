@@ -1,22 +1,8 @@
+
 document.addEventListener("DOMContentLoaded", function () {
 
     // Создание игрового поля
-    let gameBoard = document.getElementById("game-board");
-    gameBoard.style.height = innerHeight * 0.8 + "px";
-    gameBoard.style.width = gameBoard.style.height;
-    let boardSide = gameBoard.clientHeight;
-    let marginLeft = (innerWidth - boardSide) / 2;
-    console.log("marginLeft: ", marginLeft);
-    let marginTop = innerHeight - boardSide;
-    gameBoard.style.top = marginTop / 2 + "px";
-    gameBoard.style.left = marginLeft + "px";
-    let brick;
-    let level;
-    let sideValue;
-    let step = 0.5;
-    let speed = 0.5;
-    let botSpeed = 0.5;
-
+    
     //Создание звуков
     const audioShell = new Audio('../static/audio/shot.mp3');
     audioShell.volume = 0.2;
@@ -37,6 +23,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const audioExpllosion2 = new Audio('../static/audio/projectile_explosion2.mp3');
     audioExpllosion.volume = 0.6;
     let r = 1;
+    
 
     // Создание и отображение кирпичей на поле
     const socket = new WebSocket("ws://localhost:3000/ws");
