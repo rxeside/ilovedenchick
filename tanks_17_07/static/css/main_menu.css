@@ -2,6 +2,7 @@
 {
     padding: 0;
     margin: 0;
+    cursor: url(../image/cursor2.png), default;
 }
 
 .background
@@ -29,12 +30,14 @@
     margin-top: 1%;
 }
 
-.modes a:hover {
+.modes button:hover {
     box-shadow: 15px 15px 25px rgba(255, 81, 0, 0.411), -15px -15px 25px rgba(255, 81, 0, 0.411), 15px -15px 25px rgba(255, 81, 0, 0.411), -15px 15px 25px rgba(255, 81, 0, 0.411);
     color: rgba(255, 81, 0, 0.89);
+    /* background-color: rgb(185, 124, 96);
+    color: rgb(160, 81, 45);; */
 }
 
-.modes a:active {
+.modes button:active {
     color: rgb(160, 66, 23);
     box-shadow: none;
     width: 60%;

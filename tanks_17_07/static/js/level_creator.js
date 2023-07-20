@@ -7,6 +7,13 @@ const l_Name = document.getElementById('level_Name');
 let selectedType = null;
 let Obj_on_level = [];
 
+//музыка
+const audioButton = new Audio('../static/audio/button.mp3');
+audioButton.volume = 0.8;
+const audioFon = new Audio('../static/audio/fon.mp3');
+audioFon.volume = 0.6;
+audioFon.loop = true;
+
 const level = {
     name: "",
     side: "",
@@ -25,6 +32,8 @@ l_side.onchange = function() {
 //Функция обновление поля
 function updateField()
 {
+    audioButton.play();
+    audioFon.play();
     if ((level.side != null))
     {
         //Задаём нашему полю столбцы и строки
@@ -191,6 +200,7 @@ const XHRLevel = new XMLHttpRequest;
 
 function sendLeveldata()
 {
+    audioButton.play();
     for(key in level)
     {
         if (level[key] === "")
@@ -266,4 +276,8 @@ function dataError()
 {
     message.classList.add('error');
     message.textContent = "Error";
+}
+
+function deletMap() {
+    audioButton.play();
 }

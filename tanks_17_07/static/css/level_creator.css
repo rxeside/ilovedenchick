@@ -3,6 +3,7 @@
     padding: 0;
     margin: 0;
     overflow-y: hidden;
+    cursor: url(../image/cursor2.png), default;
 }
 
 .left
@@ -28,6 +29,32 @@
     padding: 6% 0 0 20px;
     gap: 36px;
     opacity: 0.7;
+}
+
+.level-data button:active {
+    width: 45%;
+    font: 400 normal 13px/30px 'Press Start 2P';
+    border-radius: 10px;
+    margin-left: 2.5%;
+}
+
+.level-data button:hover {
+    background-color: azure;
+}
+
+.choice button:active {
+    width: 45%;
+    font: 400 normal 13px/30px 'Press Start 2P';
+    border-radius: 10px;
+    margin-left: 2.5%;
+}
+
+.choice .save:hover {
+    background-color: rgb(15, 161, 100);
+}
+
+.choice .delet:hover {
+    background-color: rgb(202, 83, 83);;
 }
 
 .level-data__btn

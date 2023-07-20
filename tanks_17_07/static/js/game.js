@@ -37,6 +37,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const audioExpllosion2 = new Audio('../static/audio/projectile_explosion2.mp3');
     audioExpllosion.volume = 0.6;
     let r = 1;
+    const audioFon = new Audio('../static/audio/fon.mp3');
+    audioFon.volume = 0.01;
+    audioFon.loop = true;
+    var audioTankExplosion = new Audio('../static/audio/tank_explosion.mp3');
+    audioTankExplosion.volume = 0.8;
+
 
     // Создание и отображение кирпичей на поле
     const socket = new WebSocket("ws://localhost:3000/ws");
@@ -115,6 +121,11 @@ document.addEventListener("DOMContentLoaded", function () {
     let explosion = document.createElement("img");
     explosion.className = "explosion";
     explosion.src = '../static/image/explosion1.png';
+
+    //Создание взрыва танка
+    let tankExplosion = document.createElement("img");
+    tankExplosion.className = "tankExplosion";
+    tankExplosion.src = '../static/image/tankExplosion1.png';
 
     // Создание танка
     let tank = document.createElement("img");
@@ -361,8 +372,10 @@ document.addEventListener("DOMContentLoaded", function () {
             explosionBotShall();
             hit += 1;
             if (hit == 3) {
+                // audioTankExplosion.play(); //звук уничтожения танка
                 dead = true;
                 console.log("GAME OVER");
+                explosionTank();
                 tank.remove();
                 setTimeout(() => { location.reload(); }, 2000);
 
@@ -386,6 +399,16 @@ document.addEventListener("DOMContentLoaded", function () {
         if (botShell.update == 1) {
             requestAnimationFrame(botShooting);
         }
+    }
+
+    function explosionTank() {
+        tankExplosion.style.top = (parseInt(botShell.style.top) - 30) + "px";
+        tankExplosion.style.left = (parseInt(botShell.style.left) - 30) + "px";
+        tankExplosion.src = '../static/image/tankExplosion1.png';
+        audioTankExplosion.play();
+        gameBoard.appendChild(tankExplosion);
+        setTimeout(() => { tankExplosion.src = '../static/image/tankExplosion2.png'; tankExplosion.style.top = (parseInt(tankExplosion.style.top) - 2) + "px"; tankExplosion.style.left = (parseInt(tankExplosion.style.left) - 2) + "px"; }, 80);
+        setTimeout(() => { gameBoard.removeChild(tankExplosion); }, 240);
     }
 
 
@@ -427,6 +450,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let keyPressed = 0;
     document.addEventListener('keydown', (event) => {
         if (!keyPressed) {
+            audioFon.play(); //изменить
             audioTankStarted.play();
             keyPressed = setInterval(function () {
                 let key = event.key;
@@ -615,7 +639,17 @@ document.addEventListener("DOMContentLoaded", function () {
         setTimeout(() => { explosion.src = '../static/image/explosion2.png'; explosion.style.top = (parseInt(explosion.style.top) - 2) + "px"; explosion.style.left = (parseInt(explosion.style.left) - 2) + "px"; }, 80);
         setTimeout(() => { explosion.src = '../static/image/explosion3.png'; explosion.style.top = (parseInt(explosion.style.top) - 1) + "px"; explosion.style.left = (parseInt(explosion.style.left) - 1) + "px"; }, 160);
         setTimeout(() => { gameBoard.removeChild(explosion); }, 240);
+        r++;
+    }
 
+    function explosionEnemyTank() {
+        tankExplosion.style.top = (parseInt(bot.style.top) - 15) + "px";
+        tankExplosion.style.left = (parseInt(bot.style.left) - 15) + "px";
+        tankExplosion.src = '../static/image/tankExplosion1.png';
+        audioTankExplosion.play();
+        gameBoard.appendChild(tankExplosion);
+        setTimeout(() => { tankExplosion.src = '../static/image/tankExplosion2.png'; tankExplosion.style.top = (parseInt(tankExplosion.style.top) - 2) + "px"; tankExplosion.style.left = (parseInt(tankExplosion.style.left) - 2) + "px"; }, 80);
+        setTimeout(() => { gameBoard.removeChild(tankExplosion); }, 240);
     }
 
     function shooting() {
@@ -634,6 +668,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (bot != undefined) {
             if ((((parseInt(shell.style.top) + shell.height) > parseInt(bot.style.top)) && (parseInt(shell.style.top) < (parseInt(bot.style.top) + sideValue))) && (((parseInt(shell.style.left) + shell.width) > parseInt(bot.style.left)) && (parseInt(shell.style.left) < (parseInt(bot.style.left) + sideValue)))) {
                 explosionShall();
+                explosionEnemyTank();
                 bot.remove();
                 bot = undefined;
                 console.log(bot);
