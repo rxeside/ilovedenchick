@@ -47,71 +47,24 @@ document.addEventListener("DOMContentLoaded", function() {
                 brick[i].Pos_Y = brick[i].Pos_Y + "px";
                 createNewElt(brick[i], i);
             };
-            answerFromServer();
-            // getTanks();
+            answersFromServer();
         };
     }
 
-    // function getTanks() {
-    //     socket.send("tanks");
-    //     socket.onmessage = function(event) {
-    //         let State = JSON.parse(event.data);
-    //         updateTanks(State);
-    //         answerFromServer();
-    //     }
-    // }
-
-    // let tank
-    let updateCoordinates = true;
-
-    function answerFromServer() {
+    function answersFromServer() {
         socket.onmessage = function(event) {
             let newState = JSON.parse(event.data);
-            // console.log(newState);
+
+            if (newState.Type === "Bullet") {
+                console.log(newState.Bullets);
+            }
 
             updateTanks(newState);
-            // startDistance = message.Distance
-            // distance = message.Distance;
-
-
-            // if (message.length > numOfTanks) {
-            //     for (let i = numOfTanks; i < array.length; ++i) {
-            //         const newTank = document.createElement("img");
-            //         newTank.id = "tank" + message[];
-            //         newTank.className = "tank";
-            //         newTank.src = "../static/image/top.png";
-            //         newTank.style.top = element.Y + "px";
-            //         newTank.style.left = element.X + "px";
-
-            //         numOfTanks++;
-
-            //         gameBoard.appendChild(newTank);
-            //     }
-            // }
-
-            // if (updateCoordinates) {
-            //     console.log("tank" + message.ID);
-            //     let tank = document.getElementById("tank" + message.ID);
-            //     // if (tank === undefined) {
-            //     //     let creaeteTank = document.createElement('img');
-            //     //     creaeteTank.id = "tank" + message.ID
-            //     //     creaeteTank.className = "tank";
-            //     //     tank.src = "../static/image/top.png";
-            //     //     creaeteTank = gameBoard.appendChild(creaeteTank);
-            //     //     tank = getElementById("tank" + message.ID);
-            //     // }
-            //     tank.style.top = message.Y + "px";
-            //     tank.style.left = message.X + "px";
-            //     updateCoordinates = false;
-            // }
-
-            // console.log(parseFloat(tank.style.left));
         }; 
     }
 
     function updateTanks(newstate){
         for(key in newstate) {
-            // console.log(newstate[key]);
             let index = -1;
             if (tanks !== undefined) {
                 index = tanks.findIndex((tank) => tank.ID === newstate[key].ID);
@@ -127,8 +80,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 tanks[index].Distance = newstate[key].Distance;
             }
         };
-
-        // console.log("<---->");
 
         if (tanks !== undefined) {
             for (key in tanks) {
@@ -491,6 +442,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 }
             }
         }
+
         if (shell.update == 1) {
             requestAnimationFrame(play);
         }
@@ -498,7 +450,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // управление снарядом
     document.addEventListener("keydown", function(event) {
-        var shot = event.code;
+        let shot = event.code;
         if ((shot == "KeyZ" || shot == "Enter") && (shell.update == 0)){
             shell.direction = direction;
             if (shell.direction == 1) {

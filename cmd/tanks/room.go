@@ -46,17 +46,24 @@ type tanktype struct {
 	Status    string
 }
 
+type bullettype struct {
+	TankID int
+	X      int
+	Y      int
+}
+
 type roomdata struct {
 	// Key     int
 	LastID  int
 	Level   leveldata
 	Objects []*objdata
 	Tanks   map[*websocket.Conn]*tanktype
+	Bullets []*bullettype
 	Status  string
 }
 
-var currLevel leveldata
-var Objects []*objdata
+// var currLevel leveldata
+// var Objects []*objdata
 
 var rooms = make(map[int]*roomdata)
 
@@ -107,6 +114,10 @@ func sendMessageForCleints(tanks map[*websocket.Conn]*tanktype) {
 	}
 }
 
+func sendMessageAboutTanks() {
+
+}
+
 func roomPage(w http.ResponseWriter, r *http.Request) {
 	roomKeystr := mux.Vars(r)["roomKey"]
 	roomKey, err := strconv.Atoi(roomKeystr)
@@ -121,7 +132,7 @@ func roomPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ts, err := template.ParseFiles("pages/level.html")
+	ts, err := template.ParseFiles("pages/room.html")
 	if err != nil {
 		http.Error(w, "Internal Server Error", 500)
 		log.Println(err.Error())
@@ -137,45 +148,6 @@ func roomPage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal Server Error", 500)
 		log.Println(err.Error())
 		return
-	}
-}
-
-func level(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		levelIDstr := mux.Vars(r)["levelID"]
-		levelID, err := strconv.Atoi(levelIDstr)
-		if err != nil {
-			http.Error(w, "Err with levelID", 500)
-			log.Println(err.Error())
-		}
-
-		// rooms[currRoom].Level, err = getLevelByID(db, levelID)
-		currLevel, err = getLevelByID(db, levelID)
-		if err != nil {
-			http.Error(w, "Error with getting a level by ID", 500)
-			log.Println(err.Error())
-		}
-
-		// rooms[currRoom].Objects, err = getObjByID(db, levelID)
-		Objects, err = getObjByID(db, levelID)
-		if err != nil {
-			http.Error(w, "Error with getting an object by ID", 500)
-			log.Println(err.Error())
-		}
-
-		ts, err := template.ParseFiles("pages/level.html")
-		if err != nil {
-			http.Error(w, "Internal Server Error", 500)
-			log.Println(err.Error())
-			return
-		}
-
-		err = ts.Execute(w, nil)
-		if err != nil {
-			http.Error(w, "Internal Server Error", 500)
-			log.Println(err.Error())
-			return
-		}
 	}
 }
 

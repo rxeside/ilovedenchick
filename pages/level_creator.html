@@ -10,8 +10,9 @@
 </head>
 
 <body>
-    <div class="background">
-        <div class="page">
+    <img class="background" src="../static/image/fon_new.jpg" alt="Фон крч">
+    <div class="page">
+        <div class="left">
             <div class="level-data">
                 <div class="name">
                     <h1 class="name__title">Название уровня:</h1>
@@ -22,10 +23,6 @@
                     <input class="sizes__side" id="level_side" type="number">
                 </div>
                 <button class="level-data__btn" onclick="updateField()">Создать карту</button>
-            </div>
-            <div class="workspace">
-                <div id="level_field" class="field">
-                </div>
             </div>
             <div id="cell_menu" class="menu">
                 <div>
@@ -49,11 +46,14 @@
                     <a id="Water" onclick="selectType('Water')">Выкопать пруд</a>
                 </div>
             </div>
-            <div></div>
             <div class="choice">
                 <button class="save level-data__btn" onclick="sendLeveldata()">Сохранить уровень</button>
                 <button class="delet level-data__btn">Удалить уровень</button>
                 <p id="message" class="message">Message</p>
+            </div>
+        </div>
+        <div class="workspace">
+            <div id="level_field" class="field">
             </div>
         </div>
     </div>

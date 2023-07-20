@@ -2,36 +2,48 @@
 {
     padding: 0;
     margin: 0;
+    overflow-y: hidden;
+}
+
+.left
+{
+    padding-top: 5%;
 }
 
 .background
 {
-    background: url(../image/fon_new.jpg) no-repeat;
+    /* background: url(../image/fon_new.jpg) no-repeat;
     width: 100%;
     min-height: 969px;
-    background-size: cover;
+    background-size: cover; */
+    width: 100%;
+    height: 100%;
+    position: absolute;
 }
 
 .level-data
 {
     display: flex;
     flex-direction: column;
-    padding: 14% 0 0 20px;
+    padding: 6% 0 0 20px;
     gap: 36px;
     opacity: 0.7;
 }
 
 .level-data__btn
 {
-    width: 40%;
+    width: 50%;
     font: 400 normal 14px/30px 'Press Start 2P';
     border-radius: 10px;
+    /* box-shadow: 8px 8px 8px rgba(0, 0, 0, 0.432); */
 }
 
 .workspace{
     display: flex;
     /* padding-left: 15%; */
     padding-top: 10%;
+    max-width: 800px;
+    max-height: 800px;
 }
 
 .name
@@ -41,7 +53,8 @@
     opacity: 0.7;
     padding: 4px;
     border-radius: 5px;
-    width: 76%;
+    width: 72%;
+    box-shadow: 5px 5px 10px rgba(255, 102, 0, 0.288), -5px -5px 10px rgba(255, 102, 0, 0.288), 5px -5px 10px rgba(255, 102, 0, 0.288), -5px 5px 10px rgba(255, 102, 0, 0.288);
 }
 
 .name__title
@@ -62,7 +75,8 @@
     opacity: 0.7;
     padding: 4px 4px 4px 4px;
     border-radius: 5px;
-    width: 66.75%;
+    width: 63%;
+    box-shadow: 5px 5px 10px rgba(255, 102, 0, 0.288), -5px -5px 10px rgba(255, 102, 0, 0.288), 5px -5px 10px rgba(255, 102, 0, 0.288), -5px 5px 10px rgba(255, 102, 0, 0.288);
 }
 
 .sizes__title
@@ -81,10 +95,10 @@
 {
     display: grid;
     grid-template-columns: 48% 52%;
-    grid-template-rows: 25% 40% 35%;
+    /* grid-template-rows: 25% 35% 30%; */
     max-height: 969px;
-    margin-left: 10%;
-    margin-right: 10%;
+    margin-left: 8%;
+    margin-right: 8%;
 }
 
 .field
@@ -105,16 +119,17 @@
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    gap: 12%;
+    gap: 30px;
     visibility: hidden;
     flex-direction: column;
     align-items: flex-start; 
     justify-content: center; 
-    margin: 14% 44% 0 3%;
+    margin: 10% 44% 0 3%;
     padding: 2%;
     background-color: rgb(56, 102, 100);
     opacity: 0.5;
     border-radius: 5%;
+    box-shadow: 10px 10px 20px rgba(0, 255, 213, 0.288), -10px -10px 20px rgba(0, 255, 213, 0.288), 10px -10px 20px rgba(0, 255, 213, 0.288), -10px 10px 20px rgba(0, 255, 213, 0.288);
 }
 
 .choice
