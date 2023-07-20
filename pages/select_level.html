@@ -23,6 +23,8 @@
             overflow-y: scroll;
             border: 1px solid #ccc;
             padding: 10px;
+            display: flex; 
+            flex-direction: column;
         }
         
         .level-item {
@@ -46,14 +48,22 @@
             right:20px;
             margin: 10px;
         }
+        .field {
+            display: grid;
+            width: 50%;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="level-list">
             {{ range .LevelData }}
-                <button id="{{ .Id }}" onclick="sendData({{ .Id }})">{{ .Name }}</button>
+                <button id="{{ .Id }}" size = "{{ .Side }}" onclick="sendData({{ .Id }})" style="margin-bottom: 10px;">{{ .Name }}</button>
             {{ end }}
+        </div>
+        <div class="workspace">
+            <div id="level_field" class="field">
+            </div>
         </div>
         <div class="level-details">
             <button class="back-button">Назад</button>
@@ -61,4 +71,3 @@
         </div>
     </div>
 </body>
-</html>

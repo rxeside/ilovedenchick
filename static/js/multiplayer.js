@@ -10,10 +10,12 @@ document.addEventListener("DOMContentLoaded", function() {
     gameBoard.style.left = marginLeft + "px";
     let brick;
     let tanks = [];
+    let bullets = [];
     let level;
     let sideValue;
     let step = 0.4;
     let numOfTanks = 0;
+    let tankside;
     const room = document.getElementById('room');
     // Создание и отображение кирпичей на поле
     const socket = new WebSocket("ws://localhost:3000/ws/" + room.textContent);
@@ -27,6 +29,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         sideValue = boardSide / level.Side;
         step = sideValue / 50;
+        tankside = sideValue * 0.95 + "px";
         // tank.style.height = sideValue * 0.95 + "px";
         // tank.style.width = sideValue * 0.95 + "px";
         // tank.style.top = (boardSide / 2 - sideValue) + "px";
@@ -54,12 +57,11 @@ document.addEventListener("DOMContentLoaded", function() {
     function answersFromServer() {
         socket.onmessage = function(event) {
             let newState = JSON.parse(event.data);
-
-            if (newState.Type === "Bullet") {
-                console.log(newState.Bullets);
+            if (newState.Message === "Bullets") {
+                updateBullets(newState.Bullets);
+            } else {
+                updateTanks(newState);
             }
-
-            updateTanks(newState);
         }; 
     }
 
@@ -88,8 +90,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 if (index === -1) {
                     const removeTank = document.getElementById("tank" + tanks[key].ID);
 
-                    tanks.splice(key, 1);
                     removeTank.remove();
+                    tanks.splice(key, 1);
                 }
             }
         }
@@ -114,6 +116,40 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
+    function updateBullets(newstate) {
+        for (key in newstate) {
+            if (bullets[key] === undefined) {
+                createNewBullet(newstate[key], key);
+                bullets[key] = newstate[key];
+                bulletLive(key);
+            }
+        }
+
+        for (key in bullets) {
+            if (newstate[key] === undefined) {
+                removeBullet(key);
+            }
+        }
+    }
+
+    function bulletLive(bulletId) {
+        // const Bullet = document.getElementById("bullet" + bulletId);
+        setTimeout(function() {
+            removeBullet(bulletId)
+        }, 7000)
+    }
+
+    function removeBullet(bulletId) {
+        const bullet = document.getElementById("bullet" + bulletId);
+        if (bullet !== null) {
+            bullet.remove();
+        }
+        if (bullets[bulletId] !== undefined) {
+            console.log(bullets[bulletId]);
+            bullets.splice(bulletId, 1);
+        }
+    }
+
     function createNewTank(element) {
         const newTank = document.createElement("img");
         newTank.id = "tank" + element.ID;
@@ -122,7 +158,35 @@ document.addEventListener("DOMContentLoaded", function() {
         newTank.style.top = element.Y + "px";
         newTank.style.left = element.X + "px";
 
+        newTank.style.width = tankside;
+        newTank.style.height = tankside;
+
         gameBoard.appendChild(newTank);
+    }
+
+    function createNewBullet(element, id){
+        const newBullet = document.createElement('img');
+        newBullet.id = "bullet" + id;
+        newBullet.className = "bullet";
+        newBullet.style.top = element.Start_Y + "px";
+        newBullet.style.left = element.Start_X + "px";
+        
+        switch (element.Direction) {
+            case "1":
+                newBullet.src = "../static/image/ShellTop.png";
+                break;
+            case "2":
+                newBullet.src = "../static/image/ShellDown.png";
+                break;
+            case "3":
+                newBullet.src = "../static/image/ShellLeft.png";
+                break;
+            case "4":
+                newBullet.src = "../static/image/ShellRight.png";
+                break;
+        }
+
+        gameBoard.appendChild(newBullet);
     }
     
     function createNewElt(element, i) {
@@ -130,6 +194,9 @@ document.addEventListener("DOMContentLoaded", function() {
         obj.id =  i;
         obj.classList.add('brick');
         obj.src = element.ImgURL;
+        if (element.CanTPass == 1) {
+            obj.style.zIndex = "3";
+        }
 
         obj.style.top = element.Pos_Y;
         obj.style.left = element.Pos_X;
@@ -451,30 +518,31 @@ document.addEventListener("DOMContentLoaded", function() {
     // управление снарядом
     document.addEventListener("keydown", function(event) {
         let shot = event.code;
-        if ((shot == "KeyZ" || shot == "Enter") && (shell.update == 0)){
-            shell.direction = direction;
-            if (shell.direction == 1) {
-                shell.src = "../static/image/ShellTop.png";
-                shell.style.top = (parseInt(tank.style.top) - 6) + "px";
-                shell.style.left = (parseInt(tank.style.left) + 14) + "px";
-            }
-            if (shell.direction == 2) {
-                shell.src = "../static/image/ShellDown.png";
-                shell.style.top = (parseInt(tank.style.top) + 34) + "px";
-                shell.style.left = (parseInt(tank.style.left) + 14) + "px";
-            }
-            if (shell.direction == 3) {
-                shell.src = "../static/image/ShellLeft.png";
-                shell.style.top = (parseInt(tank.style.top) + 13) + "px";
-                shell.style.left = (parseInt(tank.style.left) - 5) + "px";
-            }
-            if (shell.direction == 4) {
-                shell.src = "../static/image/ShellRight.png";
-                shell.style.top = (parseInt(tank.style.top) + 13) + "px";
-                shell.style.left = (parseInt(tank.style.left) + 34) + "px";
-            }
-            play();
-        } 
+        if ((shot == "KeyZ" || shot == "Enter")){ //&& (shell.update == 0)){
+            socket.send("Fire");
+            // shell.direction = direction;
+            // if (shell.direction == 1) {
+            //     shell.src = "../static/image/ShellTop.png";
+            //     shell.style.top = (parseInt(tank.style.top) - 6) + "px";
+            //     shell.style.left = (parseInt(tank.style.left) + 14) + "px";
+            // }
+            // if (shell.direction == 2) {
+            //     shell.src = "../static/image/ShellDown.png";
+            //     shell.style.top = (parseInt(tank.style.top) + 34) + "px";
+            //     shell.style.left = (parseInt(tank.style.left) + 14) + "px";
+            // }
+            // if (shell.direction == 3) {
+            //     shell.src = "../static/image/ShellLeft.png";
+            //     shell.style.top = (parseInt(tank.style.top) + 13) + "px";
+            //     shell.style.left = (parseInt(tank.style.left) - 5) + "px";
+            // }
+            // if (shell.direction == 4) {
+            //     shell.src = "../static/image/ShellRight.png";
+            //     shell.style.top = (parseInt(tank.style.top) + 13) + "px";
+            //     shell.style.left = (parseInt(tank.style.left) + 34) + "px";
+            // }
+            // play();
+        }
     });
 
 });

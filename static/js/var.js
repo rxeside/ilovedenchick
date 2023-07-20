@@ -1,0 +1,15 @@
+    let gameBoard = document.getElementById("game-board");
+    gameBoard.style.height = innerHeight * 0.8 + "px";
+    gameBoard.style.width = gameBoard.style.height;
+    let boardSide = gameBoard.clientHeight;
+    let marginLeft = (innerWidth - boardSide) / 2;
+    console.log("marginLeft: ", marginLeft);
+    let marginTop = innerHeight - boardSide;
+    gameBoard.style.top = marginTop / 2 + "px";
+    gameBoard.style.left = marginLeft + "px";
+    let brick;
+    let level;
+    let sideValue;
+    let step = 0.5;
+    let speed = 0.5;
+    let botSpeed = 0.5;

@@ -10,30 +10,10 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
-	"github.com/jmoiron/sqlx"
 )
 
 type levelPage struct {
 	RoomKey int
-}
-
-type leveldata struct {
-	Id          string `db:"id"`
-	Name        string `db:"name"`
-	Side        int    `db:"side"`
-	Author      string `db:"author"`
-	IsCompleted int    `db:"is_Completed"`
-}
-
-type objdata struct {
-	ID             int     `db:"id"`
-	Name           string  `db:"name"`
-	IsDestructible int     `db:"is_Destructible"`
-	CanTPass       int     `db:"can_T_pass"`
-	CanBPass       int     `db:"can_B_pass"`
-	ImgURL         string  `db:"imageURL"`
-	Pos_X          float64 `db:"pos_x"`
-	Pos_Y          float64 `db:"pos_y"`
 }
 
 type tanktype struct {
@@ -47,23 +27,27 @@ type tanktype struct {
 }
 
 type bullettype struct {
-	TankID int
-	X      int
-	Y      int
+	Start_X   float64
+	Start_Y   float64
+	End_X     float64
+	End_Y     float64
+	Direction string
+	ObjID     int
 }
 
 type roomdata struct {
-	// Key     int
 	LastID  int
 	Level   leveldata
 	Objects []*objdata
 	Tanks   map[*websocket.Conn]*tanktype
-	Bullets []*bullettype
+	Bullets map[int]*bullettype
 	Status  string
 }
 
-// var currLevel leveldata
-// var Objects []*objdata
+type messageAboutBullets struct {
+	Message string
+	Bullets map[int]*bullettype
+}
 
 var rooms = make(map[int]*roomdata)
 
@@ -79,22 +63,41 @@ func roomIsRunning(key int) {
 				// fmt.Printf("len(currRoom.Tanks): %v\n", len(currRoom.Tanks))
 				if currRoom.Status == "Remove" {
 					delete(rooms, key)
-					fmt.Println("Del")
 					return
 				} else {
 					if len(currRoom.Tanks) > 0 {
-						sendMessageForCleints(currRoom.Tanks)
+						sendMessageForCleints(*currRoom)
 					}
 				}
 			}
 		}
 	}()
-
-	fmt.Println("Exit")
 	return
 }
 
-func sendMessageForCleints(tanks map[*websocket.Conn]*tanktype) {
+func sendMessageForCleints(currRoom roomdata) {
+	if len(currRoom.Bullets) > 0 {
+		sendMessageAboutBullets(currRoom.Tanks, currRoom.Bullets)
+	}
+	sendMessageAboutTanks(currRoom.Tanks)
+}
+
+func sendMessageAboutBullets(tanks map[*websocket.Conn]*tanktype, Bullets map[int]*bullettype) {
+	var Message messageAboutBullets
+	Message.Message = "Bullets"
+	Message.Bullets = Bullets
+	for conn, value := range tanks {
+		if value.Status != "Load" {
+			err := conn.WriteJSON(Message)
+			if err != nil {
+				log.Println(err)
+				delete(tanks, conn)
+			}
+		}
+	}
+}
+
+func sendMessageAboutTanks(tanks map[*websocket.Conn]*tanktype) {
 	var tanksForSend []*tanktype
 	for _, value := range tanks {
 		newTank := *value
@@ -112,9 +115,6 @@ func sendMessageForCleints(tanks map[*websocket.Conn]*tanktype) {
 			}
 		}
 	}
-}
-
-func sendMessageAboutTanks() {
 
 }
 
@@ -151,58 +151,6 @@ func roomPage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getLevelByID(db *sqlx.DB, levelID int) (leveldata, error) {
-	const query = `
-			SELECT
-			  id,
-			  name,
-			  side,
-			  author,
-			  is_Completed
-			FROM
-			  level
-			WHERE
-			  id = ?
-	`
-
-	var level leveldata
-
-	err := db.Get(&level, query, levelID)
-	if err != nil {
-		return leveldata{}, err
-	}
-
-	return level, nil
-}
-
-func getObjByID(db *sqlx.DB, levelID int) ([]*objdata, error) {
-	const query = `
-			SELECT
-			  id,
-			  name,
-			  is_Destructible,
-			  can_T_pass,
-			  can_B_pass,
-			  imageURL,
-			  pos_x,
-			  pos_y
-			FROM
-			  level_obj
-			WHERE
-			  id_level = ?
-	`
-	var obj []*objdata
-
-	err := db.Select(&obj, query, levelID)
-	if err != nil {
-		return nil, err
-	}
-
-	return obj, nil
-}
-
-// Сначала мы создаем экземпляр upgrader, который будет использоваться для обновления HTTP соединения до WebSocket соединения.
-// Мы устанавливаем размеры буферов чтения и записи равными 1024 байтам.
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
@@ -227,6 +175,7 @@ func wsConnection(w http.ResponseWriter, r *http.Request) {
 	currRoom.LastID++
 	tank.ID = currRoom.LastID
 	tank.Status = "Load"
+	tank.Direction = "1"
 	var levelSide float64
 	var sideValue float64
 	var step float64
@@ -257,50 +206,6 @@ func wsConnection(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// var clients = make(map[*websocket.Conn]bool)
-
-// Функция handler является обработчиком HTTP запросов.
-
-// func handler(w http.ResponseWriter, r *http.Request) {
-// 	// var tank tanktype
-// 	// var levelSide float64
-// 	// var sideValue float64
-// 	// var step float64
-
-// 	conn, err := upgrader.Upgrade(w, r, nil)
-// 	if err != nil {
-// 		log.Println(err.Error())
-// 		return
-// 	}
-
-// 	// rooms[currRoom].NumOfPlayers += 1
-// 	// rooms[currRoom].Tanks[conn].ID = rooms[currRoom].NumOfPlayers
-// 	// tank = rooms[currRoom].Tanks[conn]
-// 	clients[conn] = true
-
-// 	err = conn.WriteJSON(rooms[currRoom].Level)
-// 	err = conn.WriteJSON(currLevel)
-// 	if err != nil {
-// 		log.Println(err.Error())
-// 		return
-// 	}
-
-// 	var ticker *time.Ticker
-
-// 	go func() {
-// 		for {
-// 			_, m, err := conn.ReadMessage()
-// 			if err != nil {
-// 				log.Println(err.Error())
-// 				return
-// 			}
-
-// 			message := string(m)
-// 			readMessageFromCleints(conn, ticker, &tank, message, &levelSide, &sideValue, &step)
-// 		}
-// 	}()
-// }
-
 func readMessageFromCleints(conn *websocket.Conn, currRoom *roomdata, Objects *[]*objdata, tank *tanktype, message string, levelSide *float64, sideValue *float64, step *float64) {
 	var err error
 
@@ -312,12 +217,10 @@ func readMessageFromCleints(conn *websocket.Conn, currRoom *roomdata, Objects *[
 			return
 		}
 
-		// *sideValue = *levelSide / float64(currLevel.Side)
 		*sideValue = *levelSide / float64(currRoom.Level.Side)
 		*step = *sideValue / 5
 
 		for _, value := range currRoom.Objects {
-			// for _, value := range Objects {
 			var newObj objdata
 			newObj.ID = value.ID
 			newObj.Name = value.Name
@@ -334,7 +237,6 @@ func readMessageFromCleints(conn *websocket.Conn, currRoom *roomdata, Objects *[
 		tank.Y = *levelSide/2 - *sideValue
 
 		err = conn.WriteJSON(*Objects)
-		// err = conn.WriteJSON(rooms[currRoom].Objects)
 		if err != nil {
 			log.Println(err.Error())
 			return
@@ -363,10 +265,10 @@ func readMessageFromCleints(conn *websocket.Conn, currRoom *roomdata, Objects *[
 		dir := string(m)
 		tank.Direction = dir
 
-		findDistance(conn, *Objects, tank, dir, *levelSide, *sideValue)
+		tank.Distance = findDistance(*Objects, tank, dir, *levelSide, *sideValue)
 
 		go func() {
-			moveTank(tank, *step)
+			moveTank(tank, currRoom.Bullets, *step)
 		}()
 	case "stopMoving":
 		// partOfWay, err := getFloatFromSocket(conn)
@@ -379,6 +281,12 @@ func readMessageFromCleints(conn *websocket.Conn, currRoom *roomdata, Objects *[
 
 		tank.Distance = 0
 		// tank.IsChanged = true
+	case "Fire":
+		bullet := createNewBullet(tank, *Objects, *levelSide, *sideValue)
+		currRoom.Bullets[tank.ID] = &bullet
+		go func() {
+			bulletFlight(&bullet, currRoom, tank.ID)
+		}()
 	case "Close":
 		conn.Close()
 		return
@@ -400,7 +308,7 @@ func getFloatFromSocket(conn *websocket.Conn) (float64, error) {
 	return value, nil
 }
 
-func moveTank(tank *tanktype, step float64) {
+func moveTank(tank *tanktype, bullets map[int]*bullettype, step float64) {
 	ticker := time.NewTicker(100 * time.Millisecond)
 
 	for range ticker.C {
@@ -416,9 +324,16 @@ func moveTank(tank *tanktype, step float64) {
 			return
 		}
 
-		calculateCoordinates(tank, step)
-		tank.Distance -= step
+		if !isCollisionwithBullet(tank, bullets, step) {
+			calculateCoordinates(tank, step)
+			tank.Distance -= step
+		}
 	}
+}
+
+func isCollisionwithBullet(tank *tanktype, bullets map[int]*bullettype, step float64) bool {
+
+	return false
 }
 
 func calculateCoordinates(tank *tanktype, step float64) {
@@ -434,14 +349,13 @@ func calculateCoordinates(tank *tanktype, step float64) {
 	}
 }
 
-func findDistance(conn *websocket.Conn, Objects []*objdata, tank *tanktype, dir string, levelside float64, sideValue float64) {
+func findDistance(Objects []*objdata, tank *tanktype, dir string, levelside float64, sideValue float64) float64 {
 
-	min := calculateStartDistance(tank, dir, levelside, sideValue)
+	min := calculateStartDistance(tank.X, tank.Y, dir, levelside, sideValue*0.95)
 
-	// for _, value := range rooms[1].Objects {
 	for _, value := range Objects {
-		if isCollision(tank, value, dir, sideValue) {
-			distance := calculateDistance(tank, value, dir, sideValue)
+		if isCollision(tank.X, tank.Y, value, value.CanTPass, dir, sideValue*0.95, sideValue) {
+			distance := calculateDistance(tank.X, tank.Y, value, dir, sideValue*0.95, sideValue)
 
 			if distance < min {
 				min = distance
@@ -449,61 +363,150 @@ func findDistance(conn *websocket.Conn, Objects []*objdata, tank *tanktype, dir 
 		}
 	}
 
-	tank.Distance = min
-	tank.IsChanged = true
-
-	return
+	return min
 }
 
-func calculateStartDistance(tank *tanktype, dir string, levelside float64, sideValue float64) float64 {
-	switch dir {
+func createNewBullet(tank *tanktype, objects []*objdata, levelSide float64, sideValue float64) bullettype {
+	var newBullet bullettype
+	newBullet.Direction = tank.Direction
+	newBullet.ObjID = -1
+
+	switch tank.Direction {
 	case "1":
-		return tank.Y
+		newBullet.Start_Y = tank.Y - sideValue*0.3
+		newBullet.Start_X = tank.X + (sideValue*0.95-sideValue*0.25)/2
 	case "2":
-		return levelside - tank.Y - sideValue*0.95
+		newBullet.Start_Y = tank.Y + sideValue*0.95
+		newBullet.Start_X = tank.X + (sideValue*0.95-sideValue*0.25)/2
 	case "3":
-		return tank.X
+		newBullet.Start_Y = tank.Y + (sideValue*0.95-sideValue*0.25)/2
+		newBullet.Start_X = tank.X - sideValue*0.3
 	case "4":
-		return levelside - tank.X - sideValue*0.95
+		newBullet.Start_Y = tank.Y + (sideValue*0.95-sideValue*0.25)/2
+		newBullet.Start_X = tank.X + sideValue*0.95
 	}
 
-	return 0
+	findEndCoordinatesOfBullet(&newBullet, objects, levelSide, sideValue)
+
+	fmt.Printf("newBullet: %v\n", newBullet)
+	return newBullet
 }
 
-func calculateDistance(tank *tanktype, obj *objdata, dir string, sideValue float64) float64 {
-	switch dir {
-	case "1":
-		return tank.Y - obj.Pos_Y - sideValue
-	case "2":
-		return obj.Pos_Y - tank.Y - sideValue*0.95
-	case "3":
-		return tank.X - obj.Pos_X - sideValue
-	case "4":
-		return obj.Pos_X - tank.X - sideValue*0.95
+func findEndCoordinatesOfBullet(bullet *bullettype, objects []*objdata, levelSide float64, sideValue float64) {
+
+	minD := calculateStartDistance(bullet.Start_X, bullet.Start_Y, bullet.Direction, levelSide, sideValue*0.3)
+
+	for _, value := range objects {
+		if isCollision(bullet.Start_X, bullet.Start_Y, value, value.CanBPass, bullet.Direction, sideValue*0.25, sideValue) {
+			distance := calculateDistance(bullet.Start_X, bullet.Start_Y, value, bullet.Direction, sideValue*0.3, sideValue)
+
+			if distance < minD {
+				minD = distance
+				bullet.ObjID = value.ID
+			}
+		}
 	}
 
-	return 0
+	calculateEndCoordinates(bullet, bullet.Direction, minD)
 }
 
-func isCollision(tank *tanktype, object *objdata, dir string, sideValue float64) bool {
+func calculateEndCoordinates(bullet *bullettype, dir string, distance float64) {
 	switch dir {
 	case "1":
-		if (object.CanTPass == 0) && (tank.Y > object.Pos_Y) && (tank.X+sideValue*0.95 > object.Pos_X) && (tank.X-sideValue*0.95 < object.Pos_X) {
+		bullet.End_Y = bullet.Start_Y - distance
+		bullet.End_X = bullet.Start_X
+	case "2":
+		bullet.End_Y = bullet.Start_Y + distance
+		bullet.End_X = bullet.Start_X
+	case "3":
+		bullet.End_Y = bullet.Start_Y
+		bullet.End_X = bullet.Start_X - distance
+	case "4":
+		bullet.End_Y = bullet.Start_Y
+		bullet.End_X = bullet.Start_X + distance
+	}
+}
+
+func isCollision(X float64, Y float64, object *objdata, CanPass int, dir string, side float64, sideOfObj float64) bool {
+	switch dir {
+	case "1":
+		if (CanPass == 0) && (Y > object.Pos_Y) && (X+side > object.Pos_X) && (X-sideOfObj < object.Pos_X) {
 			return true
 		}
 	case "2":
-		if (object.CanTPass == 0) && (tank.Y < object.Pos_Y) && (tank.X+sideValue*0.95 > object.Pos_X) && (tank.X-sideValue*0.95 < object.Pos_X) {
+		if (CanPass == 0) && (Y < object.Pos_Y) && (X+side > object.Pos_X) && (X-sideOfObj < object.Pos_X) {
 			return true
 		}
 	case "3":
-		if (object.CanTPass == 0) && (tank.X > object.Pos_X) && (tank.Y+sideValue*0.95 > object.Pos_Y) && (tank.Y-sideValue*0.95 < object.Pos_Y) {
+		if (CanPass == 0) && (X > object.Pos_X) && (Y+side > object.Pos_Y) && (Y-sideOfObj < object.Pos_Y) {
 			return true
 		}
 	case "4":
-		if (object.CanTPass == 0) && (tank.X < object.Pos_X) && (tank.Y+sideValue*0.95 > object.Pos_Y) && (tank.Y-sideValue*0.95 < object.Pos_Y) {
+		if (CanPass == 0) && (X < object.Pos_X) && (Y+side > object.Pos_Y) && (Y-sideOfObj < object.Pos_Y) {
 			return true
 		}
 	}
 
 	return false
+}
+
+func calculateStartDistance(X float64, Y float64, dir string, levelside float64, side float64) float64 {
+	switch dir {
+	case "1":
+		return Y
+	case "2":
+		return levelside - Y - side
+	case "3":
+		return X
+	case "4":
+		return levelside - X - side
+	}
+
+	return 0
+}
+
+func calculateDistance(X float64, Y float64, obj *objdata, dir string, side float64, sideValue float64) float64 {
+	switch dir {
+	case "1":
+		return Y - obj.Pos_Y - sideValue
+	case "2":
+		return obj.Pos_Y - Y - side
+	case "3":
+		return X - obj.Pos_X - sideValue
+	case "4":
+		return obj.Pos_X - X - side
+	}
+
+	return 0
+}
+
+func bulletFlight(bullet *bullettype, room *roomdata, ID int) {
+	isDestoyed := false
+
+	go func() {
+		ticker := time.NewTicker(time.Second)
+		var value int
+
+		for range ticker.C {
+			if value == 5 {
+				isDestoyed = true
+			} else {
+				value++
+			}
+
+			if isDestoyed {
+				ticker.Stop()
+				return
+			}
+		}
+
+		return
+	}()
+
+	for !isDestoyed {
+	}
+
+	fmt.Println("Delete")
+	delete(room.Bullets, ID)
+	return
 }
