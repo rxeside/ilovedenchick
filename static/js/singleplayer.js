@@ -1,22 +1,8 @@
+
 document.addEventListener("DOMContentLoaded", function () {
 
     // Создание игрового поля
-    let gameBoard = document.getElementById("game-board");
-    gameBoard.style.height = innerHeight * 0.8 + "px";
-    gameBoard.style.width = gameBoard.style.height;
-    let boardSide = gameBoard.clientHeight;
-    let marginLeft = (innerWidth - boardSide) / 2;
-    console.log("marginLeft: ", marginLeft);
-    let marginTop = innerHeight - boardSide;
-    gameBoard.style.top = marginTop / 2 + "px";
-    gameBoard.style.left = marginLeft + "px";
-    let brick;
-    let level;
-    let sideValue;
-    let step = 0.5;
-    let speed = 0.5;
-    let botSpeed = 0.5;
-
+    
     //Создание звуков
     const audioShell = new Audio('../static/audio/shot.mp3');
     audioShell.volume = 0.2;
@@ -37,6 +23,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const audioExpllosion2 = new Audio('../static/audio/projectile_explosion2.mp3');
     audioExpllosion.volume = 0.6;
     let r = 1;
+    
 
     // Создание и отображение кирпичей на поле
     const socket = new WebSocket("ws://localhost:3000/ws");
@@ -94,10 +81,6 @@ document.addEventListener("DOMContentLoaded", function () {
         obj.id = i;
         obj.classList.add('brick');
         obj.src = element.ImgURL;
-        if (element.CanTPass == 1) {
-            obj.style.zIndex = "3";
-        }
-
 
         obj.style.top = element.Pos_Y;
         obj.style.left = element.Pos_X;
@@ -174,19 +157,19 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
                 seeTank = false;
 
-                if ((parseFloat(bot.style.top) > parseFloat(tank.style.top) + parseFloat(tank.style.height)) && (parseFloat(bot.style.left) < parseFloat(tank.style.left) + parseFloat(tank.style.width)) && (parseFloat(bot.style.left) + parseFloat(bot.style.width) > parseFloat(tank.style.left))) {
-                    direction = "up";
+                if ((parseFloat(bot.style.top) > parseFloat(tank.style.top) + parseFloat(tank.style.height)) && (parseFloat(bot.style.left) + 20*step < parseFloat(tank.style.left) + parseFloat(tank.style.width)) && (parseFloat(bot.style.left) + parseFloat(bot.style.width) - 20*step > parseFloat(tank.style.left))) {
+                    direction = "up";   
                     seeTank = true;
                 }
-                if ((parseFloat(bot.style.top) + parseFloat(bot.style.height) < parseFloat(tank.style.top)) && (parseFloat(bot.style.left) < parseFloat(tank.style.left) + parseFloat(tank.style.width)) && (parseFloat(bot.style.left) + parseFloat(bot.style.width) > parseFloat(tank.style.left))) {
+                if ((parseFloat(bot.style.top) + parseFloat(bot.style.height) < parseFloat(tank.style.top)) && (parseFloat(bot.style.left) + 20*step < parseFloat(tank.style.left) + parseFloat(tank.style.width)) && (parseFloat(bot.style.left) + parseFloat(bot.style.width) - 20*step > parseFloat(tank.style.left))) {
                     direction = "down";
                     seeTank = true;
                 }
-                if ((((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(bot.style.top)) && (parseFloat(tank.style.top) < (parseFloat(bot.style.top) + parseFloat(bot.style.height)))) && ((parseFloat(tank.style.left) < (parseFloat(bot.style.left) + parseFloat(bot.style.width))))) {
+                if (((parseFloat(tank.style.top) + parseFloat(tank.style.width) > parseFloat(bot.style.top) + 20*step) && (parseFloat(tank.style.top) < parseFloat(bot.style.top) + parseFloat(bot.style.height) - 20*step)) && ((parseFloat(tank.style.left) < (parseFloat(bot.style.left) + parseFloat(bot.style.width))))) {
                     direction = "left";
                     seeTank = true;
                 }
-                if ((((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(bot.style.top)) && (parseFloat(tank.style.top) < (parseFloat(bot.style.top) + parseFloat(bot.style.height)))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width) + step) > parseFloat(bot.style.left)))) {
+                if (((parseFloat(tank.style.top) + parseFloat(tank.style.width) > parseFloat(bot.style.top) + 20*step) && (parseFloat(tank.style.top) < parseFloat(bot.style.top) + parseFloat(bot.style.height) - 20*step)) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width) + step) > parseFloat(bot.style.left)))) {
                     direction = "right"
                     seeTank = true;
                 }
@@ -325,6 +308,16 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     startBot();
 
+
+
+    let botShootDelay = 0;
+
+    function botDelaying() {
+          setTimeout(() => {botShootDelay = 0;}, 1500);
+    }
+
+
+
     function botShotDirection() {
         if (botShell.update == 0) {
             botShell.direction = botShell.directionNew;
@@ -349,8 +342,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 botShell.style.top = (parseInt(bot.style.top) + parseInt(bot.style.height) * 0.5 - parseInt(botShell.style.height) * 0.5) + "px";
                 botShell.style.left = (parseInt(bot.style.left) + parseInt(bot.style.width) - parseInt(botShell.style.width) * 0.5) + "px";
             }
-
-            botShooting();
+            if (botShootDelay == 0)
+                botShooting();
         }
     }
 
@@ -358,7 +351,7 @@ document.addEventListener("DOMContentLoaded", function () {
         gameBoard.appendChild(botShell);
         updateBotShall();
         botShell.update = 1;
-        console.log("bot's shot");
+        //console.log("bot's shot");
         if ((parseInt(botShell.style.top) < 0) || ((parseInt(botShell.style.top) + 16) >= boardSide) || (parseInt(botShell.style.left) < 0) || (parseInt(botShell.style.left) >= boardSide - 16)) {
             explosionBotShall();
         }
@@ -393,6 +386,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (botShell.update == 1) {
             requestAnimationFrame(botShooting);
         }
+        botShootDelay = 1; 
     }
 
 
@@ -426,8 +420,10 @@ document.addEventListener("DOMContentLoaded", function () {
         setTimeout(() => { botShotExplosion.src = '../static/image/explosion2.png'; botShotExplosion.style.top = (parseInt(botShotExplosion.style.top) - 2) + "px"; botShotExplosion.style.left = (parseInt(botShotExplosion.style.left) - 2) + "px"; }, 80);
         setTimeout(() => { botShotExplosion.src = '../static/image/explosion3.png'; botShotExplosion.style.top = (parseInt(botShotExplosion.style.top) - 1) + "px"; botShotExplosion.style.left = (parseInt(botShotExplosion.style.left) - 1) + "px"; }, 160);
         setTimeout(() => { gameBoard.removeChild(botShotExplosion); }, 240);
+        botDelaying();
 
     }
+
 
 
     // Обработка клавиш для управления танком
@@ -440,7 +436,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 console.log("in");
                 moveTank(key);
-
             }, speed);
         }
     })
@@ -585,6 +580,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
+    let shootDelay = 0;
+
+    function delaying() {
+          setTimeout(() => {shootDelay = 0;}, 1500);
+    }
 
     function updateShall() {
         let shellSpeed = sideValue / 7;
@@ -605,6 +605,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function explosionShall() {
         shell.update = 0;
+        
         shellPlacement = sideValue / 5;
         gameBoard.removeChild(shell);
         explosion.style.top = (parseInt(shell.style.top) - shellPlacement) + "px";
@@ -622,8 +623,11 @@ document.addEventListener("DOMContentLoaded", function () {
         setTimeout(() => { explosion.src = '../static/image/explosion2.png'; explosion.style.top = (parseInt(explosion.style.top) - 2) + "px"; explosion.style.left = (parseInt(explosion.style.left) - 2) + "px"; }, 80);
         setTimeout(() => { explosion.src = '../static/image/explosion3.png'; explosion.style.top = (parseInt(explosion.style.top) - 1) + "px"; explosion.style.left = (parseInt(explosion.style.left) - 1) + "px"; }, 160);
         setTimeout(() => { gameBoard.removeChild(explosion); }, 240);
+        delaying();
 
     }
+
+    
 
     function shooting() {
         if (dead == true)
@@ -631,7 +635,10 @@ document.addEventListener("DOMContentLoaded", function () {
         gameBoard.appendChild(shell);
         updateShall();
         shell.update = 1;
+        
         console.log("shot");
+
+
 
         if ((parseInt(shell.style.top) < 0) || ((parseInt(shell.style.top) + 16) >= boardSide) || (parseInt(shell.style.left) < 0) || (parseInt(shell.style.left) >= boardSide - 16)) {
             explosionShall();
@@ -664,14 +671,19 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             }
         }
-        if (shell.update == 1) {
+        if ((shell.update == 1)) {
             requestAnimationFrame(shooting);
         }
+        shootDelay = 1;
     }
+
+
+
 
     // управление снарядом
     document.addEventListener("keydown", function (event) {
         var shot = event.code;
+
         if ((shot == "KeyZ" || shot == "Space") && (shell.update == 0)) {
             shell.direction = shell.directionNew;
             audioShell.play();
@@ -695,8 +707,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 shell.style.top = (parseInt(tank.style.top) + parseInt(tank.style.height) * 0.5 - parseInt(shell.style.height) * 0.5) + "px";
                 shell.style.left = (parseInt(tank.style.left) + parseInt(tank.style.width) - parseInt(shell.style.width) * 0.5) + "px";
             }
-
-            shooting();
+            if (shootDelay == 0)
+                shooting();
         }
     });
 

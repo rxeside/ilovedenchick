@@ -21,6 +21,25 @@ type roomdeletenum struct {
 	ID int `json:"ID"`
 }
 
+type leveldata struct {
+	Id          string `db:"id"`
+	Name        string `db:"name"`
+	Side        int    `db:"side"`
+	Author      string `db:"author"`
+	IsCompleted int    `db:"is_Completed"`
+}
+
+type objdata struct {
+	ID             int     `db:"id"`
+	Name           string  `db:"name"`
+	IsDestructible int     `db:"is_Destructible"`
+	CanTPass       int     `db:"can_T_pass"`
+	CanBPass       int     `db:"can_B_pass"`
+	ImgURL         string  `db:"imageURL"`
+	Pos_X          float64 `db:"pos_x"`
+	Pos_Y          float64 `db:"pos_y"`
+}
+
 func createRoomPage(w http.ResponseWriter, r *http.Request) {
 	ts, err := template.ParseFiles("pages/room_creator.html")
 	if err != nil {
@@ -130,4 +149,54 @@ func deleteRoom(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("%q\n", rooms)
 	return
+}
+
+func getLevelByID(db *sqlx.DB, levelID int) (leveldata, error) {
+	const query = `
+			SELECT
+			  id,
+			  name,
+			  side,
+			  author,
+			  is_Completed
+			FROM
+			  level
+			WHERE
+			  id = ?
+	`
+
+	var level leveldata
+
+	err := db.Get(&level, query, levelID)
+	if err != nil {
+		return leveldata{}, err
+	}
+
+	return level, nil
+}
+
+func getObjByID(db *sqlx.DB, levelID int) ([]*objdata, error) {
+	const query = `
+			SELECT
+			  id,
+			  name,
+			  is_Destructible,
+			  can_T_pass,
+			  can_B_pass,
+			  imageURL,
+			  pos_x,
+			  pos_y
+			FROM
+			  level_obj
+			WHERE
+			  id_level = ?
+	`
+	var obj []*objdata
+
+	err := db.Select(&obj, query, levelID)
+	if err != nil {
+		return nil, err
+	}
+
+	return obj, nil
 }

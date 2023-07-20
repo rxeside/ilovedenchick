@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", function() {
     let level;
     let sideValue;
     let step = 0.4;
+    let bulletStep = 0.4;
     let numOfTanks = 0;
     let tankside;
     const room = document.getElementById('room');
@@ -29,11 +30,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
         sideValue = boardSide / level.Side;
         step = sideValue / 50;
-        tankside = sideValue * 0.95 + "px";
-        // tank.style.height = sideValue * 0.95 + "px";
-        // tank.style.width = sideValue * 0.95 + "px";
-        // tank.style.top = (boardSide / 2 - sideValue) + "px";
-        // tank.style.left = (boardSide / 2 - sideValue) + "px";
+        bulletStep = step * 3;
+        tankside = sideValue * 0.9 + "px";
 
         getObjects();
     };
@@ -59,6 +57,8 @@ document.addEventListener("DOMContentLoaded", function() {
             let newState = JSON.parse(event.data);
             if (newState.Message === "Bullets") {
                 updateBullets(newState.Bullets);
+            } else if(newState.Message === "Objects") { 
+                destroyObjects(newState.Objects)
             } else {
                 updateTanks(newState);
             }
@@ -75,7 +75,7 @@ document.addEventListener("DOMContentLoaded", function() {
             if (index === -1) {
                 createNewTank(newstate[key]);
                 tanks.push(newstate[key]);
-            } else {
+            } else if(newstate[key].Update) {
                 tanks[index].X = newstate[key].X;
                 tanks[index].Y = newstate[key].Y;
                 tanks[index].Direction = newstate[key].Direction;
@@ -97,12 +97,9 @@ document.addEventListener("DOMContentLoaded", function() {
         }
 
         for (key in tanks) {
-            // console.log(currTank);
             let currTank = document.getElementById("tank" + tanks[key].ID);
 
             if(tanks[key].Distance === 0) {
-                // console.log("Coordinates");
-                currTank.classList.remove("moving");
                 currTank.style.top = tanks[key].Y + "px";
                 currTank.style.left = tanks[key].X + "px";
             } else {
@@ -116,12 +113,21 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
+    function destroyObjects(newstate) {
+        for (key in newstate) {
+            const eltRemove = document.getElementById(newstate[key]);
+            if (eltRemove != null) {
+                eltRemove.remove();
+            }
+        }
+    }
+
     function updateBullets(newstate) {
         for (key in newstate) {
             if (bullets[key] === undefined) {
                 createNewBullet(newstate[key], key);
                 bullets[key] = newstate[key];
-                bulletLive(key);
+                bulletLive(bullets[key], key);
             }
         }
 
@@ -132,11 +138,55 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    function bulletLive(bulletId) {
-        // const Bullet = document.getElementById("bullet" + bulletId);
-        setTimeout(function() {
-            removeBullet(bulletId)
-        }, 7000)
+    function bulletLive(currBullet, bulletId) {
+        console.log(bullets[bulletId]);
+        const bulletElt = document.getElementById("bullet" + bulletId);
+        let destroy = false;
+        let bulletTimerID = setInterval(function() {
+
+            if(bulletElt !== null) {
+                if (destroy) {
+                    removeBullet(bulletId);
+                    clearInterval(bulletTimerID);
+                    return;
+                }
+                
+                switch (currBullet.Direction) {
+                    case "1":
+                        if (parseFloat(bulletElt.style.top) - currBullet.End_Y > bulletStep) {
+                            bulletElt.style.top = parseFloat(bulletElt.style.top) - bulletStep + "px"; 
+                        } else {
+                            bulletElt.style.top = currBullet.End_Y + "px";
+                            destroy = true;
+                        }
+                        break;
+                    case "2":
+                        if (currBullet.End_Y - parseFloat(bulletElt.style.top) > bulletStep) {
+                            bulletElt.style.top = parseFloat(bulletElt.style.top) + bulletStep + "px"; 
+                        } else {
+                            bulletElt.style.top = currBullet.End_Y + "px";
+                            destroy = true;
+                        }
+                        break;
+                    case "3":
+                        if (parseFloat(bulletElt.style.left) - currBullet.End_X > bulletStep) {
+                            bulletElt.style.left = parseFloat(bulletElt.style.left) - bulletStep + "px"; 
+                        } else {
+                            bulletElt.style.left = currBullet.End_X + "px";
+                            destroy = true;
+                        }
+                        break;
+                    case "4":
+                        if (currBullet.End_X - parseFloat(bulletElt.style.left) > bulletStep) {
+                            bulletElt.style.left = parseFloat(bulletElt.style.left) + bulletStep + "px"; 
+                        } else {
+                            bulletElt.style.left = currBullet.End_X + "px";
+                            destroy = true;
+                        }
+                        break;
+                }
+            }
+        }, 10)
     }
 
     function removeBullet(bulletId) {
@@ -145,7 +195,6 @@ document.addEventListener("DOMContentLoaded", function() {
             bullet.remove();
         }
         if (bullets[bulletId] !== undefined) {
-            console.log(bullets[bulletId]);
             bullets.splice(bulletId, 1);
         }
     }
@@ -174,15 +223,23 @@ document.addEventListener("DOMContentLoaded", function() {
         switch (element.Direction) {
             case "1":
                 newBullet.src = "../static/image/ShellTop.png";
+                newBullet.style.width = sideValue * 0.25 + "px";
+                newBullet.style.height = sideValue * 0.3 + "px";
                 break;
             case "2":
                 newBullet.src = "../static/image/ShellDown.png";
+                newBullet.style.width = sideValue * 0.25 + "px";
+                newBullet.style.height = sideValue * 0.3 + "px";
                 break;
             case "3":
                 newBullet.src = "../static/image/ShellLeft.png";
+                newBullet.style.width = sideValue * 0.3 + "px";
+                newBullet.style.height = sideValue * 0.25 + "px";
                 break;
             case "4":
                 newBullet.src = "../static/image/ShellRight.png";
+                newBullet.style.width = sideValue * 0.3 + "px";
+                newBullet.style.height = sideValue * 0.25 + "px";
                 break;
         }
 
@@ -220,15 +277,6 @@ document.addEventListener("DOMContentLoaded", function() {
     explosion.className = "explosion";
     explosion.src = '../static/image/explosion1.png'
     
-    // Создание танка
-    // var tank = document.createElement("img");
-
-    // tank.className = "tank";
-    // tank.src = '../static/image/top.png';
-    
-    // Добавление танка на игровое поле
-    // gameBoard.appendChild(tank);
-    
     // Обработка клавиш для управления танком
     
     let status = 0;
@@ -244,29 +292,43 @@ document.addEventListener("DOMContentLoaded", function() {
             console.log("Close");
         }
 
-        if (!is_move) {
-            switch (key) {
-                case "ArrowUp":
+        switch (key) {
+            case "ArrowUp":
+                if ((direction !== 1) || (!is_move)) {
+                    if (is_move) {
+                        stopMove();
+                    }
                     direction = 1;
-                    // stopMove();
-                    movingTank();
-                    break;
-                case "ArrowDown":
+                    sendDir();
+                }
+                break;
+            case "ArrowDown":
+                if ((direction !== 2) || (!is_move)) {
+                    if (is_move) {
+                        stopMove();
+                    }
                     direction = 2;
-                    // stopMove();
-                    movingTank();
-                    break;
-                case "ArrowLeft":
+                    sendDir();
+                }
+                break;
+            case "ArrowLeft":
+                if ((direction !== 3) || (!is_move)) {
+                    if (is_move) {
+                        stopMove();
+                    }
                     direction = 3;
-                    // stopMove();
-                    movingTank();
-                    break;
-                case "ArrowRight":
+                    sendDir();
+                }
+                break;
+            case "ArrowRight":
+                if ((direction !== 4) || (!is_move)) {
+                    if (is_move) {
+                        stopMove();
+                    }
                     direction = 4;
-                    // stopMove();
-                    movingTank();
-                    break;
-            }
+                    sendDir();
+                }
+                break;
         }
     });
 
@@ -300,43 +362,13 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function stopMove() {
         socket.send("stopMoving");
-        // updateCoordinates = true;
-        // if (distance > 0) {
-            // let partOfWay = (startDistance - distance) % (step * 10);//Часть пути которое проедет клиент, но сервер не обработает
-            // console.log(tank);
-            // console.log(partOfWay);
-            // socket.send(partOfWay);
-        // }
-        // else {
-        // }
-        // socket.send(0);
         is_move = false;
         distance = 0;
     }
 
-    function movingTank() {
-        sendDir();
-        // is_move = true;
-
-        // let moveTimerID = setInterval(function() {
-            // changAnimation();
-
-        //     if (is_move) {
-        //         if (distance !== 0) 
-        //         {
-                    // moveByDistance();
-        //         } 
-        //         else 
-        //         {
-        //             // moveByCoordinates();
-        //         }
-        //     } 
-        //     else 
-        //     {
-        //         clearInterval(moveTimerID);
-        //     }
-        // }, 10);
-    }
+    // function movingTank() {
+    //     sendDir();
+    // }
 
     function sendDir()
     {
@@ -347,16 +379,16 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function moveByDistance(currTank) {
         let tankElement = document.getElementById("tank" + tanks[key].ID);
-        // distance = currTank.Distance;
-        direction = currTank.Direction;
-        let status = 0;
+
         let moveTimerID = setInterval(function(){
             if (currTank.Distance <= step) {
                 clearInterval(moveTimerID);
+                tankElement.classList.remove("moving");
+                return;
             }
 
             currTank.Distance -= step;
-            switch (direction) {
+            switch (currTank.Direction) {
                 case "1":
                     tankElement.style.top = parseFloat(tankElement.style.top) - step + "px";
                     break;
@@ -370,8 +402,8 @@ document.addEventListener("DOMContentLoaded", function() {
                     tankElement.style.left = parseFloat(tankElement.style.left) + step + "px";
                     break;
             }
-        }, 10)
-
+        }, 10);
+        
     }
     
     function moveByCoordinates() {

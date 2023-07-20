@@ -6,47 +6,45 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/jmoiron/sqlx"
 )
 
 type selectLevelPage struct {
-	LevelData []*levelsdata
+	LevelData []*leveldata
 }
 
-type levelsdata struct {
-	Id          int    `db:"id"`
-	Name        string `db:"name"`
-	Side        int    `db:"side"`
-	Author      string `db:"author"`
-	IsCompleted int    `db:"is_Completed"`
-}
+// type levelsdata struct {
+// 	Id          int    `db:"id"`
+// 	Name        string `db:"name"`
+// 	Side        int    `db:"side"`
+// 	Author      string `db:"author"`
+// 	IsCompleted int    `db:"is_Completed"`
+// }
 
-type obJects struct {
-	Id              int    `db:"id"`
-	Id_Level        int    `db:"id_level"`
-	Name            string `db:"name"`
-	Is_Destructible int    `db:"is_Destructible"`
-	Can_T_Pass      int    `db:"can_T_pass"`
-	Can_B_pass      int    `db:"can_B_pass"`
-	ImageURL        string `db:"imageURL"`
-	PosX            int    `db:"pos_x"`
-	PosY            int    `db:"pos_y"`
-}
+// type obJects struct {
+// 	Id              int    `db:"id"`
+// 	Id_Level        int    `db:"id_level"`
+// 	Name            string `db:"name"`
+// 	Is_Destructible int    `db:"is_Destructible"`
+// 	Can_T_Pass      int    `db:"can_T_pass"`
+// 	Can_B_pass      int    `db:"can_B_pass"`
+// 	ImageURL        string `db:"imageURL"`
+// 	PosX            int    `db:"pos_x"`
+// 	PosY            int    `db:"pos_y"`
+// }
 
 func getLevelObj(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		levelNum, err := handleLevelID(w, r)
-		// levelNum, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			// http.Error(w, "Error with data", 500)
 			log.Println(err.Error())
 			return
 		}
 
 		levelobjects, err := getObjByID(db, levelNum)
 		if err != nil {
-			// http.Error(w, "Error with data", 500)
 			log.Println(err.Error())
 			return
 		}
@@ -64,16 +62,6 @@ func getLevelObj(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// func numbersHandler(w http.ResponseWriter, r *http.Request) {
-// 	numbers := []int{1, 2, 3, 4, 5}
-// 	jsonNumbers, err := json.Marshal(numbers)
-// 	if err != nil {
-// 		// обработка ошибки
-// 	}
-// 	w.Header().Set("Content-Type", "application/json")
-// 	w.Write(jsonNumbers)
-// }
-
 func handleLevelID(w http.ResponseWriter, r *http.Request) (int, error) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -82,12 +70,18 @@ func handleLevelID(w http.ResponseWriter, r *http.Request) (int, error) {
 	}
 	defer r.Body.Close()
 
-	var number int
-	err = json.Unmarshal(body, &number)
+	var numStr string
+	err = json.Unmarshal(body, &numStr)
 	if err != nil {
 		http.Error(w, "Invalid number", http.StatusBadRequest)
 		return 0, err
 	}
+
+	number, err := strconv.Atoi(numStr)
+	if err != nil {
+		return 0, err
+	}
+
 	return number, nil
 }
 
@@ -120,11 +114,7 @@ func selectLevel(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// func sendData(w http.ResponseWriter, data int, r *http.Request) {
-// 	fmt.Fprintf(w, "%d", data)
-// }
-
-func levelsSelect(db *sqlx.DB) ([]*levelsdata, error) {
+func levelsSelect(db *sqlx.DB) ([]*leveldata, error) {
 	const query = `
 		SELECT
 		  id,
@@ -136,7 +126,7 @@ func levelsSelect(db *sqlx.DB) ([]*levelsdata, error) {
 		  level
 	`
 
-	var level []*levelsdata
+	var level []*leveldata
 
 	err := db.Select(&level, query)
 	if err != nil {
