@@ -19,7 +19,7 @@ const (
 
 func main() {
 	cfg := mysql.Config{
-		User: "root",
+		User:   "root",
 		Passwd: "P@ssw0rd",
 		Net:    "tcp",
 		Addr:   "localhost:3306",
@@ -35,13 +35,21 @@ func main() {
 
 	mux := mux.NewRouter()
 	mux.HandleFunc("/ws", handler)
+	mux.HandleFunc("/ws/{roomKey}", wsConnection)
 
 	mux.HandleFunc("/level/{levelID}", level(dbx))
+	mux.HandleFunc("/room/{roomKey}", roomPage)
 	mux.HandleFunc("/create_level", createLevel)
-	mux.HandleFunc("/main_menu", mainMenu)
+	mux.HandleFunc("/main", mainMenu)
+	mux.HandleFunc("/create_room", createRoomPage)
+	mux.HandleFunc("/select_level", selectLevel(dbx))
 
 	mux.HandleFunc("/api/save_level", saveLevel(dbx)).Methods(http.MethodPost)
+	// mux.HandleFunc("/api/save_select", saveLevel(dbx)).Methods(http.MethodPost)
 	mux.HandleFunc("/api/save_obj", saveObj(dbx)).Methods(http.MethodPost)
+	mux.HandleFunc("/api/create_new_room", createNewRoom(dbx)).Methods(http.MethodPost)
+	mux.HandleFunc("/api/delete_room", deleteRoom).Methods(http.MethodPost)
+	mux.HandleFunc("/api/getlevelobj", getLevelObj(dbx)).Methods((http.MethodPost))
 
 	mux.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 
