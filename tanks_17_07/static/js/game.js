@@ -66,6 +66,8 @@ document.addEventListener("DOMContentLoaded", function () {
             explosion.style.width = sideValue * 0.7 + "px";
             botShotExplosion.style.height = sideValue * 0.7 + "px";
             botShotExplosion.style.width = sideValue * 0.7 + "px";
+            tankExplosion.style.height = sideValue * 1.5 + "px";
+            tankExplosion.style.width = sideValue * 1.5 + "px";
 
             if (sideValue > 60) {
                 step = 1;
@@ -402,8 +404,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function explosionTank() {
-        tankExplosion.style.top = (parseInt(botShell.style.top) - 30) + "px";
-        tankExplosion.style.left = (parseInt(botShell.style.left) - 30) + "px";
+        tankExplosionPlacement = sideValue / 2;
+        tankExplosion.style.top = (parseInt(botShell.style.top) - tankExplosionPlacement) + "px";
+        tankExplosion.style.left = (parseInt(botShell.style.left) - tankExplosionPlacement) + "px";
         tankExplosion.src = '../static/image/tankExplosion1.png';
         audioTankExplosion.play();
         gameBoard.appendChild(tankExplosion);
@@ -643,8 +646,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function explosionEnemyTank() {
-        tankExplosion.style.top = (parseInt(bot.style.top) - 15) + "px";
-        tankExplosion.style.left = (parseInt(bot.style.left) - 15) + "px";
+        tankEnemyExplosionPlacement = sideValue / 4;
+        tankExplosion.style.top = (parseInt(bot.style.top) - tankEnemyExplosionPlacement) + "px";
+        tankExplosion.style.left = (parseInt(bot.style.left) - tankEnemyExplosionPlacement) + "px";
         tankExplosion.src = '../static/image/tankExplosion1.png';
         audioTankExplosion.play();
         gameBoard.appendChild(tankExplosion);
