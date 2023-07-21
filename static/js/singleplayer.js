@@ -1,7 +1,4 @@
-
 document.addEventListener("DOMContentLoaded", function () {
-
-    
 
     // Создание и отображение кирпичей на поле
     const socket = new WebSocket("ws://localhost:3000/ws");
@@ -39,9 +36,8 @@ document.addEventListener("DOMContentLoaded", function () {
         socket.send(boardSide);
         socket.send(marginLeft);
         socket.send(marginTop);
-
-
     }
+
 
     function newAns() {
         socket.onmessage = function (event) {
@@ -68,14 +64,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-
     // Добавление танка на игровое поле
     gameBoard.appendChild(tank);
-
-
-  
-    
-
 
 
     // Обработка клавиш для управления танком
@@ -252,6 +242,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+
     function explosionShall() {
         shell.update = 0;
         shellPlacement = sideValue / 5;
@@ -276,7 +267,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     
-
     function shooting() {
         if (dead == true)
             return;
@@ -326,7 +316,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    // управление снарядом
+    // управление снарядом  
     document.addEventListener("keydown", function (event) {
         let shot = event.code;
         if ((shot == "KeyZ" || shot == "Space") && (shell.update == 0)) {
@@ -355,7 +345,5 @@ document.addEventListener("DOMContentLoaded", function () {
             if (shootDelay == 0)
                 shooting();
         }
-    });
-
-    
+    }); 
 });
