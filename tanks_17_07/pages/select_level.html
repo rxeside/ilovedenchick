@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <script defer src="../static/js/level_select.js"></script>
+    <title>Выбор уровня</title>
+    <style>
+        body {
+            font-family: 'Press Start 2P', sans-serif;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 20px;
+        }
+        
+        .level-list {
+            width: 200px;
+            height: 300px;
+            overflow-y: scroll;
+            border: 1px solid #ccc;
+            padding: 10px;
+            display: flex; 
+            flex-direction: column;
+        }
+        
+        .level-item {
+            margin-bottom: 10px;
+        }
+        
+        
+        
+        .back-button {
+            font: 400 normal 24px/24px 'Press Start 2P';
+            position: fixed;
+            bottom: 20px;
+            left:20px;
+            margin: 10px
+        }
+        
+        .play-button {
+            font: 400 normal 24px/24px 'Press Start 2P';
+            position: fixed;
+            bottom: 20px;
+            right:20px;
+            margin: 10px;
+        }
+        .field {
+            display: grid;
+            width: 50%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="level-list">
+            {{ range .LevelData }}
+                <button id="{{ .Id }}" size = "{{ .Side }}" onclick="sendData({{ .Id }})" style="margin-bottom: 10px;">{{ .Name }}</button>
+            {{ end }}
+        </div>
+        <div class="workspace">
+            <div id="level_field" class="field">
+            </div>
+        </div>
+        <div class="level-details">
+            <button class="back-button">Назад</button>
+            <button class="play-button">Играть</button>
+        </div>
+    </div>
+</body>
+</html>
