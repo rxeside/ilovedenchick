@@ -92,6 +92,12 @@ func createNewRoom(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 			log.Println(err.Error())
 			return
 		}
+
+		for _, value := range NewRoom.Objects {
+			value.Pos_X = value.Pos_X * size
+			value.Pos_Y = value.Pos_Y * size
+		}
+
 		NewRoom.Status = "IdlePlayers"
 
 		rooms[key] = &NewRoom

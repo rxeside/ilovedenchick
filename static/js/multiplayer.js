@@ -15,9 +15,17 @@ document.addEventListener("DOMContentLoaded", function() {
     let sideValue;
     let step = 0.4;
     let bulletStep = 0.4;
-    let numOfTanks = 0;
     let tankside;
+    let ratio;
+
+    const sizeOnServer = 100;
     const room = document.getElementById('room');
+    const tanksize = 0.9;
+    const tankstep = 50;
+    const bulletstep = 3;
+    const bulletwidth = 0.25;
+    const bulletlen = 0.3;
+
     // Создание и отображение кирпичей на поле
     const socket = new WebSocket("ws://localhost:3000/ws/" + room.textContent);
 
@@ -28,25 +36,23 @@ document.addEventListener("DOMContentLoaded", function() {
     socket.onmessage = function(event) {
         level = JSON.parse(event.data);
 
+        ratio = boardSide / (level.Side * sizeOnServer)
         sideValue = boardSide / level.Side;
-        step = sideValue / 50;
-        bulletStep = step * 3;
-        tankside = sideValue * 0.9 + "px";
+
+        step = sideValue / tankstep;
+        bulletStep = step * bulletstep;
+        tankside = sideValue * tanksize + "px";
 
         getObjects();
     };
 
     function getObjects() {
-        socket.send("level");
-        socket.send(boardSide);
-        socket.send(marginLeft);
-        socket.send(marginTop);
         socket.onmessage = function(event) {
             brick = JSON.parse(event.data);
             if (brick != null) {
                 for (let i = 0; i < brick.length; i++) {
-                    brick[i].Pos_X = brick[i].Pos_X + "px";
-                    brick[i].Pos_Y = brick[i].Pos_Y + "px";
+                    brick[i].Pos_X = brick[i].Pos_X*ratio + "px";
+                    brick[i].Pos_Y = brick[i].Pos_Y*ratio + "px";
                     createNewElt(brick[i]);
                 };
             }
@@ -75,13 +81,17 @@ document.addEventListener("DOMContentLoaded", function() {
             }
 
             if (index === -1) {
-                createNewTank(newstate[key]);
-                tanks.push(newstate[key]);
+                let newS = newstate[key];
+                newS.X = newS.X * ratio;
+                newS.Y = newS.Y * ratio;
+                console.log(newS);
+                tanks.push(newS);
+                createNewTank(newS);
             } else {//if(newstate[key].Update) {
-                tanks[index].X = newstate[key].X;
-                tanks[index].Y = newstate[key].Y;
+                tanks[index].X = newstate[key].X * ratio;
+                tanks[index].Y = newstate[key].Y * ratio;
                 tanks[index].Direction = newstate[key].Direction;
-                tanks[index].Distance = newstate[key].Distance;
+                tanks[index].Distance = newstate[key].Distance * ratio;
             }
             // else {
             // tanks[index].Distance = newstate[key].Distance
@@ -132,9 +142,14 @@ document.addEventListener("DOMContentLoaded", function() {
             if (bullets[key] === undefined) {
                 createNewBullet(newstate[key], key);
                 bullets[key] = newstate[key];
+                bullets[key].Start_X = bullets[key].Start_X * ratio;
+                bullets[key].Start_Y = bullets[key].Start_Y * ratio;
+                bullets[key].End_X = bullets[key].End_X * ratio;
+                bullets[key].End_Y = bullets[key].End_Y * ratio;
                 bulletLive(bullets[key], key);
             } else {
-
+                bullets[key].End_X = newstate[key].End_X * ratio;
+                bullets[key].End_Y = newstate[key].End_Y * ratio;
             }
         }
 
@@ -217,6 +232,8 @@ document.addEventListener("DOMContentLoaded", function() {
         newTank.style.width = tankside;
         newTank.style.height = tankside;
 
+        changeAnimation(newTank, element.Direction)
+
         gameBoard.appendChild(newTank);
     }
 
@@ -224,29 +241,29 @@ document.addEventListener("DOMContentLoaded", function() {
         const newBullet = document.createElement('img');
         newBullet.id = "bullet" + id;
         newBullet.className = "bullet";
-        newBullet.style.top = element.Start_Y + "px";
-        newBullet.style.left = element.Start_X + "px";
+        newBullet.style.top = element.Start_Y * ratio + "px";
+        newBullet.style.left = element.Start_X * ratio + "px";
         
         switch (element.Direction) {
             case "1":
                 newBullet.src = "../static/image/ShellTop.png";
-                newBullet.style.width = sideValue * 0.25 + "px";
-                newBullet.style.height = sideValue * 0.3 + "px";
+                newBullet.style.width = sideValue * bulletwidth + "px";
+                newBullet.style.height = sideValue * bulletlen + "px";
                 break;
             case "2":
                 newBullet.src = "../static/image/ShellDown.png";
-                newBullet.style.width = sideValue * 0.25 + "px";
-                newBullet.style.height = sideValue * 0.3 + "px";
+                newBullet.style.width = sideValue * bulletwidth + "px";
+                newBullet.style.height = sideValue * bulletlen + "px";
                 break;
             case "3":
                 newBullet.src = "../static/image/ShellLeft.png";
-                newBullet.style.width = sideValue * 0.3 + "px";
-                newBullet.style.height = sideValue * 0.25 + "px";
+                newBullet.style.width = sideValue * bulletlen + "px";
+                newBullet.style.height = sideValue * bulletwidth + "px";
                 break;
             case "4":
                 newBullet.src = "../static/image/ShellRight.png";
-                newBullet.style.width = sideValue * 0.3 + "px";
-                newBullet.style.height = sideValue * 0.25 + "px";
+                newBullet.style.width = sideValue * bulletlen + "px";
+                newBullet.style.height = sideValue * bulletwidth + "px";
                 break;
         }
 
@@ -285,9 +302,6 @@ document.addEventListener("DOMContentLoaded", function() {
     explosion.src = '../static/image/explosion1.png'
     
     // Обработка клавиш для управления танком
-    
-    let status = 0;
-    let distance = 0; 
     let direction = 1
     let is_move = false;
 
@@ -372,10 +386,6 @@ document.addEventListener("DOMContentLoaded", function() {
         is_move = false;
         distance = 0;
     }
-
-    // function movingTank() {
-    //     sendDir();
-    // }
 
     function sendDir()
     {
