@@ -43,11 +43,13 @@ document.addEventListener("DOMContentLoaded", function() {
         socket.send(marginTop);
         socket.onmessage = function(event) {
             brick = JSON.parse(event.data);
-            for (let i = 0; i < brick.length; i++) {
-                brick[i].Pos_X = brick[i].Pos_X + "px";
-                brick[i].Pos_Y = brick[i].Pos_Y + "px";
-                createNewElt(brick[i], i);
-            };
+            if (brick != null) {
+                for (let i = 0; i < brick.length; i++) {
+                    brick[i].Pos_X = brick[i].Pos_X + "px";
+                    brick[i].Pos_Y = brick[i].Pos_Y + "px";
+                    createNewElt(brick[i]);
+                };
+            }
             answersFromServer();
         };
     }
@@ -57,7 +59,7 @@ document.addEventListener("DOMContentLoaded", function() {
             let newState = JSON.parse(event.data);
             if (newState.Message === "Bullets") {
                 updateBullets(newState.Bullets);
-            } else if(newState.Message === "Objects") { 
+            } else if (newState.Message === "Objects") { 
                 destroyObjects(newState.Objects)
             } else {
                 updateTanks(newState);
@@ -75,12 +77,15 @@ document.addEventListener("DOMContentLoaded", function() {
             if (index === -1) {
                 createNewTank(newstate[key]);
                 tanks.push(newstate[key]);
-            } else if(newstate[key].Update) {
+            } else {//if(newstate[key].Update) {
                 tanks[index].X = newstate[key].X;
                 tanks[index].Y = newstate[key].Y;
                 tanks[index].Direction = newstate[key].Direction;
                 tanks[index].Distance = newstate[key].Distance;
             }
+            // else {
+            // tanks[index].Distance = newstate[key].Distance
+            // }
         };
 
         if (tanks !== undefined) {
@@ -128,18 +133,20 @@ document.addEventListener("DOMContentLoaded", function() {
                 createNewBullet(newstate[key], key);
                 bullets[key] = newstate[key];
                 bulletLive(bullets[key], key);
+            } else {
+
             }
         }
 
         for (key in bullets) {
-            if (newstate[key] === undefined) {
+            if ((newstate[key] === undefined) || (newstate[key].Destroy)){
                 removeBullet(key);
+                console.log("Remove");
             }
         }
     }
 
     function bulletLive(currBullet, bulletId) {
-        console.log(bullets[bulletId]);
         const bulletElt = document.getElementById("bullet" + bulletId);
         let destroy = false;
         let bulletTimerID = setInterval(function() {
@@ -246,9 +253,9 @@ document.addEventListener("DOMContentLoaded", function() {
         gameBoard.appendChild(newBullet);
     }
     
-    function createNewElt(element, i) {
+    function createNewElt(element) {
         let obj = document.createElement("img");
-        obj.id =  i;
+        obj.id =  element.ID;
         obj.classList.add('brick');
         obj.src = element.ImgURL;
         if (element.CanTPass == 1) {
@@ -259,7 +266,7 @@ document.addEventListener("DOMContentLoaded", function() {
         obj.style.left = element.Pos_X;
         obj.style.width = sideValue + "px";
         obj.style.height = sideValue + "px";
-
+        
         gameBoard.appendChild(obj);
     }
 
