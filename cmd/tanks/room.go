@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -136,7 +135,6 @@ func sendMessageAboutBullets(tanks map[*websocket.Conn]*tanktype, Bullets *map[i
 
 	for index, bullet := range *Bullets {
 		if bullet.Destroy {
-			fmt.Println(bullet)
 			delete(*Bullets, index)
 		}
 	}
@@ -569,15 +567,13 @@ func destoyedObj(room *roomdata, ObjID int) []*objdata {
 }
 
 func hitByBullet(tank *tanktype, bullets *map[int]*bullettype) bool {
-	for i, bullet := range *bullets {
+	for _, bullet := range *bullets {
 
-		if isCollision(bullet.Start_X, bullet.Start_Y, tank.X, tank.Y, 0, bullet.Direction, bullet_len, tanksize) {
+		if (!bullet.Destroy) && (isCollision(bullet.Start_X, bullet.Start_Y, tank.X, tank.Y, 0, bullet.Direction, bullet_len, tanksize)) {
 			distance := calculateDistance(bullet.Start_X, bullet.Start_Y, tank.X, tank.Y, bullet.Direction, bullet_len, tanksize)
 			if distance < bullet_len {
 				bullet.Destroy = true
 				bullet.ObjID = -1
-				fmt.Println("Is hit")
-				fmt.Printf("i: %v\n", i)
 				return true
 			}
 		}
@@ -589,4 +585,5 @@ func hitByBullet(tank *tanktype, bullets *map[int]*bullettype) bool {
 func deadTank(tank *tanktype) {
 	tank.X = 0
 	tank.Y = 0
+	tank.Distance = 0
 }
