@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const room = document.getElementById('room');
     const tanksize = 0.9;
     const tankstep = 50;
-    const bulletstep = 3;
+    const bulletstep = 5;
     const bulletwidth = 0.25;
     const bulletlen = 0.3;
 
@@ -87,15 +87,13 @@ document.addEventListener("DOMContentLoaded", function() {
                 console.log(newS);
                 tanks.push(newS);
                 createNewTank(newS);
-            } else {//if(newstate[key].Update) {
+            } else {
                 tanks[index].X = newstate[key].X * ratio;
                 tanks[index].Y = newstate[key].Y * ratio;
                 tanks[index].Direction = newstate[key].Direction;
                 tanks[index].Distance = newstate[key].Distance * ratio;
+                tanks[index].Status = newstate[key].Status
             }
-            // else {
-            // tanks[index].Distance = newstate[key].Distance
-            // }
         };
 
         if (tanks !== undefined) {
@@ -117,13 +115,13 @@ document.addEventListener("DOMContentLoaded", function() {
             if(tanks[key].Distance === 0) {
                 currTank.style.top = tanks[key].Y + "px";
                 currTank.style.left = tanks[key].X + "px";
-            } else {
-                if (!currTank.classList.contains("moving")) {
-                    currTank.classList.add("moving");
-                    moveByDistance(tanks[key]);
-                } else {
-                    changeAnimation(currTank, tanks[key].Direction);
-                }
+            } else if (!currTank.classList.contains("moving")) {
+                currTank.classList.add("moving");
+                moveByDistance(tanks[key]);
+            }
+
+            if ((tanks[key].Status === "Moving") || (tanks[key].Status === "Collision")) {
+                changeAnimation(currTank, tanks[key].Direction);
             }
         }
     }
@@ -150,6 +148,7 @@ document.addEventListener("DOMContentLoaded", function() {
             } else {
                 bullets[key].End_X = newstate[key].End_X * ratio;
                 bullets[key].End_Y = newstate[key].End_Y * ratio;
+                console.log(bullets[key].End_X, ' ', bullets[key].End_Y);
             }
         }
 
@@ -395,10 +394,11 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function moveByDistance(currTank) {
-        let tankElement = document.getElementById("tank" + tanks[key].ID);
+        let tankElement = document.getElementById("tank" + currTank.ID);
 
         let moveTimerID = setInterval(function(){
             if (currTank.Distance <= step) {
+                console.log(currTank);
                 clearInterval(moveTimerID);
                 tankElement.classList.remove("moving");
                 return;

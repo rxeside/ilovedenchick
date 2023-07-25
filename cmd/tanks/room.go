@@ -15,7 +15,7 @@ import (
 const (
 	size         = 100.0
 	tankstep     = size / 10
-	bulletstep   = tankstep * 3
+	bulletstep   = tankstep * 5
 	bullet_len   = 0.3 * size
 	tanksize     = 0.9 * size
 	bullet_width = 0.25 * size
@@ -136,6 +136,7 @@ func sendMessageAboutBullets(tanks map[*websocket.Conn]*tanktype, Bullets *map[i
 
 	for index, bullet := range *Bullets {
 		if bullet.Destroy {
+			fmt.Println(bullet)
 			delete(*Bullets, index)
 		}
 	}
@@ -303,13 +304,16 @@ func readMessageFromCleints(conn *websocket.Conn, currRoom *roomdata, tank *tank
 	case "stopMoving":
 		tank.Distance = 0
 		tank.Update = true
+		if tank.Status == "Collision" {
+			tank.Status = "Staying"
+		}
 	case "Fire":
 		_, ok := currRoom.Bullets[tank.ID]
 		if !ok {
 			bullet := createNewBullet(tank, currRoom.Objects, *levelSize)
 			currRoom.Bullets[tank.ID] = &bullet
 			go func() {
-				bulletFlight(&bullet, currRoom, tank.ID)
+				bulletFlight(&bullet, currRoom, *levelSize, tank.ID)
 			}()
 		}
 	case "Close":
@@ -325,7 +329,9 @@ func moveTank(tank *tanktype, Objects []*objdata, bullets map[int]*bullettype, l
 		if tank.Distance <= 0 {
 			tank.Distance = 0
 			ticker.Stop()
-			tank.Status = "Staying"
+			if tank.Status != "Collision" {
+				tank.Status = "Staying"
+			}
 			return
 		}
 		tank.Distance = findDistance(Objects, tank, tank.Direction, levelSize)
@@ -333,6 +339,7 @@ func moveTank(tank *tanktype, Objects []*objdata, bullets map[int]*bullettype, l
 		if (tank.Distance <= tankstep) && (tank.Distance > 0) {
 			calculateCoordinates(tank, tank.Distance-(tankstep*0.1))
 			tank.Distance = 0
+			tank.Status = "Collision"
 		}
 
 		if tank.Distance > tankstep {
@@ -484,7 +491,7 @@ func calculateDistance(X1 float64, Y1 float64, X2 float64, Y2 float64, dir strin
 	return 0
 }
 
-func bulletFlight(bullet *bullettype, room *roomdata, ID int) {
+func bulletFlight(bullet *bullettype, room *roomdata, levelSize float64, ID int) {
 	bullet.Destroy = ((bullet.Start_X == bullet.End_X) && (bullet.Start_Y == bullet.End_Y))
 
 	go func() {
@@ -498,6 +505,7 @@ func bulletFlight(bullet *bullettype, room *roomdata, ID int) {
 			}
 
 			moveBullet(bullet)
+			findEndCoordinatesOfBullet(bullet, room.Objects, levelSize)
 			bullet.Destroy = ((bullet.Start_X == bullet.End_X) && (bullet.Start_Y == bullet.End_Y))
 		}
 
