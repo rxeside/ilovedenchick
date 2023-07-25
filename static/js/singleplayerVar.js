@@ -59,31 +59,55 @@ let status = 0;
 let dead = false;
 let hit = 0;
 
-// Создание ботов
-let bot = document.createElement("img");
-bot.className = "bot1";
-bot.style.top = (boardSide / 4 - 40) + "px";
-bot.style.left = (boardSide / 2 - 40) + "px";
-bot.src = '../static/image/botTop.png';
-gameBoard.appendChild(bot);
-let botMovement = 0;
-let botShell = document.createElement("img");
-botShell.className = "botShell";
-botShell.src = "../static/image/ShellTop.png";
-botShell.direction = 1;
-botShell.directionNew = 1;
-botShell.update = 0;
-botSkinStatus = 0;
-let botShotExplosion = document.createElement("img");
-botShotExplosion.className = "botShotExplosion";
-botShotExplosion.src = '../static/image/explosion1.png';
-let seeTank = false;
 
 
+let newBot = {
+    className: "bot1",
+    style: {
+        top: (boardSide/4 - 40),
+        left: (boardSide/2 - 40)
+    },
+    src: '../static/image/botTop.png',
+    botMovement: 0,
+    botShell: {
+        className: 'botShell',
+        src: '../static/image/ShellTop.png',
+        direction: 1,
+        directionNew: 1,
+        update: 0
+    },
+    botSkinStatus: 0,
+    botShotExplosion: {
+        className: "botShotExplosion",
+        src: '../static/image/explosion1.png'
+    },
+    seeTank: false
+};
 
-// Прочие переменные для бота
-let direction;
-let botShootDelay = 0;  
+let bots = [];
+
+let bot1 = document.createElement("img");
+bot1.className = "bot1";
+bot1.style.top = (boardSide / 4 - 40) + "px";
+bot1.style.left = (boardSide / 2 - 40) + "px";
+bot1.src = '../static/image/botTop.png';
+gameBoard.appendChild(bot1);
+bot1.botMovement = 0;
+bot1.botShell = document.createElement("img");
+bot1.botShell.className = "botShell";
+bot1.botShell.src = "../static/image/ShellTop.png";
+bot1.botShell.direction = 1;
+bot1.botShell.directionNew = 1;
+bot1.botShell.update = 0;
+bot1.botSkinStatus = 0;
+bot1.botShotExplosion = document.createElement("img");
+bot1.botShotExplosion.className = "botShotExplosion";
+bot1.botShotExplosion.src = '../static/image/explosion1.png';
+bot1.seeTank = false;
+bot1.direction;
+bot1.botShootDelay = 0;  
+
+
 
 // Прочие переменные для танка
 let keyPressed = 0;

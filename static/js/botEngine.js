@@ -1,154 +1,154 @@
 // Обработка движения бота
 function updateBot() {
-    if (bot == undefined) {
+    if (bot1 == undefined) {
         return;
     }
     let action = generateRandomAction();
     console.log("action: ", action);
     if (action == 'move') {
-        clearInterval(botMovement);
-        botMovement = 0;
-        direction = getRandomDirection();
-        console.log("direction: ", direction);
+        clearInterval(bot1.botMovement);
+        bot1.botMovement = 0;
+        bot1.direction = getRandomDirection();
+        console.log("direction: ", bot1.direction);
 
-        botMovement = setInterval(function () {
-            if (bot == undefined) {
+        bot1.botMovement = setInterval(function () {
+            if (bot1 == undefined) {
                 return;
             }
-            seeTank = false;
+            bot1.seeTank = false;
 
-            if ((parseFloat(bot.style.top) > parseFloat(tank.style.top) + parseFloat(tank.style.height)) && (parseFloat(bot.style.left) + 20*step < parseFloat(tank.style.left) + parseFloat(tank.style.width)) && (parseFloat(bot.style.left) + parseFloat(bot.style.width) - 20*step > parseFloat(tank.style.left))) {
-                direction = "up";   
-                seeTank = true;
+            if ((parseFloat(bot1.style.top) > parseFloat(tank.style.top) + parseFloat(tank.style.height)) && (parseFloat(bot1.style.left) + 20*step < parseFloat(tank.style.left) + parseFloat(tank.style.width)) && (parseFloat(bot1.style.left) + parseFloat(bot1.style.width) - 20*step > parseFloat(tank.style.left))) {
+                bot1.direction = "up";   
+                bot1.seeTank = true;
             }
-            if ((parseFloat(bot.style.top) + parseFloat(bot.style.height) < parseFloat(tank.style.top)) && (parseFloat(bot.style.left) + 20*step < parseFloat(tank.style.left) + parseFloat(tank.style.width)) && (parseFloat(bot.style.left) + parseFloat(bot.style.width) - 20*step > parseFloat(tank.style.left))) {
-                direction = "down";
-                seeTank = true;
+            if ((parseFloat(bot1.style.top) + parseFloat(bot1.style.height) < parseFloat(tank.style.top)) && (parseFloat(bot1.style.left) + 20*step < parseFloat(tank.style.left) + parseFloat(tank.style.width)) && (parseFloat(bot1.style.left) + parseFloat(bot1.style.width) - 20*step > parseFloat(tank.style.left))) {
+                bot1.direction = "down";
+                bot1.seeTank = true;
             }
-            if (((parseFloat(tank.style.top) + parseFloat(tank.style.width) > parseFloat(bot.style.top) + 20*step) && (parseFloat(tank.style.top) < parseFloat(bot.style.top) + parseFloat(bot.style.height) - 20*step)) && ((parseFloat(tank.style.left) < (parseFloat(bot.style.left) + parseFloat(bot.style.width))))) {
-                direction = "left";
-                seeTank = true;
+            if (((parseFloat(tank.style.top) + parseFloat(tank.style.width) > parseFloat(bot1.style.top) + 20*step) && (parseFloat(tank.style.top) < parseFloat(bot1.style.top) + parseFloat(bot1.style.height) - 20*step)) && ((parseFloat(tank.style.left) < (parseFloat(bot1.style.left) + parseFloat(bot1.style.width))))) {
+                bot1.direction = "left";
+                bot1.seeTank = true;
             }
-            if (((parseFloat(tank.style.top) + parseFloat(tank.style.width) > parseFloat(bot.style.top) + 20*step) && (parseFloat(tank.style.top) < parseFloat(bot.style.top) + parseFloat(bot.style.height) - 20*step)) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width) + step) > parseFloat(bot.style.left)))) {
-                direction = "right"
-                seeTank = true;
+            if (((parseFloat(tank.style.top) + parseFloat(tank.style.width) > parseFloat(bot1.style.top) + 20*step) && (parseFloat(tank.style.top) < parseFloat(bot1.style.top) + parseFloat(bot1.style.height) - 20*step)) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width) + step) > parseFloat(bot1.style.left)))) {
+                bot1.direction = "right"
+                bot1.seeTank = true;
             }
 
-            if (direction == 'up') {
+            if (bot1.direction == 'up') {
                 let can_move = true;
                 brick.forEach(element => {
                     if (element != undefined) {
-                        if (((parseFloat(tank.style.top) + parseFloat(tank.style.height) < parseFloat(bot.style.top) + parseFloat(bot.style.height)) && (parseFloat(tank.style.top) + parseFloat(tank.style.height) + step > parseFloat(bot.style.top)) && (parseFloat(tank.style.left) + parseFloat(tank.style.width) > parseFloat(bot.style.left)) && (parseFloat(tank.style.left) < parseFloat(bot.style.left) + parseFloat(bot.style.width)))) {
+                        if (((parseFloat(tank.style.top) + parseFloat(tank.style.height) < parseFloat(bot1.style.top) + parseFloat(bot1.style.height)) && (parseFloat(tank.style.top) + parseFloat(tank.style.height) + step > parseFloat(bot1.style.top)) && (parseFloat(tank.style.left) + parseFloat(tank.style.width) > parseFloat(bot1.style.left)) && (parseFloat(tank.style.left) < parseFloat(bot1.style.left) + parseFloat(bot1.style.width)))) {
                             can_move = false;
                         }
-                        if ((((parseFloat(bot.style.top) + parseFloat(bot.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(bot.style.top) < (parseFloat(element.Pos_Y) + parseFloat(bot.style.width) + step))) && (((parseFloat(bot.style.left) + parseFloat(bot.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(bot.style.left) < (parseFloat(element.Pos_X) + parseFloat(bot.style.width)))) || ((parseFloat(bot.style.top) <= 0))) {
+                        if ((((parseFloat(bot1.style.top) + parseFloat(bot1.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(bot1.style.top) < (parseFloat(element.Pos_Y) + parseFloat(bot1.style.width) + step))) && (((parseFloat(bot1.style.left) + parseFloat(bot1.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(bot1.style.left) < (parseFloat(element.Pos_X) + parseFloat(bot1.style.width)))) || ((parseFloat(bot1.style.top) <= 0))) {
                             if (element.CanTPass === 0) {
                                 can_move = false;
-                                if (!seeTank)
-                                    direction = "down";
+                                if (!bot1.seeTank)
+                                    bot1.direction = "down";
                             }
                         }
                     }
                 });
 
-                botShell.directionNew = 1;
-                if (botSkinStatus === 0) {
-                    botSkinStatus = 1;
-                    bot.src = '../static/image/botTop.png';
-                } else if (botSkinStatus === 1) {
-                    botSkinStatus = 0;
-                    bot.src = '../static/image/botTop1.png';
+                bot1.botShell.directionNew = 1;
+                if (bot1.botSkinStatus === 0) {
+                    bot1.botSkinStatus = 1;
+                    bot1.src = '../static/image/botTop.png';
+                } else if (bot1.botSkinStatus === 1) {
+                    bot1.botSkinStatus = 0;
+                    bot1.src = '../static/image/botTop1.png';
                 }
                 if (can_move) {
-                    bot.style.top = (parseFloat(bot.style.top) - step) + "px";
+                    bot1.style.top = (parseFloat(bot1.style.top) - step) + "px";
                     botShotDirection();
                 }
-            } if (direction == 'down') {
+            } if (bot1.direction == 'down') {
                 let can_move = true;
-                if (((parseFloat(tank.style.top) > parseFloat(bot.style.top)) && (parseFloat(tank.style.top) - step < parseFloat(bot.style.top) + parseFloat(bot.style.height)) && (parseFloat(tank.style.left) + parseFloat(tank.style.width) > parseFloat(bot.style.left)) && (parseFloat(tank.style.left) < parseFloat(bot.style.left) + parseFloat(bot.style.width)))) {
+                if (((parseFloat(tank.style.top) > parseFloat(bot1.style.top)) && (parseFloat(tank.style.top) - step < parseFloat(bot1.style.top) + parseFloat(bot1.style.height)) && (parseFloat(tank.style.left) + parseFloat(tank.style.width) > parseFloat(bot1.style.left)) && (parseFloat(tank.style.left) < parseFloat(bot1.style.left) + parseFloat(bot1.style.width)))) {
                     can_move = false;
                 }
                 brick.forEach(element => {
                     if (element != undefined) {
-                        if ((((parseFloat(bot.style.top) + parseFloat(bot.style.width) + step) > parseFloat(element.Pos_Y)) && (parseFloat(bot.style.top) < (parseFloat(element.Pos_Y) + parseFloat(bot.style.width)))) && (((parseFloat(bot.style.left) + parseFloat(bot.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(bot.style.left) < (parseFloat(element.Pos_X) + parseFloat(bot.style.width)))) || ((parseFloat(bot.style.top) + parseFloat(bot.style.width) >= boardSide))) {
+                        if ((((parseFloat(bot1.style.top) + parseFloat(bot1.style.width) + step) > parseFloat(element.Pos_Y)) && (parseFloat(bot1.style.top) < (parseFloat(element.Pos_Y) + parseFloat(bot1.style.width)))) && (((parseFloat(bot1.style.left) + parseFloat(bot1.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(bot1.style.left) < (parseFloat(element.Pos_X) + parseFloat(bot1.style.width)))) || ((parseFloat(bot1.style.top) + parseFloat(bot1.style.width) >= boardSide))) {
                             if (element.CanTPass === 0) {
                                 can_move = false;
-                                if (!seeTank)
-                                    direction = "up";
+                                if (!bot1.seeTank)
+                                    bot1.direction = "up";
                             }
                         }
                     }
                 });
 
-                botShell.directionNew = 2;
-                if (botSkinStatus === 0) {
-                    botSkinStatus = 1;
-                    bot.src = '../static/image/botDown.png';
-                } else if (botSkinStatus === 1) {
-                    botSkinStatus = 0;
-                    bot.src = '../static/image/botDown1.png';
+                bot1.botShell.directionNew = 2;
+                if (bot1.botSkinStatus === 0) {
+                    bot1.botSkinStatus = 1;
+                    bot1.src = '../static/image/botDown.png';
+                } else if (bot1.botSkinStatus === 1) {
+                    bot1.botSkinStatus = 0;
+                    bot1.src = '../static/image/botDown1.png';
                 }
                 if (can_move) {
-                    bot.style.top = (parseFloat(bot.style.top) + step) + "px";
+                    bot1.style.top = (parseFloat(bot1.style.top) + step) + "px";
                     botShotDirection();
                 }
-            } if (direction == 'left') {
+            } if (bot1.direction == 'left') {
                 let can_move = true;
-                if ((((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(bot.style.top)) && (parseFloat(tank.style.top) < (parseFloat(bot.style.top) + parseFloat(bot.style.height)))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width) + 2 * step) > parseFloat(bot.style.left)) && (parseFloat(tank.style.left) < (parseFloat(bot.style.left) + parseFloat(bot.style.width))))) {
+                if ((((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(bot1.style.top)) && (parseFloat(tank.style.top) < (parseFloat(bot1.style.top) + parseFloat(bot1.style.height)))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width) + 2 * step) > parseFloat(bot1.style.left)) && (parseFloat(tank.style.left) < (parseFloat(bot1.style.left) + parseFloat(bot1.style.width))))) {
                     can_move = false;
                 }
                 brick.forEach(element => {
                     if (element != undefined) {
-                        if ((((parseFloat(bot.style.top) + parseFloat(bot.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(bot.style.top) < (parseFloat(element.Pos_Y) + parseFloat(bot.style.width)))) && (((parseFloat(bot.style.left) + parseFloat(bot.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(bot.style.left) < (parseFloat(element.Pos_X) + parseFloat(bot.style.width) + step))) || ((parseFloat(bot.style.left) <= 0))) {
+                        if ((((parseFloat(bot1.style.top) + parseFloat(bot1.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(bot1.style.top) < (parseFloat(element.Pos_Y) + parseFloat(bot1.style.width)))) && (((parseFloat(bot1.style.left) + parseFloat(bot1.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(bot1.style.left) < (parseFloat(element.Pos_X) + parseFloat(bot1.style.width) + step))) || ((parseFloat(bot1.style.left) <= 0))) {
                             if (element.CanTPass === 0) {
                                 can_move = false;
-                                if (!seeTank) {
-                                    direction = "right";
+                                if (!bot1.seeTank) {
+                                    bot1.direction = "right";
                                 }
                             }
                         }
                     }
                 });
 
-                botShell.directionNew = 3;
-                if (botSkinStatus === 0) {
-                    botSkinStatus = 1;
-                    bot.src = '../static/image/botLeft.png';
-                } else if (status === 1) {
-                    botSkinStatus = 0;
-                    bot.src = '../static/image/botLeft1.png';
+                bot1.botShell.directionNew = 3;
+                if (bot1.botSkinStatus === 0) {
+                    bot1.botSkinStatus = 1;
+                    bot1.src = '../static/image/botLeft.png';
+                } else if (bot1.botSkinStatus === 1) {
+                    bot1.botSkinStatus = 0;
+                    bot1.src = '../static/image/botLeft1.png';
                 }
                 if (can_move) {
-                    bot.style.left = (parseFloat(bot.style.left) - step) + "px";
+                    bot1.style.left = (parseFloat(bot1.style.left) - step) + "px";
                     botShotDirection();
                 }
-            } if (direction == 'right') {
+            } if (bot1.direction == 'right') {
                 let can_move = true;
-                if ((((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(bot.style.top)) && (parseFloat(tank.style.top) < (parseFloat(bot.style.top) + parseFloat(tank.style.width)))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width)) > parseFloat(bot.style.left)) && (parseFloat(tank.style.left) < (parseFloat(bot.style.left) + parseFloat(tank.style.width) + step)))) {
+                if ((((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(bot1.style.top)) && (parseFloat(tank.style.top) < (parseFloat(bot1.style.top) + parseFloat(tank.style.width)))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width)) > parseFloat(bot1.style.left)) && (parseFloat(tank.style.left) < (parseFloat(bot1.style.left) + parseFloat(tank.style.width) + step)))) {
                     can_move = false;
                 }
                 brick.forEach(element => {
                     if (element != undefined) {
-                        if ((((parseFloat(bot.style.top) + parseFloat(bot.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(bot.style.top) < (parseFloat(element.Pos_Y) + parseFloat(bot.style.width)))) && (((parseFloat(bot.style.left) + parseFloat(bot.style.width) + step) > parseFloat(element.Pos_X)) && (parseFloat(bot.style.left) < (parseFloat(element.Pos_X) + parseFloat(bot.style.width)))) || ((parseFloat(bot.style.left) + parseFloat(bot.style.width) >= boardSide))) {
+                        if ((((parseFloat(bot1.style.top) + parseFloat(bot1.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(bot1.style.top) < (parseFloat(element.Pos_Y) + parseFloat(bot1.style.width)))) && (((parseFloat(bot1.style.left) + parseFloat(bot1.style.width) + step) > parseFloat(element.Pos_X)) && (parseFloat(bot1.style.left) < (parseFloat(element.Pos_X) + parseFloat(bot1.style.width)))) || ((parseFloat(bot1.style.left) + parseFloat(bot1.style.width) >= boardSide))) {
                             if (element.CanTPass === 0) {
                                 can_move = false;
-                                if (!seeTank)
-                                    direction = "left";
+                                if (!bot1.seeTank)
+                                    bot1.direction = "left";
                             }
                         }
                     }
                 });
 
-                botShell.directionNew = 4;
-                if (botSkinStatus === 0) {
-                    botSkinStatus = 1;
-                    bot.src = '../static/image/botRight.png';
-                } else if (botSkinStatus === 1) {
-                    botSkinStatus = 0;
-                    bot.src = '../static/image/botRight1.png';
+                bot1.botShell.directionNew = 4;
+                if (bot1.botSkinStatus === 0) {
+                    bot1.botSkinStatus = 1;
+                    bot1.src = '../static/image/botRight.png';
+                } else if (bot1.botSkinStatus === 1) {
+                    bot1.botSkinStatus = 0;
+                    bot1.src = '../static/image/botRight1.png';
                 }
                 if (can_move) {
-                    bot.style.left = (parseFloat(bot.style.left) + step) + "px";
+                    bot1.style.left = (parseFloat(bot1.style.left) + step) + "px";
                     botShotDirection();
                 }
             }
@@ -161,7 +161,7 @@ function updateBot() {
 
 function startBot() {
     // Обновляем состояние игры каждые 2 секунд
-    if (bot != undefined)
+    if (bot1 != undefined)
         setInterval(updateBot, 1000);
 
 }
@@ -169,51 +169,51 @@ startBot();
 
 
 function botDelaying() {
-      setTimeout(() => {botShootDelay = 0;}, 1500);
+      setTimeout(() => {bot1.botShootDelay = 0;}, 1500);
 }
 
 
 
 function botShotDirection() {
-    if (botShell.update == 0) {
-        botShell.direction = botShell.directionNew;
+    if (bot1.botShell.update == 0) {
+        bot1.botShell.direction = bot1.botShell.directionNew;
 
-        if (botShell.direction == 1) {
-            botShell.src = "../static/image/ShellTop.png";
-            botShell.style.top = (parseInt(bot.style.top) - parseInt(botShell.style.height) * 0.5) + "px";
-            botShell.style.left = (parseInt(bot.style.left) + parseInt(bot.style.width) * 0.5 - parseInt(botShell.style.width) * 0.5) + "px";
+        if (bot1.botShell.direction == 1) {
+            bot1.botShell.src = "../static/image/ShellTop.png";
+            bot1.botShell.style.top = (parseInt(bot1.style.top) - parseInt(bot1.botShell.style.height) * 0.5) + "px";
+            bot1.botShell.style.left = (parseInt(bot1.style.left) + parseInt(bot1.style.width) * 0.5 - parseInt(bot1.botShell.style.width) * 0.5) + "px";
         }
-        if (botShell.direction == 2) {
-            botShell.src = "../static/image/ShellDown.png";
-            botShell.style.top = (parseInt(bot.style.top) + parseInt(bot.style.height) - parseInt(botShell.style.height) * 0.5) + "px";
-            botShell.style.left = (parseInt(bot.style.left) + parseInt(bot.style.width) * 0.5 - parseInt(botShell.style.width) * 0.5) + "px";
+        if (bot1.botShell.direction == 2) {
+            bot1.botShell.src = "../static/image/ShellDown.png";
+            bot1.botShell.style.top = (parseInt(bot1.style.top) + parseInt(bot1.style.height) - parseInt(bot1.botShell.style.height) * 0.5) + "px";
+            bot1.botShell.style.left = (parseInt(bot1.style.left) + parseInt(bot1.style.width) * 0.5 - parseInt(bot1.botShell.style.width) * 0.5) + "px";
         }
-        if (botShell.direction == 3) {
-            botShell.src = "../static/image/ShellLeft.png";
-            botShell.style.top = (parseInt(bot.style.top) + parseInt(bot.style.height) * 0.5 - parseInt(botShell.style.height) * 0.5) + "px";
-            botShell.style.left = (parseInt(bot.style.left) - parseInt(bot.style.width) * 0.5) + "px";
+        if (bot1.botShell.direction == 3) {
+            bot1.botShell.src = "../static/image/ShellLeft.png";
+            bot1.botShell.style.top = (parseInt(bot1.style.top) + parseInt(bot1.style.height) * 0.5 - parseInt(bot1.botShell.style.height) * 0.5) + "px";
+            bot1.botShell.style.left = (parseInt(bot1.style.left) - parseInt(bot1.style.width) * 0.5) + "px";
         }
-        if (botShell.direction == 4) {
-            botShell.src = "../static/image/ShellRight.png";
-            botShell.style.top = (parseInt(bot.style.top) + parseInt(bot.style.height) * 0.5 - parseInt(botShell.style.height) * 0.5) + "px";
-            botShell.style.left = (parseInt(bot.style.left) + parseInt(bot.style.width) - parseInt(botShell.style.width) * 0.5) + "px";
+        if (bot1.botShell.direction == 4) {
+            bot1.botShell.src = "../static/image/ShellRight.png";
+            bot1.botShell.style.top = (parseInt(bot1.style.top) + parseInt(bot1.style.height) * 0.5 - parseInt(bot1.botShell.style.height) * 0.5) + "px";
+            bot1.botShell.style.left = (parseInt(bot1.style.left) + parseInt(bot1.style.width) - parseInt(bot1.botShell.style.width) * 0.5) + "px";
         }
-        if (botShootDelay == 0)
+        if (bot1.botShootDelay == 0)
             botShooting();
     }
 }
 
 function botShooting() {
-    gameBoard.appendChild(botShell);
+    gameBoard.appendChild(bot1.botShell);
     updateBotShall();
-    botShell.update = 1;
+    bot1.botShell.update = 1;
     //console.log("bot's shot");
-    if ((parseInt(botShell.style.top) < 0) || ((parseInt(botShell.style.top) + 16) >= boardSide) || (parseInt(botShell.style.left) < 0) || (parseInt(botShell.style.left) >= boardSide - 16)) {
+    if ((parseInt(bot1.botShell.style.top) < 0) || ((parseInt(bot1.botShell.style.top) + 16) >= boardSide) || (parseInt(bot1.botShell.style.left) < 0) || (parseInt(bot1.botShell.style.left) >= boardSide - 16)) {
         explosionBotShall();
     }
 
 
-    if ((((parseInt(botShell.style.top) + botShell.height) > parseInt(tank.style.top)) && (parseInt(botShell.style.top) < (parseInt(tank.style.top) + sideValue))) && (((parseInt(botShell.style.left) + botShell.width) > parseInt(tank.style.left)) && (parseInt(botShell.style.left) < (parseInt(tank.style.left) + sideValue)))) {
+    if ((((parseInt(bot1.botShell.style.top) + bot1.botShell.height) > parseInt(tank.style.top)) && (parseInt(bot1.botShell.style.top) < (parseInt(tank.style.top) + sideValue))) && (((parseInt(bot1.botShell.style.left) + bot1.botShell.width) > parseInt(tank.style.left)) && (parseInt(bot1.botShell.style.left) < (parseInt(tank.style.left) + sideValue)))) {
         explosionBotShall();
         hit += 1;
         if (hit == 3) {
@@ -229,7 +229,7 @@ function botShooting() {
     for (var i = 0; i < brick.length; i++) {
         element = brick[i];
         if (element != undefined) {
-            if ((((parseInt(botShell.style.top) + botShell.height) > parseInt(element.Pos_Y)) && (parseInt(botShell.style.top) < (parseInt(element.Pos_Y) + 40))) && (((parseInt(botShell.style.left) + botShell.width) > parseInt(element.Pos_X)) && (parseInt(botShell.style.left) < (parseInt(element.Pos_X) + 40))) && (element.CanBPass === 0)) {
+            if ((((parseInt(bot1.botShell.style.top) + bot1.botShell.height) > parseInt(element.Pos_Y)) && (parseInt(bot1.botShell.style.top) < (parseInt(element.Pos_Y) + 40))) && (((parseInt(bot1.botShell.style.left) + bot1.botShell.width) > parseInt(element.Pos_X)) && (parseInt(bot1.botShell.style.left) < (parseInt(element.Pos_X) + 40))) && (element.CanBPass === 0)) {
                 explosionBotShall();
                 if (element.IsDestructible === 1) {
                     let removeObj = document.getElementById(i);
@@ -239,43 +239,43 @@ function botShooting() {
             }
         }
     }
-    if (botShell.update == 1) {
+    if (bot1.botShell.update == 1) {
         requestAnimationFrame(botShooting);
     }
-    botShootDelay = 1; 
+    bot1.botShootDelay = 1; 
 }
 
 
 function updateBotShall() {
     let botShellSpeed = sideValue / 7;
 
-    if (botShell.direction == 1) {
-        botShell.style.top = (parseInt(botShell.style.top) - botShellSpeed) + "px";
+    if (bot1.botShell.direction == 1) {
+        bot1.botShell.style.top = (parseInt(bot1.botShell.style.top) - botShellSpeed) + "px";
     }
-    if (botShell.direction == 2) {
-        botShell.style.top = (parseInt(botShell.style.top) + botShellSpeed) + "px";
+    if (bot1.botShell.direction == 2) {
+        bot1.botShell.style.top = (parseInt(bot1.botShell.style.top) + botShellSpeed) + "px";
     }
-    if (botShell.direction == 3) {
-        botShell.style.left = (parseInt(botShell.style.left) - botShellSpeed) + "px";
+    if (bot1.botShell.direction == 3) {
+        bot1.botShell.style.left = (parseInt(bot1.botShell.style.left) - botShellSpeed) + "px";
     }
-    if (botShell.direction == 4) {
-        botShell.style.left = (parseInt(botShell.style.left) + botShellSpeed) + "px";
+    if (bot1.botShell.direction == 4) {
+        bot1.botShell.style.left = (parseInt(bot1.botShell.style.left) + botShellSpeed) + "px";
     }
 
 }
 
 
 function explosionBotShall() {
-    botShell.update = 0;
+    bot1.botShell.update = 0;
     botShellPlacement = sideValue / 5;
-    gameBoard.removeChild(botShell);
-    botShotExplosion.style.top = (parseInt(botShell.style.top) - botShellPlacement) + "px";
-    botShotExplosion.style.left = (parseInt(botShell.style.left) - botShellPlacement) + "px";
-    botShotExplosion.src = '../static/image/explosion1.png';
-    gameBoard.appendChild(botShotExplosion);
-    setTimeout(() => { botShotExplosion.src = '../static/image/explosion2.png'; botShotExplosion.style.top = (parseInt(botShotExplosion.style.top) - 2) + "px"; botShotExplosion.style.left = (parseInt(botShotExplosion.style.left) - 2) + "px"; }, 80);
-    setTimeout(() => { botShotExplosion.src = '../static/image/explosion3.png'; botShotExplosion.style.top = (parseInt(botShotExplosion.style.top) - 1) + "px"; botShotExplosion.style.left = (parseInt(botShotExplosion.style.left) - 1) + "px"; }, 160);
-    setTimeout(() => { gameBoard.removeChild(botShotExplosion); }, 240);
+    gameBoard.removeChild(bot1.botShell);
+    bot1.botShotExplosion.style.top = (parseInt(bot1.botShell.style.top) - botShellPlacement) + "px";
+    bot1.botShotExplosion.style.left = (parseInt(bot1.botShell.style.left) - botShellPlacement) + "px";
+    bot1.botShotExplosion.src = '../static/image/explosion1.png';
+    gameBoard.appendChild(bot1.botShotExplosion);
+    setTimeout(() => { bot1.botShotExplosion.src = '../static/image/explosion2.png'; bot1.botShotExplosion.style.top = (parseInt(bot1.botShotExplosion.style.top) - 2) + "px"; bot1.botShotExplosion.style.left = (parseInt(bot1.botShotExplosion.style.left) - 2) + "px"; }, 80);
+    setTimeout(() => { bot1.botShotExplosion.src = '../static/image/explosion3.png'; bot1.botShotExplosion.style.top = (parseInt(bot1.botShotExplosion.style.top) - 1) + "px"; bot1.botShotExplosion.style.left = (parseInt(bot1.botShotExplosion.style.left) - 1) + "px"; }, 160);
+    setTimeout(() => { gameBoard.removeChild(bot1.botShotExplosion); }, 240);
     botDelaying();
 
 }

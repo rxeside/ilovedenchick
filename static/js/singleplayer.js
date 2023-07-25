@@ -11,17 +11,19 @@ document.addEventListener("DOMContentLoaded", function () {
             sideValue = boardSide / level.Side;
             tank.style.height = sideValue * 0.95 + "px";
             tank.style.width = sideValue * 0.95 + "px";
-            bot.style.height = sideValue * 0.95 + "px";
-            bot.style.width = sideValue * 0.95 + "px";
+            bot1.style.height = sideValue * 0.95 + "px";
+            bot1.style.width = sideValue * 0.95 + "px";
             console.log(sideValue);
             shell.style.height = sideValue * 0.3 + "px";
             shell.style.width = sideValue * 0.25 + "px";
-            botShell.style.height = sideValue * 0.3 + "px";
-            botShell.style.width = sideValue * 0.25 + "px";
+            bot1.botShell.style.height = sideValue * 0.3 + "px";
+            bot1.botShell.style.width = sideValue * 0.25 + "px";
             explosion.style.height = sideValue * 0.7 + "px";
             explosion.style.width = sideValue * 0.7 + "px";
-            botShotExplosion.style.height = sideValue * 0.7 + "px";
-            botShotExplosion.style.width = sideValue * 0.7 + "px";
+            bot1.botShotExplosion.style.height = sideValue * 0.7 + "px";
+            bot1.botShotExplosion.style.width = sideValue * 0.7 + "px";
+            
+
 
             if (sideValue > 60) {
                 step = 1;
@@ -87,8 +89,8 @@ document.addEventListener("DOMContentLoaded", function () {
         if ((key === "ArrowUp")) {
             let can_move = true;
             audioTankRide.play();
-            if (bot != undefined) {
-                if (((parseFloat(tank.style.top) > parseFloat(bot.style.top)) && (parseFloat(tank.style.top) < parseFloat(bot.style.top) + parseFloat(bot.style.height) + step) && (parseFloat(tank.style.left) + parseFloat(tank.style.width) > parseFloat(bot.style.left)) && (parseFloat(tank.style.left) < parseFloat(bot.style.left) + parseFloat(bot.style.width)))) {
+            if (bot1 != undefined) {
+                if (((parseFloat(tank.style.top) > parseFloat(bot1.style.top)) && (parseFloat(tank.style.top) < parseFloat(bot1.style.top) + parseFloat(bot1.style.height) + step) && (parseFloat(tank.style.left) + parseFloat(tank.style.width) > parseFloat(bot1.style.left)) && (parseFloat(tank.style.left) < parseFloat(bot1.style.left) + parseFloat(bot1.style.width)))) {
                     can_move = false;
                 }
             }
@@ -119,8 +121,8 @@ document.addEventListener("DOMContentLoaded", function () {
         } else if ((key === "ArrowDown")) {
             let can_move = true;
             audioTankRide.play();
-            if (bot != undefined) {
-                if (((parseFloat(tank.style.top) + parseFloat(tank.style.height) < parseFloat(bot.style.top) + parseFloat(bot.style.height)) && (parseFloat(tank.style.top) + parseFloat(tank.style.height) > parseFloat(bot.style.top) - step) && (parseFloat(tank.style.left) + parseFloat(tank.style.width) > parseFloat(bot.style.left)) && (parseFloat(tank.style.left) < parseFloat(bot.style.left) + parseFloat(bot.style.width)))) {
+            if (bot1 != undefined) {
+                if (((parseFloat(tank.style.top) + parseFloat(tank.style.height) < parseFloat(bot1.style.top) + parseFloat(bot1.style.height)) && (parseFloat(tank.style.top) + parseFloat(tank.style.height) > parseFloat(bot1.style.top) - step) && (parseFloat(tank.style.left) + parseFloat(tank.style.width) > parseFloat(bot1.style.left)) && (parseFloat(tank.style.left) < parseFloat(bot1.style.left) + parseFloat(bot1.style.width)))) {
                     can_move = false;
                 }
             }
@@ -150,8 +152,8 @@ document.addEventListener("DOMContentLoaded", function () {
         } else if ((key === "ArrowLeft")) {
             let can_move = true;
             audioTankRide.play();
-            if (bot != undefined) {
-                if ((((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(bot.style.top)) && (parseFloat(tank.style.top) < (parseFloat(bot.style.top) + parseFloat(tank.style.width)))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width)) > parseFloat(bot.style.left)) && (parseFloat(tank.style.left) < (parseFloat(bot.style.left) + parseFloat(tank.style.width) + step)))) {
+            if (bot1 != undefined) {
+                if ((((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(bot1.style.top)) && (parseFloat(tank.style.top) < (parseFloat(bot1.style.top) + parseFloat(tank.style.width)))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width)) > parseFloat(bot1.style.left)) && (parseFloat(tank.style.left) < (parseFloat(bot1.style.left) + parseFloat(tank.style.width) + step)))) {
                     can_move = false;
                 }
             }
@@ -180,8 +182,8 @@ document.addEventListener("DOMContentLoaded", function () {
         } else if ((key === "ArrowRight")) {
             let can_move = true;
             audioTankRide.play();
-            if (bot != undefined) {
-                if ((((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(bot.style.top)) && (parseFloat(tank.style.top) < (parseFloat(bot.style.top) + parseFloat(bot.style.height)))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width) + step) > parseFloat(bot.style.left)) && (parseFloat(tank.style.left) < (parseFloat(bot.style.left) + parseFloat(bot.style.width))))) {
+            if (bot1 != undefined) {
+                if ((((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(bot1.style.top)) && (parseFloat(tank.style.top) < (parseFloat(bot1.style.top) + parseFloat(bot1.style.height)))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width) + step) > parseFloat(bot1.style.left)) && (parseFloat(tank.style.left) < (parseFloat(bot1.style.left) + parseFloat(bot1.style.width))))) {
                     can_move = false;
                 }
             }
@@ -283,12 +285,12 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
 
-        if (bot != undefined) {
-            if ((((parseInt(shell.style.top) + shell.height) > parseInt(bot.style.top)) && (parseInt(shell.style.top) < (parseInt(bot.style.top) + sideValue))) && (((parseInt(shell.style.left) + shell.width) > parseInt(bot.style.left)) && (parseInt(shell.style.left) < (parseInt(bot.style.left) + sideValue)))) {
+        if (bot1 != undefined) {
+            if ((((parseInt(shell.style.top) + shell.height) > parseInt(bot1.style.top)) && (parseInt(shell.style.top) < (parseInt(bot1.style.top) + sideValue))) && (((parseInt(shell.style.left) + shell.width) > parseInt(bot1.style.left)) && (parseInt(shell.style.left) < (parseInt(bot1.style.left) + sideValue)))) {
                 explosionShall();
-                bot.remove();
-                bot = undefined;
-                console.log(bot);
+                bot1.remove();
+                bot1 = undefined;
+                console.log(bot1);
             }
         }
 
