@@ -1,3 +1,15 @@
+//музыка
+const audioButton = new Audio('../static/audio/button.mp3');
+audioButton.volume = 0.8;
+
+function back() {
+    audioButton.play();
+}
+
+function play() {
+    audioButton.play();
+}
+
 function sendData(buttonId) {
     const button = document.getElementById(buttonId);
     const size = button.getAttribute("size");
@@ -57,7 +69,7 @@ function sendData(buttonId) {
                 }
                 switch (map[i]) {
                     case 'Grey':
-                        newElement.src = "../static/image/grey.png";
+                        newElement.src = "../static/image/greyP.png";
                         break;
                     case 'Brick':
                         newElement.src = "../static/image/brick.png";
@@ -78,4 +90,15 @@ function sendData(buttonId) {
 
         })
         .catch(error => console.error(error));
+        
 };
+
+function back() {
+    audioButton.play();
+    setTimeout(() => { window.location.href = "/main";}, 200);
+}
+
+function play() {
+    audioButton.play();
+    setTimeout(() => { window.location.href = "/level/9";}, 200);
+}

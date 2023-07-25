@@ -16,7 +16,9 @@ function clikButtonEditor() {
 
 function clikButtonSinglePlayer() {
     audioButton.play();
+    setTimeout(() => { window.location.href = " /select_level";}, 200);
 }
+
 
 function clikButtonEditorMultyPlayer() {
     audioButton.play();

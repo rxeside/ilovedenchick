@@ -431,7 +431,6 @@ document.addEventListener("DOMContentLoaded", function () {
         if (botShell.direction == 4) {
             botShell.style.left = (parseInt(botShell.style.left) + botShellSpeed) + "px";
         }
-
     }
 
 

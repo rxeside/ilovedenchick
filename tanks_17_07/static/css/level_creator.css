@@ -217,3 +217,30 @@
 {
     font: 400 normal 13px/25px 'Press Start 2P';
 }
+
+.exit
+{
+    height: 102px;
+    width: 102px;
+    /* background-color: aqua; */
+    background-image: url(../image/exit_mini.png);
+    position: fixed;
+    bottom: 4.65%;
+    left: 1%;
+    margin: 10px;
+    border-radius: 50%;
+}
+
+.exit:hover
+{
+    background-image: url(../image/exit_hover.png);
+}
+
+.exit:active
+{
+    background-image: url(../image/exit_activ.png);
+    height: 92px;
+    width: 92px;
+    bottom: 5%;
+    left: 1.2%;
+}

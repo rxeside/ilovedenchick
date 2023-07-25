@@ -281,3 +281,8 @@ function dataError()
 function deletMap() {
     audioButton.play();
 }
+
+function exit() {
+    audioButton.play();
+    setTimeout(() => { window.location.href = "/main";}, 200);
+}
