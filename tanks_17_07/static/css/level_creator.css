@@ -31,6 +31,10 @@
     opacity: 0.7;
 }
 
+.choice button{
+    width: 20%;
+}
+
 .level-data button:active {
     width: 45%;
     font: 400 normal 13px/30px 'Press Start 2P';
@@ -43,10 +47,14 @@
 }
 
 .choice button:active {
-    width: 45%;
+    width: 18%;
     font: 400 normal 13px/30px 'Press Start 2P';
     border-radius: 10px;
-    margin-left: 2.5%;
+    margin-left: 0.5%;
+}
+
+.choice .save:active {
+    margin-right: 1.5%;
 }
 
 .choice .save:hover {
@@ -159,13 +167,19 @@
     box-shadow: 10px 10px 20px rgba(0, 255, 213, 0.288), -10px -10px 20px rgba(0, 255, 213, 0.288), 10px -10px 20px rgba(0, 255, 213, 0.288), -10px 10px 20px rgba(0, 255, 213, 0.288);
 }
 
-.choice
+.alert
 {
     display: flex;
     flex-direction: column;
     padding: 20px 0 0 20px;
-    gap: 30px;
+    gap: 20px;
     opacity: 0.7;
+}
+
+.choice
+{
+    flex-direction: row;
+    gap: 30px;
 }
 
 .menu a
@@ -210,6 +224,7 @@
 
 .delet
 {
+    margin-top: 8%;
     background-color: rgb(177, 67, 67);
 }
 
