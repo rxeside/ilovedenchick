@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", function() {
     let marginTop = innerHeight - boardSide;
     gameBoard.style.top = marginTop / 2 + "px";
     gameBoard.style.left = marginLeft + "px";
-    let brick;
+    let brick = [];
     let tanks = [];
     let bullets = [];
     let level;
@@ -31,6 +31,8 @@ document.addEventListener("DOMContentLoaded", function() {
         Left: false,
         Right: false
     }
+
+    const lives = document.getElementById('lives')
 
     // Создание и отображение кирпичей на поле
     // const socket = new WebSocket("wss://" + document.location.hostname +":/ws/" + room.textContent);
@@ -55,13 +57,10 @@ document.addEventListener("DOMContentLoaded", function() {
     function getObjects() {
         socket.onmessage = function(event) {
             brick = JSON.parse(event.data);
-            if (brick != null) {
-                for (let i = 0; i < brick.length; i++) {
-                    brick[i].Pos_X = brick[i].Pos_X*ratio + "px";
-                    brick[i].Pos_Y = brick[i].Pos_Y*ratio + "px";
-                    createNewElt(brick[i]);
-                };
-            }
+            console.log(brick);
+
+            createObjects(brick)
+            
             answersFromServer();
         };
     }
@@ -69,7 +68,11 @@ document.addEventListener("DOMContentLoaded", function() {
     function answersFromServer() {
         socket.onmessage = function(event) {
             let newState = JSON.parse(event.data);
-            if (newState.Message === "Bullets") {
+            if (newState.Message === "Reset") {
+                deleteObjects();
+                createObjects(newState.Objects);
+                return
+            } else if (newState.Message === "Bullets") {
                 updateBullets(newState.Bullets);
             } else if (newState.Message === "Objects") { 
                 destroyObjects(newState.Objects)
@@ -77,6 +80,18 @@ document.addEventListener("DOMContentLoaded", function() {
                 updateTanks(newState);
             }
         }; 
+    }
+
+    function createObjects(objects) {
+        if (objects != null) {
+            for (let i = 0; i < objects.length; i++) {
+                objects[i].Pos_X = objects[i].Pos_X*ratio + "px";
+                objects[i].Pos_Y = objects[i].Pos_Y*ratio + "px";
+                if (objects[i].Name !== "Tank") {
+                    createNewElt(objects[i]);
+                }
+            };
+        }
     }
 
     function updateTanks(newstate){
@@ -129,6 +144,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 changeAnimation(currTank, tanks[key].Direction);
             }
         }
+
+        // updateLives();
     }
 
     function destroyObjects(newstate) {
@@ -142,8 +159,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function updateBullets(newstate) {
         for (key in newstate) {
-            if (!newstate[key].Destroy) {
-                if (bullets[key] === undefined) {
+            if (bullets[key] === undefined) {
+                if (!newstate[key].Destroy) {
                     createNewBullet(newstate[key], key);
                     bullets[key] = newstate[key];
                     bullets[key].Start_X = bullets[key].Start_X * ratio;
@@ -151,12 +168,11 @@ document.addEventListener("DOMContentLoaded", function() {
                     bullets[key].End_X = bullets[key].End_X * ratio;
                     bullets[key].End_Y = bullets[key].End_Y * ratio;
                     bulletLive(bullets[key], key);
-                } else if(bullets[key] !== undefined) {
-                    bullets[key].End_X = newstate[key].End_X * ratio;
-                    bullets[key].End_Y = newstate[key].End_Y * ratio;
                 }
-            } else {
-                bullets[key].Destroy = true;
+            } else if(bullets[key] !== undefined) {
+                bullets[key].End_X = newstate[key].End_X * ratio;
+                bullets[key].End_Y = newstate[key].End_Y * ratio;
+                bullets[key].Destroy = newstate[key].Destroy
             }
         }
 
@@ -184,7 +200,7 @@ document.addEventListener("DOMContentLoaded", function() {
                             bulletElt.style.top = parseFloat(bulletElt.style.top) - bulletStep + "px"; 
                         } else {
                             bulletElt.style.top = currBullet.End_Y + "px";
-                            currBullet.Destroy = true;
+                            removeBullet(bulletId);
                         }
                         break;
                     case "2":
@@ -192,7 +208,7 @@ document.addEventListener("DOMContentLoaded", function() {
                             bulletElt.style.top = parseFloat(bulletElt.style.top) + bulletStep + "px"; 
                         } else {
                             bulletElt.style.top = currBullet.End_Y + "px";
-                            currBullet.Destroy = true;
+                            removeBullet(bulletId);
                         }
                         break;
                     case "3":
@@ -200,7 +216,7 @@ document.addEventListener("DOMContentLoaded", function() {
                             bulletElt.style.left = parseFloat(bulletElt.style.left) - bulletStep + "px"; 
                         } else {
                             bulletElt.style.left = currBullet.End_X + "px";
-                            currBullet.Destroy = true;
+                            removeBullet(bulletId);
                         }
                         break;
                     case "4":
@@ -208,7 +224,7 @@ document.addEventListener("DOMContentLoaded", function() {
                             bulletElt.style.left = parseFloat(bulletElt.style.left) + bulletStep + "px"; 
                         } else {
                             bulletElt.style.left = currBullet.End_X + "px";
-                            currBullet.Destroy = true;
+                            removeBullet(bulletId);
                         }
                         break;
                 }
@@ -222,7 +238,9 @@ document.addEventListener("DOMContentLoaded", function() {
             bullet.remove();
         }
         if (bullets[bulletId] !== undefined) {
-            bullets[bulletId] = undefined;
+            if (bullets[bulletId].Destroy) {
+                bullets[bulletId] = undefined;
+            }
         }
     }
 
@@ -475,4 +493,57 @@ document.addEventListener("DOMContentLoaded", function() {
                 break;
         }
     }
+
+    function deleteObjects() {
+        for (key in brick) {
+            const element = document.getElementById(brick[key].ID);
+            if (element !== null) {
+                element.remove();
+            }
+        }
+    
+        brick = null
+    }
+
+    // function updateLives() {
+    //     let i = 0;
+    //     while (lives.children[i] !== undefined) {
+    //         let tankLive = lives.children[i];
+    //         let find = false;
+
+    //         tanks.forEach(tank => {
+    //             if ("live" + tank.ID === tankLive.id) {
+    //                 console.log(tank.Live);
+    //                 tankLive.children[1].textContent = tank.Live;
+    //                 find = true;
+    //             }
+    //         });
+
+    //         if (!find) {
+    //             tankLive.remove();
+    //         }
+
+    //         i++;
+    //     }
+
+    //     tanks.forEach(tank => {
+    //         let tankLive = document.getElementById("live" + tank.ID);
+
+    //         if (tankLive === null) {
+    //             const newElt = document.createElement("div");
+    //             const tankName = document.createElement("p");
+    //             const liveNum = document.createElement("p");
+
+    //             tankName.textContent = "Tank# " + tank.ID;
+    //             liveNum.textContent = tank.Live;
+
+    //             newElt.appendChild(tankName);
+    //             newElt.appendChild(liveNum);
+
+    //             newElt.id = "live" + tank.ID;
+
+    //             lives.appendChild(newElt);
+    //         }
+    //     });
+    // }
 });

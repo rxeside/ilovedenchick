@@ -22,7 +22,7 @@ type roomdeletenum struct {
 }
 
 type leveldata struct {
-	Id          string `db:"id"`
+	Id          int    `db:"id"`
 	Name        string `db:"name"`
 	Side        int    `db:"side"`
 	Author      string `db:"author"`
@@ -96,6 +96,13 @@ func createNewRoom(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 		for _, value := range NewRoom.Objects {
 			value.Pos_X = value.Pos_X * size
 			value.Pos_Y = value.Pos_Y * size
+			if value.Name == "Tank" {
+				var NewPos positionstruct
+				NewPos.X = value.Pos_X
+				NewPos.Y = value.Pos_Y
+
+				NewRoom.PointsToSpawn = append(NewRoom.PointsToSpawn, &NewPos)
+			}
 		}
 
 		NewRoom.Status = "IdlePlayers"
@@ -103,7 +110,7 @@ func createNewRoom(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 		rooms[key] = &NewRoom
 		fmt.Printf("key: %v\n", key)
 
-		roomIsRunning(key)
+		roomIsRunning(db, key)
 
 		return
 	}
@@ -130,30 +137,6 @@ func deleteRoom(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(roomId)
 
 	rooms[roomId].Status = "Remove"
-	// roomIndex := -1
-
-	// for index, value := range rooms {
-	// 	if value.ID == roomId {
-	// 		roomIndex = index
-	// 	}
-	// }
-
-	// if roomIndex != -1 {
-	// 	if len(rooms) == 1 {
-	// 		rooms = nil
-	// 		fmt.Println("Nil")
-	// 	} else {
-
-	// 		if roomIndex+1 > len(rooms) {
-	// 			fmt.Println("Overflow")
-	// 		} else {
-	// 			fmt.Println("Cut")
-	// 			rooms = append(rooms[:roomIndex], rooms[roomIndex+1:]...)
-	// 		}
-	// 	}
-	// }
-
-	log.Printf("%q\n", rooms)
 	return
 }
 

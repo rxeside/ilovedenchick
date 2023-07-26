@@ -7,6 +7,13 @@ const l_Name = document.getElementById('level_Name');
 let selectedType = null;
 let Obj_on_level = [];
 
+//музыка
+const audioButton = new Audio('../static/audio/button.mp3');
+audioButton.volume = 0.8;
+const audioFon = new Audio('../static/audio/fon.mp3');
+audioFon.volume = 0.6;
+audioFon.loop = true;
+
 const level = {
     name: "",
     side: "",
@@ -25,6 +32,8 @@ l_side.onchange = function() {
 //Функция обновление поля
 function updateField()
 {
+    audioButton.play();
+    audioFon.play();
     if ((level.side != null))
     {
         //Задаём нашему полю столбцы и строки
@@ -140,6 +149,12 @@ function changeIcon(id)
         case 'Water':
             cell.src = "../static/image/water.png";
             break;
+        case 'Base':
+            cell.src = "../static/image/base1.png";
+            break;
+        case 'Tank':
+            cell.src = "../static/image/tank_mini.png";
+            break;
     }
 }
 
@@ -176,6 +191,18 @@ function editcell(id)
                 CurrentCell.canBpass = 1;
                 CurrentCell.imgURL = "../static/image/water.png";
                 break;
+            case 'Base':
+                CurrentCell.isDestructible = 1;
+                CurrentCell.canTpass = 0;
+                CurrentCell.canBpass = 0;
+                CurrentCell.imgURL = "../static/image/base1.png";
+                break;
+            case 'Tank':
+                CurrentCell.isDestructible = 0;
+                CurrentCell.canTpass = 1;
+                CurrentCell.canBpass = 1;
+                CurrentCell.imgURL = "../static/image/tank_mini.png";
+                break;
         }
         addNewCell(id);
     }
@@ -191,6 +218,7 @@ const XHRLevel = new XMLHttpRequest;
 
 function sendLeveldata()
 {
+    audioButton.play();
     for(key in level)
     {
         if (level[key] === "")
@@ -266,4 +294,13 @@ function dataError()
 {
     message.classList.add('error');
     message.textContent = "Error";
+}
+
+function deletMap() {
+    audioButton.play();
+}
+
+function exit() {
+    audioButton.play();
+    setTimeout(() => { window.location.href = "/main";}, 200);
 }

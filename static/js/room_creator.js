@@ -17,7 +17,7 @@ joinBtn.onclick = function() {
     joinToRoom();
 }
 
-let s = 1;
+let s = 10;
 
 function createNewRoom() {
     let newData = {

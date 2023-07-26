@@ -1,14 +1,17 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
 	"log"
+	"math/rand"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
+	"github.com/jmoiron/sqlx"
 )
 
 const (
@@ -31,6 +34,7 @@ type tanktype struct {
 	Direction string
 	Distance  float64
 	Update    bool
+	Live      int
 	Status    string
 }
 
@@ -45,13 +49,15 @@ type bullettype struct {
 }
 
 type roomdata struct {
-	LastID      int
-	Level       leveldata
-	Objects     []*objdata
-	ObjToRemove []int
-	Tanks       map[*websocket.Conn]*tanktype
-	Bullets     map[int]*bullettype
-	Status      string
+	LastID           int
+	Level            leveldata
+	Objects          []*objdata
+	ObjToRemove      []int
+	Tanks            map[*websocket.Conn]*tanktype
+	Bullets          map[int]*bullettype
+	PointsToSpawn    []*positionstruct
+	PlayersAreLiving int
+	Status           string
 }
 
 type messageAboutBullets struct {
@@ -64,26 +70,47 @@ type messageAboutObjects struct {
 	Objects []int
 }
 
+type positionstruct struct {
+	X float64
+	Y float64
+}
+
+type messageReset struct {
+	Message string
+	Objects []*objdata
+}
+
 var rooms = make(map[int]*roomdata)
 
-func roomIsRunning(key int) {
+func roomIsRunning(db *sqlx.DB, key int) {
 	currRoom := rooms[key]
 
 	ticker := time.NewTicker(33 * time.Millisecond)
+
+	for currRoom.PlayersAreLiving == 0 {
+	}
 
 	go func() {
 		for {
 			select {
 			case <-ticker.C:
 				// fmt.Printf("len(currRoom.Tanks): %v\n", len(currRoom.Tanks))
-				if currRoom.Status == "Remove" {
+				if (currRoom.Status == "Remove") || (currRoom.PlayersAreLiving <= 0) {
+					fmt.Println("Remove")
 					delete(rooms, key)
 					return
-				} else {
+				} else if currRoom.Status == "Reset" {
+					resetRoom(db, currRoom)
+					sendMessageAboutReset(currRoom)
+				} else { //if currRoom.PlayersAreLiving > 1 {
 					if len(currRoom.Tanks) > 0 {
 						sendMessageForCleints(currRoom)
 					}
 				}
+				// } else {
+				// fmt.Println("Reset")
+				// fmt.Println("Start")
+				// }
 			}
 		}
 	}()
@@ -92,25 +119,46 @@ func roomIsRunning(key int) {
 
 func sendMessageForCleints(currRoom *roomdata) {
 	if len(currRoom.ObjToRemove) > 0 {
-		sendMessageAboutObj(currRoom.Tanks, &currRoom.ObjToRemove)
+		sendMessageAboutObj(currRoom, &currRoom.ObjToRemove)
 	}
 	if len(currRoom.Bullets) > 0 {
-		sendMessageAboutBullets(currRoom.Tanks, &currRoom.Bullets)
+		sendMessageAboutBullets(currRoom, &currRoom.Bullets)
 	}
-	sendMessageAboutTanks(currRoom.Tanks)
+	sendMessageAboutTanks(currRoom)
 }
 
-func sendMessageAboutObj(tanks map[*websocket.Conn]*tanktype, ObjtoRemove *[]int) {
+func sendMessageAboutReset(currRoom *roomdata) {
+	var Message messageReset
+	Message.Message = "Reset"
+	Message.Objects = currRoom.Objects
+
+	for conn := range currRoom.Tanks {
+		err := conn.WriteJSON(Message)
+		if err != nil {
+			log.Println(err.Error())
+			delete(currRoom.Tanks, conn)
+			currRoom.PlayersAreLiving--
+			return
+		}
+	}
+
+	time.Sleep(1 * time.Second)
+	currRoom.Status = "Game"
+	return
+}
+
+func sendMessageAboutObj(currRoom *roomdata, ObjtoRemove *[]int) {
 	var Message messageAboutObjects
 	Message.Message = "Objects"
 	Message.Objects = *ObjtoRemove
 
-	for conn, value := range tanks {
+	for conn, value := range currRoom.Tanks {
 		if value.Status != "Load" {
 			err := conn.WriteJSON(Message)
 			if err != nil {
 				log.Println(err)
-				delete(tanks, conn)
+				delete(currRoom.Tanks, conn)
+				currRoom.PlayersAreLiving--
 			}
 		}
 	}
@@ -118,17 +166,18 @@ func sendMessageAboutObj(tanks map[*websocket.Conn]*tanktype, ObjtoRemove *[]int
 	*ObjtoRemove = nil
 }
 
-func sendMessageAboutBullets(tanks map[*websocket.Conn]*tanktype, Bullets *map[int]*bullettype) {
+func sendMessageAboutBullets(currRoom *roomdata, Bullets *map[int]*bullettype) {
 	var Message messageAboutBullets
 	Message.Message = "Bullets"
 	Message.Bullets = *Bullets
 
-	for conn, value := range tanks {
+	for conn, value := range currRoom.Tanks {
 		if value.Status != "Load" {
 			err := conn.WriteJSON(Message)
 			if err != nil {
 				log.Println(err)
-				delete(tanks, conn)
+				delete(currRoom.Tanks, conn)
+				currRoom.PlayersAreLiving--
 			}
 		}
 	}
@@ -140,20 +189,21 @@ func sendMessageAboutBullets(tanks map[*websocket.Conn]*tanktype, Bullets *map[i
 	}
 }
 
-func sendMessageAboutTanks(tanks map[*websocket.Conn]*tanktype) {
+func sendMessageAboutTanks(currRoom *roomdata) {
 	var tanksForSend []*tanktype
-	for _, value := range tanks {
+	for _, value := range currRoom.Tanks {
 		newTank := *value
 
 		tanksForSend = append(tanksForSend, &newTank)
 	}
 
-	for conn, value := range tanks {
+	for conn, value := range currRoom.Tanks {
 		if value.Status != "Load" {
 			err := conn.WriteJSON(tanksForSend)
 			if err != nil {
 				log.Println(err)
-				delete(tanks, conn)
+				delete(currRoom.Tanks, conn)
+				currRoom.PlayersAreLiving--
 			}
 			value.Update = false
 		}
@@ -213,13 +263,28 @@ func wsConnection(w http.ResponseWriter, r *http.Request) {
 
 	currRoom.Status = "Load"
 	currRoom.LastID++
+	currRoom.PlayersAreLiving++
 	tank.ID = currRoom.LastID
 	tank.Status = "Load"
 	tank.Direction = "1"
+	tank.Live = 3
 
 	levelSize := float64(currRoom.Level.Side) * size
-	tank.X = levelSize/2 - size
-	tank.Y = levelSize/2 - size
+
+	max := len(currRoom.PointsToSpawn)
+	spawnIndex := rand.Intn(max)
+
+	if max > 0 {
+		for index, value := range currRoom.PointsToSpawn {
+			if index == spawnIndex {
+				tank.X = value.X
+				tank.Y = value.Y
+			}
+		}
+	} else {
+		tank.X = 0
+		tank.Y = 0
+	}
 
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -246,7 +311,7 @@ func wsConnection(w http.ResponseWriter, r *http.Request) {
 			isHit := hitByBullet(&tank, &currRoom.Bullets)
 
 			if isHit {
-				deadTank(&tank)
+				deadTank(currRoom, &tank)
 			}
 		}
 	}()
@@ -296,7 +361,7 @@ func readMessageFromCleints(conn *websocket.Conn, currRoom *roomdata, tank *tank
 		if tank.Status != "Moving" {
 			tank.Status = "Moving"
 			go func() {
-				moveTank(tank, currRoom.Objects, currRoom.Bullets, *levelSize)
+				moveTank(tank, currRoom.Objects, *levelSize)
 			}()
 		}
 	case "stopMoving":
@@ -311,7 +376,7 @@ func readMessageFromCleints(conn *websocket.Conn, currRoom *roomdata, tank *tank
 			bullet := createNewBullet(tank, currRoom.Objects, *levelSize)
 			currRoom.Bullets[tank.ID] = &bullet
 			go func() {
-				bulletFlight(&bullet, currRoom, *levelSize, tank.ID)
+				bulletFlight(&bullet, currRoom, *levelSize)
 			}()
 		}
 	case "Close":
@@ -320,7 +385,7 @@ func readMessageFromCleints(conn *websocket.Conn, currRoom *roomdata, tank *tank
 	}
 }
 
-func moveTank(tank *tanktype, Objects []*objdata, bullets map[int]*bullettype, levelSize float64) {
+func moveTank(tank *tanktype, Objects []*objdata, levelSize float64) {
 	ticker := time.NewTicker(50 * time.Millisecond)
 
 	for range ticker.C {
@@ -380,6 +445,7 @@ func findDistance(Objects []*objdata, tank *tanktype, dir string, levelSize floa
 func createNewBullet(tank *tanktype, objects []*objdata, levelSize float64) bullettype {
 	var newBullet bullettype
 	newBullet.Direction = tank.Direction
+	newBullet.Destroy = false
 	newBullet.ObjID = -1
 
 	switch tank.Direction {
@@ -489,7 +555,7 @@ func calculateDistance(X1 float64, Y1 float64, X2 float64, Y2 float64, dir strin
 	return 0
 }
 
-func bulletFlight(bullet *bullettype, room *roomdata, levelSize float64, ID int) {
+func bulletFlight(bullet *bullettype, room *roomdata, levelSize float64) {
 	bullet.Destroy = ((bullet.Start_X == bullet.End_X) && (bullet.Start_Y == bullet.End_Y))
 
 	go func() {
@@ -582,8 +648,76 @@ func hitByBullet(tank *tanktype, bullets *map[int]*bullettype) bool {
 	return false
 }
 
-func deadTank(tank *tanktype) {
-	tank.X = 0
-	tank.Y = 0
-	tank.Distance = 0
+func deadTank(room *roomdata, tank *tanktype) {
+	if tank.Live > 0 {
+		resetTank(room, tank)
+	} else {
+		tank.Status = "Dead"
+		room.PlayersAreLiving--
+		room.Status = "Reset"
+	}
+
+	return
+}
+
+func resetTank(room *roomdata, tank *tanktype) {
+	tank.Live--
+
+	max := len(room.PointsToSpawn)
+	spawnIndex := rand.Intn(max)
+
+	if max > 0 {
+		for index, value := range room.PointsToSpawn {
+			if index == spawnIndex {
+				tank.X = value.X
+				tank.Y = value.Y
+			}
+		}
+	} else {
+		tank.X = 0
+		tank.Y = 0
+	}
+
+	return
+}
+
+func resetRoom(db *sqlx.DB, room *roomdata) {
+	room.ObjToRemove = nil
+	room.Bullets = make(map[int]*bullettype)
+	room.PlayersAreLiving = 0
+	for _, tank := range room.Tanks {
+		tank.Live = 3
+		room.PlayersAreLiving++
+
+		max := len(room.PointsToSpawn)
+		spawnIndex := rand.Intn(max)
+
+		if max > 0 {
+			for index, value := range room.PointsToSpawn {
+				if index == spawnIndex {
+					tank.X = value.X
+					tank.Y = value.Y
+				}
+			}
+		} else {
+			tank.X = 0
+			tank.Y = 0
+		}
+	}
+
+	var err error
+	room.Objects, err = getObjByID(db, room.Level.Id)
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
+
+	for _, value := range room.Objects {
+		value.Pos_Y *= size
+		value.Pos_X *= size
+	}
+
+	fmt.Println("Reset")
+
+	return
 }
