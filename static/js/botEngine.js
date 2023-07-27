@@ -2,7 +2,6 @@ let bots = [bot1, bot2, bot3];
 
 // Обработка движения бота
 function updateBot() {
-
     console.log(bots);
     bots.forEach(bot => {
         currentBot = bots.indexOf(bot);
@@ -158,7 +157,7 @@ function updateBot() {
 function startBot() {
     // Обновляем состояние игры каждые 2 секунд
 
-        setInterval(updateBot, 1000);
+        setInterval(updateBot, 2000);
 
 }
 startBot();

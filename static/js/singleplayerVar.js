@@ -90,7 +90,7 @@ bot1.botShootDelay = 0;
 let bot2 = document.createElement("img");
 bot2.className = "bot2";
 bot2.style.top = (boardSide / 6 - 40) + "px";
-bot2.style.left = (boardSide / 2 + 40) + "px";
+bot2.style.left = (boardSide / 6 - 100) + "px";
 bot2.src = '../static/image/botTop.png';
 gameBoard.appendChild(bot2);
 bot2.botMovement = 0;

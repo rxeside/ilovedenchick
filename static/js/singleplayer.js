@@ -11,23 +11,12 @@ document.addEventListener("DOMContentLoaded", function () {
             sideValue = boardSide / level.Side;
             tank.style.height = sideValue * 0.95 + "px";
             tank.style.width = sideValue * 0.95 + "px";
-            // bot1.style.height = sideValue * 0.95 + "px";
-            // bot1.style.width = sideValue * 0.95 + "px";
-            // bot2.style.height = sideValue * 0.95 + "px";
-            // bot2.style.width = sideValue * 0.95 + "px";
             console.log(sideValue);
             shell.style.height = sideValue * 0.3 + "px";
             shell.style.width = sideValue * 0.25 + "px";
-            // bot1.botShell.style.height = sideValue * 0.3 + "px";
-            // bot1.botShell.style.width = sideValue * 0.25 + "px";
-            // bot2.botShell.style.height = sideValue * 0.3 + "px";
-            // bot2.botShell.style.width = sideValue * 0.25 + "px";
             explosion.style.height = sideValue * 0.7 + "px";
             explosion.style.width = sideValue * 0.7 + "px";
-            // bot1.botShotExplosion.style.height = sideValue * 0.7 + "px";
-            // bot1.botShotExplosion.style.width = sideValue * 0.7 + "px";
-            // bot2.botShotExplosion.style.height = sideValue * 0.7 + "px";
-            // bot2.botShotExplosion.style.width = sideValue * 0.7 + "px";
+
             bots.forEach(bot => {
                 bot.style.height = sideValue * 0.95 + "px";
                 bot.style.width = sideValue * 0.95 + "px";
@@ -63,6 +52,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 brick[i].Pos_Y = brick[i].Pos_Y + "px";
                 createNewElt(brick[i], i);
             };
+            
         };
     }
 
@@ -104,9 +94,9 @@ document.addEventListener("DOMContentLoaded", function () {
         if ((key === "ArrowUp")) {
             let can_move = true;
             audioTankRide.play();
-            bots.forEach(bot1 => {
-            if (bot1 != undefined) {
-                    if (((parseFloat(tank.style.top) > parseFloat(bot1.style.top)) && (parseFloat(tank.style.top) < parseFloat(bot1.style.top) + parseFloat(bot1.style.height) + step) && (parseFloat(tank.style.left) + parseFloat(tank.style.width) > parseFloat(bot1.style.left)) && (parseFloat(tank.style.left) < parseFloat(bot1.style.left) + parseFloat(bot1.style.width)))) {
+            bots.forEach(bot => {
+            if (bot != undefined) {
+                    if (((parseFloat(tank.style.top) > parseFloat(bot.style.top)) && (parseFloat(tank.style.top) < parseFloat(bot.style.top) + parseFloat(bot.style.height) + step) && (parseFloat(tank.style.left) + parseFloat(tank.style.width) > parseFloat(bot.style.left)) && (parseFloat(tank.style.left) < parseFloat(bot.style.left) + parseFloat(bot.style.width)))) {
                         can_move = false;
                     }
                 }
@@ -138,9 +128,9 @@ document.addEventListener("DOMContentLoaded", function () {
         } else if ((key === "ArrowDown")) {
             let can_move = true;
             audioTankRide.play();
-            bots.forEach(bot1 => {
-                if (bot1 != undefined) {
-                    if (((parseFloat(tank.style.top) + parseFloat(tank.style.height) < parseFloat(bot1.style.top) + parseFloat(bot1.style.height)) && (parseFloat(tank.style.top) + parseFloat(tank.style.height) > parseFloat(bot1.style.top) - step) && (parseFloat(tank.style.left) + parseFloat(tank.style.width) > parseFloat(bot1.style.left)) && (parseFloat(tank.style.left) < parseFloat(bot1.style.left) + parseFloat(bot1.style.width)))) {
+            bots.forEach(bot => {
+                if (bot != undefined) {
+                    if (((parseFloat(tank.style.top) + parseFloat(tank.style.height) < parseFloat(bot.style.top) + parseFloat(bot.style.height)) && (parseFloat(tank.style.top) + parseFloat(tank.style.height) > parseFloat(bot.style.top) - step) && (parseFloat(tank.style.left) + parseFloat(tank.style.width) > parseFloat(bot.style.left)) && (parseFloat(tank.style.left) < parseFloat(bot.style.left) + parseFloat(bot.style.width)))) {
                         can_move = false;
                     }
                 }
@@ -170,9 +160,9 @@ document.addEventListener("DOMContentLoaded", function () {
         } else if ((key === "ArrowLeft")) {
             let can_move = true;
             audioTankRide.play();
-            bots.forEach(bot1 => {
-                if (bot1 != undefined) {
-                    if ((((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(bot1.style.top)) && (parseFloat(tank.style.top) < (parseFloat(bot1.style.top) + parseFloat(tank.style.width)))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width)) > parseFloat(bot1.style.left)) && (parseFloat(tank.style.left) < (parseFloat(bot1.style.left) + parseFloat(tank.style.width) + step)))) {
+            bots.forEach(bot => {
+                if (bot != undefined) {
+                    if ((((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(bot.style.top)) && (parseFloat(tank.style.top) < (parseFloat(bot.style.top) + parseFloat(tank.style.width)))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width)) > parseFloat(bot.style.left)) && (parseFloat(tank.style.left) < (parseFloat(bot.style.left) + parseFloat(tank.style.width) + step)))) {
                         can_move = false;
                     }
                 }
@@ -202,9 +192,9 @@ document.addEventListener("DOMContentLoaded", function () {
         } else if ((key === "ArrowRight")) {
             let can_move = true;
             audioTankRide.play();
-            bots.forEach(bot1 => {
-                if (bot1 != undefined) {
-                    if ((((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(bot1.style.top)) && (parseFloat(tank.style.top) < (parseFloat(bot1.style.top) + parseFloat(bot1.style.height)))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width) + step) > parseFloat(bot1.style.left)) && (parseFloat(tank.style.left) < (parseFloat(bot1.style.left) + parseFloat(bot1.style.width))))) {
+            bots.forEach(bot => {
+                if (bot != undefined) {
+                    if ((((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(bot.style.top)) && (parseFloat(tank.style.top) < (parseFloat(bot.style.top) + parseFloat(bot.style.height)))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width) + 2*step) > parseFloat(bot.style.left)) && (parseFloat(tank.style.left) < (parseFloat(bot.style.left) + parseFloat(bot.style.width))))) {
                         can_move = false;
                     }
                 }
@@ -296,24 +286,20 @@ document.addEventListener("DOMContentLoaded", function () {
         gameBoard.appendChild(shell);
         updateShall();
         shell.update = 1;
-        
         console.log("shot");
-
-
-
         if ((parseInt(shell.style.top) < 0) || ((parseInt(shell.style.top) + 16) >= boardSide) || (parseInt(shell.style.left) < 0) || (parseInt(shell.style.left) >= boardSide - 16)) {
             explosionShall();
         }
 
-        bots.forEach(bot1 => {
-            if (bot1 != undefined) {
-                if ((((parseInt(shell.style.top) + shell.height) > parseInt(bot1.style.top)) && (parseInt(shell.style.top) < (parseInt(bot1.style.top) + sideValue))) && (((parseInt(shell.style.left) + shell.width) > parseInt(bot1.style.left)) && (parseInt(shell.style.left) < (parseInt(bot1.style.left) + sideValue)))) {
+        bots.forEach(bot => {
+            if (bot != undefined) {
+                if ((((parseInt(shell.style.top) + shell.height) > parseInt(bot.style.top)) && (parseInt(shell.style.top) < (parseInt(bot.style.top) + sideValue))) && (((parseInt(shell.style.left) + shell.width) > parseInt(bot.style.left)) && (parseInt(shell.style.left) < (parseInt(bot.style.left) + sideValue)))) {
                     explosionShall();
-                    bot1.remove();
-                    //bot1 = undefined;
-                    deadBot = bots.indexOf(bot1);
+                    bot.remove();
+                    //bot = undefined;
+                    deadBot = bots.indexOf(bot);
                     bots.splice(deadBot, 1);
-                    console.log(bot1);
+                    console.log(bot);
                 }
             }
         })
