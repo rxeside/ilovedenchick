@@ -11,23 +11,31 @@ document.addEventListener("DOMContentLoaded", function () {
             sideValue = boardSide / level.Side;
             tank.style.height = sideValue * 0.95 + "px";
             tank.style.width = sideValue * 0.95 + "px";
-            bot1.style.height = sideValue * 0.95 + "px";
-            bot1.style.width = sideValue * 0.95 + "px";
-            bot2.style.height = sideValue * 0.95 + "px";
-            bot2.style.width = sideValue * 0.95 + "px";
+            // bot1.style.height = sideValue * 0.95 + "px";
+            // bot1.style.width = sideValue * 0.95 + "px";
+            // bot2.style.height = sideValue * 0.95 + "px";
+            // bot2.style.width = sideValue * 0.95 + "px";
             console.log(sideValue);
             shell.style.height = sideValue * 0.3 + "px";
             shell.style.width = sideValue * 0.25 + "px";
-            bot1.botShell.style.height = sideValue * 0.3 + "px";
-            bot1.botShell.style.width = sideValue * 0.25 + "px";
-            bot2.botShell.style.height = sideValue * 0.3 + "px";
-            bot2.botShell.style.width = sideValue * 0.25 + "px";
+            // bot1.botShell.style.height = sideValue * 0.3 + "px";
+            // bot1.botShell.style.width = sideValue * 0.25 + "px";
+            // bot2.botShell.style.height = sideValue * 0.3 + "px";
+            // bot2.botShell.style.width = sideValue * 0.25 + "px";
             explosion.style.height = sideValue * 0.7 + "px";
             explosion.style.width = sideValue * 0.7 + "px";
-            bot1.botShotExplosion.style.height = sideValue * 0.7 + "px";
-            bot1.botShotExplosion.style.width = sideValue * 0.7 + "px";
-            bot2.botShotExplosion.style.height = sideValue * 0.7 + "px";
-            bot2.botShotExplosion.style.width = sideValue * 0.7 + "px";
+            // bot1.botShotExplosion.style.height = sideValue * 0.7 + "px";
+            // bot1.botShotExplosion.style.width = sideValue * 0.7 + "px";
+            // bot2.botShotExplosion.style.height = sideValue * 0.7 + "px";
+            // bot2.botShotExplosion.style.width = sideValue * 0.7 + "px";
+            bots.forEach(bot => {
+                bot.style.height = sideValue * 0.95 + "px";
+                bot.style.width = sideValue * 0.95 + "px";
+                bot.botShell.style.height = sideValue * 0.3 + "px";
+                bot.botShell.style.width = sideValue * 0.25 + "px";
+                bot.botShotExplosion.style.height = sideValue * 0.7 + "px";
+                bot.botShotExplosion.style.width = sideValue * 0.7 + "px";
+            })
             
 
 

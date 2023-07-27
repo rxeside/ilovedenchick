@@ -64,31 +64,6 @@ let hit = 0;
 
 
 
-let newBot = {
-    className: "bot1",
-    style: {
-        top: (boardSide/4 - 40),
-        left: (boardSide/2 - 40)
-    },
-    src: '../static/image/botTop.png',
-    botMovement: 0,
-    botShell: {
-        className: 'botShell',
-        src: '../static/image/ShellTop.png',
-        direction: 1,
-        directionNew: 1,
-        update: 0
-    },
-    botSkinStatus: 0,
-    botShotExplosion: {
-        className: "botShotExplosion",
-        src: '../static/image/explosion1.png'
-    },
-    seeTank: false
-};
-
-
-
 let bot1 = document.createElement("img");
 bot1.className = "bot1";
 bot1.style.top = (boardSide / 4 - 40) + "px";
@@ -135,9 +110,26 @@ bot2.botShootDelay = 0;
 
 
 
-let bulletUpdate = 0;
-
-
+let bot3 = document.createElement("img");
+bot3.className = "bot2";
+bot3.style.top = (boardSide / 6 - 40) + "px";
+bot3.style.left = (boardSide / 2 + 100) + "px";
+bot3.src = '../static/image/botTop.png';
+gameBoard.appendChild(bot3);
+bot3.botMovement = 0;
+bot3.botShell = document.createElement("img");
+bot3.botShell.className = "botShell2";
+bot3.botShell.src = "../static/image/ShellTop.png";
+bot3.botShell.direction = 1;
+bot3.botShell.directionNew = 1;
+bot3.botShell.update = 0;
+bot3.botSkinStatus = 0;
+bot3.botShotExplosion = document.createElement("img");
+bot3.botShotExplosion.className = "botShotExplosion";
+bot3.botShotExplosion.src = '../static/image/explosion1.png';
+bot3.seeTank = false;
+bot3.direction;
+bot3.botShootDelay = 0;  
 
 
 // Прочие переменные для танка
