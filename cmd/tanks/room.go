@@ -49,6 +49,7 @@ type bullettype struct {
 }
 
 type roomdata struct {
+	Name             string
 	LastID           int
 	Level            leveldata
 	Objects          []*objdata
@@ -75,11 +76,6 @@ type positionstruct struct {
 	Y float64
 }
 
-type messageReset struct {
-	Message string
-	Objects []*objdata
-}
-
 var rooms = make(map[int]*roomdata)
 
 func roomIsRunning(db *sqlx.DB, key int) {
@@ -92,10 +88,22 @@ func roomIsRunning(db *sqlx.DB, key int) {
 
 	go func() {
 		for {
+			if (len(currRoom.Tanks) <= 0) && (currRoom.Status != "Idle") {
+				currRoom.Status = "Idle"
+				go func() {
+					fmt.Println("Sleep")
+					time.Sleep(time.Minute)
+					fmt.Println("Up")
+					if currRoom.Status == "Idle" {
+						currRoom.Status = "Remove"
+					}
+					return
+				}()
+			}
+
 			select {
 			case <-ticker.C:
-				// fmt.Printf("len(currRoom.Tanks): %v\n", len(currRoom.Tanks))
-				if (currRoom.Status == "Remove") || (currRoom.PlayersAreLiving <= 0) {
+				if currRoom.Status == "Remove" {
 					fmt.Println("Remove")
 					delete(rooms, key)
 					return
@@ -107,10 +115,6 @@ func roomIsRunning(db *sqlx.DB, key int) {
 						sendMessageForCleints(currRoom)
 					}
 				}
-				// } else {
-				// fmt.Println("Reset")
-				// fmt.Println("Start")
-				// }
 			}
 		}
 	}()
@@ -121,29 +125,26 @@ func sendMessageForCleints(currRoom *roomdata) {
 	if len(currRoom.ObjToRemove) > 0 {
 		sendMessageAboutObj(currRoom, &currRoom.ObjToRemove)
 	}
-	if len(currRoom.Bullets) > 0 {
-		sendMessageAboutBullets(currRoom, &currRoom.Bullets)
-	}
+	sendMessageAboutBullets(currRoom, &currRoom.Bullets)
 	sendMessageAboutTanks(currRoom)
 }
 
 func sendMessageAboutReset(currRoom *roomdata) {
-	var Message messageReset
-	Message.Message = "Reset"
-	Message.Objects = currRoom.Objects
+	var Message string
+	Message = "Reset"
 
 	for conn := range currRoom.Tanks {
 		err := conn.WriteJSON(Message)
 		if err != nil {
 			log.Println(err.Error())
-			delete(currRoom.Tanks, conn)
-			currRoom.PlayersAreLiving--
 			return
 		}
+
+		currRoom.Tanks[conn].Status = "Closed"
+		delete(currRoom.Tanks, conn)
+		currRoom.PlayersAreLiving--
 	}
 
-	time.Sleep(1 * time.Second)
-	currRoom.Status = "Game"
 	return
 }
 
@@ -157,6 +158,7 @@ func sendMessageAboutObj(currRoom *roomdata, ObjtoRemove *[]int) {
 			err := conn.WriteJSON(Message)
 			if err != nil {
 				log.Println(err)
+				value.Status = "Closed"
 				delete(currRoom.Tanks, conn)
 				currRoom.PlayersAreLiving--
 			}
@@ -176,6 +178,7 @@ func sendMessageAboutBullets(currRoom *roomdata, Bullets *map[int]*bullettype) {
 			err := conn.WriteJSON(Message)
 			if err != nil {
 				log.Println(err)
+				value.Status = "Closed"
 				delete(currRoom.Tanks, conn)
 				currRoom.PlayersAreLiving--
 			}
@@ -193,7 +196,6 @@ func sendMessageAboutTanks(currRoom *roomdata) {
 	var tanksForSend []*tanktype
 	for _, value := range currRoom.Tanks {
 		newTank := *value
-
 		tanksForSend = append(tanksForSend, &newTank)
 	}
 
@@ -202,6 +204,7 @@ func sendMessageAboutTanks(currRoom *roomdata) {
 			err := conn.WriteJSON(tanksForSend)
 			if err != nil {
 				log.Println(err)
+				value.Status = "Closed"
 				delete(currRoom.Tanks, conn)
 				currRoom.PlayersAreLiving--
 			}
@@ -261,9 +264,7 @@ func wsConnection(w http.ResponseWriter, r *http.Request) {
 
 	var tank tanktype
 
-	currRoom.Status = "Load"
 	currRoom.LastID++
-	currRoom.PlayersAreLiving++
 	tank.ID = currRoom.LastID
 	tank.Status = "Load"
 	tank.Direction = "1"
@@ -291,7 +292,10 @@ func wsConnection(w http.ResponseWriter, r *http.Request) {
 		log.Println(err.Error())
 		return
 	}
+
 	currRoom.Tanks[conn] = &tank
+	currRoom.PlayersAreLiving++
+	currRoom.Status = "Load"
 
 	err = conn.WriteJSON(currRoom.Level)
 	if err != nil {
@@ -306,12 +310,16 @@ func wsConnection(w http.ResponseWriter, r *http.Request) {
 	}
 
 	go func() {
-		ticker := time.NewTicker(50 * time.Millisecond)
+		ticker := time.NewTicker(25 * time.Millisecond)
 		for range ticker.C {
 			isHit := hitByBullet(&tank, &currRoom.Bullets)
 
 			if isHit {
-				deadTank(currRoom, &tank)
+				hitTank(currRoom, &tank)
+			}
+
+			if tank.Status == "Closed" {
+				return
 			}
 		}
 	}()
@@ -378,6 +386,8 @@ func readMessageFromCleints(conn *websocket.Conn, currRoom *roomdata, tank *tank
 			go func() {
 				bulletFlight(&bullet, currRoom, *levelSize)
 			}()
+		} else {
+			fmt.Println("Already shoot")
 		}
 	case "Close":
 		conn.Close()
@@ -648,7 +658,11 @@ func hitByBullet(tank *tanktype, bullets *map[int]*bullettype) bool {
 	return false
 }
 
-func deadTank(room *roomdata, tank *tanktype) {
+func hitTank(room *roomdata, tank *tanktype) {
+	fmt.Printf("tank.ID: %v\n", tank.ID)
+	tank.Distance = 0
+	tank.Live--
+
 	if tank.Live > 0 {
 		resetTank(room, tank)
 	} else {
@@ -661,8 +675,6 @@ func deadTank(room *roomdata, tank *tanktype) {
 }
 
 func resetTank(room *roomdata, tank *tanktype) {
-	tank.Live--
-
 	max := len(room.PointsToSpawn)
 	spawnIndex := rand.Intn(max)
 
@@ -685,25 +697,6 @@ func resetRoom(db *sqlx.DB, room *roomdata) {
 	room.ObjToRemove = nil
 	room.Bullets = make(map[int]*bullettype)
 	room.PlayersAreLiving = 0
-	for _, tank := range room.Tanks {
-		tank.Live = 3
-		room.PlayersAreLiving++
-
-		max := len(room.PointsToSpawn)
-		spawnIndex := rand.Intn(max)
-
-		if max > 0 {
-			for index, value := range room.PointsToSpawn {
-				if index == spawnIndex {
-					tank.X = value.X
-					tank.Y = value.Y
-				}
-			}
-		} else {
-			tank.X = 0
-			tank.Y = 0
-		}
-	}
 
 	var err error
 	room.Objects, err = getObjByID(db, room.Level.Id)

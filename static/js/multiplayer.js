@@ -57,7 +57,6 @@ document.addEventListener("DOMContentLoaded", function() {
     function getObjects() {
         socket.onmessage = function(event) {
             brick = JSON.parse(event.data);
-            console.log(brick);
 
             createObjects(brick)
             
@@ -68,13 +67,14 @@ document.addEventListener("DOMContentLoaded", function() {
     function answersFromServer() {
         socket.onmessage = function(event) {
             let newState = JSON.parse(event.data);
-            if (newState.Message === "Reset") {
+            if (newState === "Reset") {
                 deleteObjects();
-                createObjects(newState.Objects);
+                location.reload();
+                // createObjects(newState.Objects);
                 return
             } else if (newState.Message === "Bullets") {
                 updateBullets(newState.Bullets);
-            } else if (newState.Message === "Objects") { 
+            } else if (newState.Message === "Objects") {
                 destroyObjects(newState.Objects)
             } else {
                 updateTanks(newState);
@@ -105,6 +105,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 let newS = newstate[key];
                 newS.X = newS.X * ratio;
                 newS.Y = newS.Y * ratio;
+                newS.Distance = newS * ratio
                 tanks.push(newS);
                 createNewTank(newS);
             } else {
@@ -113,6 +114,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 tanks[index].Direction = newstate[key].Direction;
                 tanks[index].Distance = newstate[key].Distance * ratio;
                 tanks[index].Status = newstate[key].Status
+                tanks[index].Live = newstate[key].Live
             }
         };
 
@@ -145,12 +147,12 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         }
 
-        // updateLives();
+        updateLives();
     }
 
     function destroyObjects(newstate) {
         for (key in newstate) {
-            const eltRemove = document.getElementById(newstate[key]);
+            let eltRemove = document.getElementById(newstate[key]);
             if (eltRemove != null) {
                 eltRemove.remove();
             }
@@ -505,45 +507,44 @@ document.addEventListener("DOMContentLoaded", function() {
         brick = null
     }
 
-    // function updateLives() {
-    //     let i = 0;
-    //     while (lives.children[i] !== undefined) {
-    //         let tankLive = lives.children[i];
-    //         let find = false;
+    function updateLives() {
+        let i = 0;
+        while (lives.children[i] !== undefined) {
+            let tankLive = lives.children[i];
+            let find = false;
 
-    //         tanks.forEach(tank => {
-    //             if ("live" + tank.ID === tankLive.id) {
-    //                 console.log(tank.Live);
-    //                 tankLive.children[1].textContent = tank.Live;
-    //                 find = true;
-    //             }
-    //         });
+            tanks.forEach(tank => {
+                if ("live" + tank.ID === tankLive.id) {
+                    tankLive.children[1].textContent = tank.Live;
+                    find = true;
+                }
+            });
 
-    //         if (!find) {
-    //             tankLive.remove();
-    //         }
+            if (!find) {
+                tankLive.remove();
+            }
 
-    //         i++;
-    //     }
+            i++;
+        }
 
-    //     tanks.forEach(tank => {
-    //         let tankLive = document.getElementById("live" + tank.ID);
+        tanks.forEach(tank => {
+            let tankLive = document.getElementById("live" + tank.ID);
 
-    //         if (tankLive === null) {
-    //             const newElt = document.createElement("div");
-    //             const tankName = document.createElement("p");
-    //             const liveNum = document.createElement("p");
+            if (tankLive === null) {
+                const newElt = document.createElement("div");
+                const tankName = document.createElement("p");
+                const liveNum = document.createElement("p");
 
-    //             tankName.textContent = "Tank# " + tank.ID;
-    //             liveNum.textContent = tank.Live;
+                tankName.textContent = "Tank# " + tank.ID;
+                liveNum.textContent = tank.Live;
 
-    //             newElt.appendChild(tankName);
-    //             newElt.appendChild(liveNum);
+                newElt.appendChild(tankName);
+                newElt.appendChild(liveNum);
 
-    //             newElt.id = "live" + tank.ID;
+                newElt.id = "live" + tank.ID;
 
-    //             lives.appendChild(newElt);
-    //         }
-    //     });
-    // }
+                lives.appendChild(newElt);
+            }
+        });
+    }
 });

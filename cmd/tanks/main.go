@@ -41,8 +41,9 @@ func main() {
 	mux.HandleFunc("/room/{roomKey}", roomPage)
 	mux.HandleFunc("/create_level", createLevel)
 	mux.HandleFunc("/main", mainMenu)
-	mux.HandleFunc("/create_room", createRoomPage)
+	mux.HandleFunc("/create_room", createRoomPage(dbx))
 	mux.HandleFunc("/select_level", selectLevel(dbx))
+	mux.HandleFunc("/select_room", selectRoom)
 
 	mux.HandleFunc("/api/save_level", saveLevel(dbx)).Methods(http.MethodPost)
 	mux.HandleFunc("/api/save_obj", saveObj(dbx)).Methods(http.MethodPost)

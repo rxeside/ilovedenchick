@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="ru">
+        <title>Выбор комнаты</title>
+        <script src="../static/js/room_select.js"></script>
+        <style src="../static/css/room_select.css"></style>
+    </head>
+    <body>
+        {{ range .Rooms }}
+            <a href="/room/{{ .key }}"></a>
+        {{ end }}
+    </body>
+</html>

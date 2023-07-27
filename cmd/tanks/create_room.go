@@ -14,7 +14,8 @@ import (
 )
 
 type roomdatarequest struct {
-	LevelID int `json:"Id"`
+	LevelID   int    `json:"Id"`
+	LevelName string `json:"Name"`
 }
 
 type roomdeletenum struct {
@@ -40,19 +41,32 @@ type objdata struct {
 	Pos_Y          float64 `db:"pos_y"`
 }
 
-func createRoomPage(w http.ResponseWriter, r *http.Request) {
-	ts, err := template.ParseFiles("pages/room_creator.html")
-	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
-		log.Println(err.Error())
-		return
-	}
+func createRoomPage(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		levels, err := levelsSelect(db)
+		if err != nil {
+			http.Error(w, "Error", 500)
+			log.Println(err)
+			return
+		}
 
-	err = ts.Execute(w, nil)
-	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
-		log.Println(err.Error())
-		return
+		ts, err := template.ParseFiles("pages/room_creator.html")
+		if err != nil {
+			http.Error(w, "Internal Server Error", 500)
+			log.Println(err)
+			return
+		}
+
+		data := selectLevelPage{
+			LevelData: levels,
+		}
+
+		err = ts.Execute(w, data)
+		if err != nil {
+			http.Error(w, "Server Error", 500)
+			log.Println(err.Error())
+			return
+		}
 	}
 }
 
@@ -73,10 +87,11 @@ func createNewRoom(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 		}
 
 		levelID := req.LevelID
+		levelName := req.LevelName
 
 		var NewRoom roomdata
 		NewRoom.LastID = 0
-		// NewRoom.ID = int(rand.Int31())
+		NewRoom.Name = levelName
 		key := int(rand.Int31())
 		NewRoom.Tanks = make(map[*websocket.Conn]*tanktype)
 		NewRoom.Bullets = make(map[int]*bullettype)

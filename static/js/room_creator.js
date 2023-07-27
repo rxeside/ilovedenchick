@@ -1,27 +1,66 @@
 const createBtn = document.getElementById('create');
-const deleteBtn = document.getElementById('delete');
-const joinBtn = document.getElementById('join');
-const key = document.getElementById('num');
+const nameFeild = document.getElementById('name');
+
+let LevelID;
+let RoomName;
+
+nameFeild.onchange = function() {
+    RoomName = nameFeild.value;
+}
 
 createBtn.onclick = function() {
-    createNewRoom()
+    createNewRoom();
 }
 
-deleteBtn.onclick = function() {
-    if (key.value !== "") {
-        deleteCurrRoom();
-    }
-}
+function sendData(buttonId) {
+    const button = document.getElementById(buttonId);
+    const size = button.getAttribute("size");
+    const requestOption = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json'},
+        body: JSON.stringify(buttonId)
+    };
 
-joinBtn.onclick = function() {
-    joinToRoom();
-}
+    LevelID = buttonId;
 
-let s = 10;
+    fetch('api/getlevelobj', requestOption)
+        .then(Response => Response.json())
+        .then(data => {
+            const elements = document.querySelectorAll('.field__cell');
+            elements.forEach(element => {
+                element.remove();
+            });
+
+            let objects = [];
+
+            data.forEach(element => {
+                objects[element.Pos_X + size * element.Pos_Y] = element.ImgURL;
+            })
+
+            const l_field = document.getElementById('level_field');
+            l_field.style.gridTemplateColumns = "repeat(" + size + ", 1fr)";
+            l_field.style.gridTemplateRows = "repeat(" + size + ", 1fr)";
+
+            for (let i = 0; i < size ** 2; i++) {
+                const newElement = document.createElement('img');
+                newElement.className = "field__cell";
+
+                if (objects[i] === undefined) {
+                    newElement.src = "../static/image/grey.png";
+                } else {
+                    newElement.src = objects[i];
+                }
+
+                l_field.appendChild(newElement);
+            }
+        })
+        .catch(error => console.error(error));
+};
 
 function createNewRoom() {
     let newData = {
-        Id: s
+        Id: LevelID,
+        Name: RoomName
     };
 
     const requestOption  = {
@@ -31,25 +70,4 @@ function createNewRoom() {
     };
 
     fetch('api/create_new_room', requestOption);
-    s++;
-}
-
-function deleteCurrRoom() {
-    let number = parseInt(key.value)
-
-    let roomID = {
-        ID: number
-    };
-    
-    const requestOption  = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json'},
-        body: JSON.stringify(roomID)
-    };
-
-    fetch('api/delete_room', requestOption);
-}
-
-function joinToRoom() {
-    window.location.href = "/room/" + key.value
 }

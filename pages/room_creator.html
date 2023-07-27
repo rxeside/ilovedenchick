@@ -13,9 +13,19 @@
         <script defer src="../static/js/room_creator.js"></script>
     </head>
     <body>
-        <button id="create" style="margin: 20px;">Создать комнату</button>
-        <input id="num" type="number">
-        <button id="delete" style="margin: 20px;">Удалить комнату</button>
-        <button id="join" style="margin: 20px;">Join</button>
+        <div class="level-name">
+            <p class="level-name__title">Введите название комнаты</p>
+            <input id="name" class="level-name__input" type="text">
+        </div>
+        <div class="level-list">
+            {{ range .LevelData }}
+                <button class="level-item" id="{{ .Id }}" size="{{ .Side }}" onclick="sendData({{ .Id }})">{{ .Name }}</button>
+            {{ end }}
+        </div>
+        <div class="workspace">
+            <div id="level_field" class="field">
+            </div>
+        </div>
+        <button id="create">Создать комнату</button>
     </body>
 </html>

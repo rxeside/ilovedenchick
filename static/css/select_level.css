@@ -37,7 +37,6 @@
     width: 400px;
     height: 700px;
     overflow-y: scroll;
-    border: 1px solid #ccc;
     padding: 10px;
     display: flex; 
     flex-direction: column;
