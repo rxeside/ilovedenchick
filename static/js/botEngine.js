@@ -68,7 +68,7 @@ function updateBot() {
                     }
                     if (can_move) {
                         bot1.style.top = (parseFloat(bot1.style.top) - step) + "px";
-                        //botShotDirection(bot1);
+                        botShotDirection(bot1);
                     }
                 } if (bot1.direction == 'down') {
                     let can_move = true;
@@ -97,7 +97,7 @@ function updateBot() {
                     }
                     if (can_move) {
                         bot1.style.top = (parseFloat(bot1.style.top) + step) + "px";
-                        //botShotDirection(bot1);
+                        botShotDirection(bot1);
                     }
                 } if (bot1.direction == 'left') {
                     let can_move = true;
@@ -127,7 +127,7 @@ function updateBot() {
                     }
                     if (can_move) {
                         bot1.style.left = (parseFloat(bot1.style.left) - step) + "px";
-                        //botShotDirection(bot1);
+                        botShotDirection(bot1);
                     }
                 } if (bot1.direction == 'right') {
                     let can_move = true;
@@ -156,7 +156,7 @@ function updateBot() {
                     }
                     if (can_move) {
                         bot1.style.left = (parseFloat(bot1.style.left) + step) + "px";
-                        //botShotDirection(bot1);
+                        botShotDirection(bot1);
                     }
                 }
             }, botSpeed);
@@ -171,7 +171,7 @@ function startBot() {
     // Обновляем состояние игры каждые 2 секунд
 
     if (bot1 != undefined)
-        setInterval(updateBot, 5000);
+        setInterval(updateBot, 1000);
 
 }
 startBot();
@@ -207,18 +207,17 @@ function botShotDirection(bot1) {
             bot1.botShell.style.top = (parseInt(bot1.style.top) + parseInt(bot1.style.height) * 0.5 - parseInt(bot1.botShell.style.height) * 0.5) + "px";
             bot1.botShell.style.left = (parseInt(bot1.style.left) + parseInt(bot1.style.width) - parseInt(bot1.botShell.style.width) * 0.5) + "px";
         }
-        if (bot1.botShootDelay == 0)
+        if (bot1.botShootDelay == 0) 
             botShooting(bot1);
     }
 }
 
 function botShooting(bot1) {
-
+    botShell = bot1.botShell;
     console.log(bot1.botShell, " 1--------")
     gameBoard.appendChild(bot1.botShell);
     updateBotShall(bot1);
     bot1.botShell.update = 1;
-    //console.log("bot's shot");
     if ((parseInt(bot1.botShell.style.top) < 0) || ((parseInt(bot1.botShell.style.top) + 16) >= boardSide) || (parseInt(bot1.botShell.style.left) < 0) || (parseInt(bot1.botShell.style.left) >= boardSide - 16)) {
         explosionBotShall(bot1);
     }
@@ -251,8 +250,8 @@ function botShooting(bot1) {
         }
     }
     if (bot1.botShell.update == 1) {
-        console.log("TUT");
-        requestAnimationFrame(botShooting);
+        console.log(bot1.botShell, "TUT");
+        requestAnimationFrame(() => {botShooting(bot1)});
     }
     bot1.botShootDelay = 1;
 }

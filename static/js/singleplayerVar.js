@@ -97,7 +97,7 @@ bot1.src = '../static/image/botTop.png';
 gameBoard.appendChild(bot1);
 bot1.botMovement = 0;
 bot1.botShell = document.createElement("img");
-bot1.botShell.className = "botShell";
+bot1.botShell.className = "botShell1";
 bot1.botShell.src = "../static/image/ShellTop.png";
 bot1.botShell.direction = 1;
 bot1.botShell.directionNew = 1;
@@ -110,23 +110,17 @@ bot1.seeTank = false;
 bot1.direction;
 bot1.botShootDelay = 0;  
 
-// var bot1 = {
-//     tankimg: {
-//         var img = new Image(),
-//         img.src = '../static/image/botTop.png'
-//     },//по onload
-//     bulletimg:  // по onload
-// }
+
 
 let bot2 = document.createElement("img");
-bot2.className = "bot1";
+bot2.className = "bot2";
 bot2.style.top = (boardSide / 6 - 40) + "px";
 bot2.style.left = (boardSide / 2 + 40) + "px";
 bot2.src = '../static/image/botTop.png';
 gameBoard.appendChild(bot2);
 bot2.botMovement = 0;
 bot2.botShell = document.createElement("img");
-bot2.botShell.className = "botShell";
+bot2.botShell.className = "botShell2";
 bot2.botShell.src = "../static/image/ShellTop.png";
 bot2.botShell.direction = 1;
 bot2.botShell.directionNew = 1;
@@ -138,6 +132,11 @@ bot2.botShotExplosion.src = '../static/image/explosion1.png';
 bot2.seeTank = false;
 bot2.direction;
 bot2.botShootDelay = 0;  
+
+
+
+let bulletUpdate = 0;
+
 
 
 
