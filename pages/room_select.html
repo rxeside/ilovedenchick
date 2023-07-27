@@ -8,7 +8,7 @@
     </head>
     <body>
         {{ range .Rooms }}
-            <a href="/room/{{ .key }}"></a>
+            <button class="btn-room" id="{{ .Key }}" name="room">{{ .Name }}</a>
         {{ end }}
     </body>
 </html>

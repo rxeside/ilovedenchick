@@ -6,8 +6,13 @@ import (
 	"text/template"
 )
 
-type selectRoomdata struct {
-	Rooms map[int]*roomdata
+type selectRoomPage struct {
+	Rooms []selectRoomBtn
+}
+
+type selectRoomBtn struct {
+	Key  int
+	Name string
 }
 
 func selectRoom(w http.ResponseWriter, r *http.Request) {
@@ -18,8 +23,18 @@ func selectRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := selectRoomdata{
-		Rooms: rooms,
+	var linkOfRooms []selectRoomBtn
+
+	for key, room := range rooms {
+		var point selectRoomBtn
+		point.Key = key
+		point.Name = room.Name
+
+		linkOfRooms = append(linkOfRooms, point)
+	}
+
+	data := selectRoomPage{
+		Rooms: linkOfRooms,
 	}
 
 	err = ts.Execute(w, data)
