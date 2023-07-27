@@ -60,7 +60,7 @@ tank.style.left = (boardSide / 2 - 40) + "px";
 tank.src = '../static/image/top.png';
 let status = 0;
 let dead = false;
-let hit = 0;
+let health = 3;
 
 
 
@@ -83,7 +83,8 @@ bot1.botShotExplosion.className = "botShotExplosion";
 bot1.botShotExplosion.src = '../static/image/explosion1.png';
 bot1.seeTank = false;
 bot1.direction;
-bot1.botShootDelay = 0;  
+bot1.botShootDelay = 0;
+bot1.health = 2;  
 
 
 
@@ -106,7 +107,8 @@ bot2.botShotExplosion.className = "botShotExplosion";
 bot2.botShotExplosion.src = '../static/image/explosion1.png';
 bot2.seeTank = false;
 bot2.direction;
-bot2.botShootDelay = 0;  
+bot2.botShootDelay = 0;
+bot2.health = 2;
 
 
 
@@ -130,7 +132,7 @@ bot3.botShotExplosion.src = '../static/image/explosion1.png';
 bot3.seeTank = false;
 bot3.direction;
 bot3.botShootDelay = 0;  
-
+bot3.health = 2;
 
 // Прочие переменные для танка
 let keyPressed = 0;

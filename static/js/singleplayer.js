@@ -295,10 +295,12 @@ document.addEventListener("DOMContentLoaded", function () {
             if (bot != undefined) {
                 if ((((parseInt(shell.style.top) + shell.height) > parseInt(bot.style.top)) && (parseInt(shell.style.top) < (parseInt(bot.style.top) + sideValue))) && (((parseInt(shell.style.left) + shell.width) > parseInt(bot.style.left)) && (parseInt(shell.style.left) < (parseInt(bot.style.left) + sideValue)))) {
                     explosionShall();
-                    bot.remove();
-                    //bot = undefined;
-                    deadBot = bots.indexOf(bot);
-                    bots.splice(deadBot, 1);
+                    bot.health -= 1;
+                    if (bot.health == 0) {
+                        bot.remove();
+                        deadBot = bots.indexOf(bot);
+                        bots.splice(deadBot, 1);
+                    }
                     console.log(bot);
                 }
             }

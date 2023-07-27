@@ -3,7 +3,11 @@ let bots = [bot1, bot2, bot3];
 // Обработка движения бота
 function updateBot() {
     console.log(bots);
-    bots.forEach(bot => {
+    if (bots.length == 0){
+        console.log("WIN");
+        setTimeout(() => { location.reload(); }, 2000);
+    }
+    bots.forEach(bot => {   
         currentBot = bots.indexOf(bot);
         let action = generateRandomAction();
         console.log("action: ", action);
@@ -209,8 +213,8 @@ function botShooting(bot) {
 
     if ((((parseInt(bot.botShell.style.top) + bot.botShell.height) > parseInt(tank.style.top)) && (parseInt(bot.botShell.style.top) < (parseInt(tank.style.top) + sideValue))) && (((parseInt(bot.botShell.style.left) + bot.botShell.width) > parseInt(tank.style.left)) && (parseInt(bot.botShell.style.left) < (parseInt(tank.style.left) + sideValue)))) {
         explosionBotShall(bot);
-        hit += 1;
-        if (hit == 30) {
+        health -= 1;
+        if (health == 0) {
             dead = true;
             console.log("GAME OVER");
             tank.remove();
