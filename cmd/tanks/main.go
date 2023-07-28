@@ -44,6 +44,7 @@ func main() {
 	mux.HandleFunc("/create_room", createRoomPage(dbx))
 	mux.HandleFunc("/select_level", selectLevel(dbx))
 	mux.HandleFunc("/select_room", selectRoom)
+	mux.HandleFunc("/enter_to_battle", enterToBattlePage)
 
 	mux.HandleFunc("/api/save_level", saveLevel(dbx)).Methods(http.MethodPost)
 	mux.HandleFunc("/api/save_obj", saveObj(dbx)).Methods(http.MethodPost)
@@ -51,6 +52,8 @@ func main() {
 	mux.HandleFunc("/api/delete_room", deleteRoom).Methods(http.MethodPost)
 	mux.HandleFunc("/api/getlevelobj", getLevelObj(dbx)).Methods((http.MethodPost))
 	mux.HandleFunc("/api/getobjfromroom", getObjFromRoom(dbx)).Methods((http.MethodPost))
+	mux.HandleFunc("/api/login", searchUser(dbx)).Methods(http.MethodPost)
+	mux.HandleFunc("/api/register", saveUser(dbx)).Methods(http.MethodPost)
 
 	mux.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 
