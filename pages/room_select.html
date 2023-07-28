@@ -8,7 +8,11 @@
     </head>
     <body>
         {{ range .Rooms }}
-            <button class="btn-room" id="{{ .Key }}" name="room">{{ .Name }}</a>
+            <button class="btn-room" id="{{ .Key }}" size="{{ .Size }}" name="room">{{ .Name }}</button>
         {{ end }}
+        <div class="workspace">
+            <div id="level_field" class="field"></div>
+        </div>
+        <button style="margin: 30px; background-color: red;" onclick="joinToRoom()">Join</button>
     </body>
 </html>

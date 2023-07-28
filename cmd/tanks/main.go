@@ -50,6 +50,7 @@ func main() {
 	mux.HandleFunc("/api/create_new_room", createNewRoom(dbx)).Methods(http.MethodPost)
 	mux.HandleFunc("/api/delete_room", deleteRoom).Methods(http.MethodPost)
 	mux.HandleFunc("/api/getlevelobj", getLevelObj(dbx)).Methods((http.MethodPost))
+	mux.HandleFunc("/api/getobjfromroom", getObjFromRoom(dbx)).Methods((http.MethodPost))
 
 	mux.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 
