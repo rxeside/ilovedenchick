@@ -1,21 +1,18 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link href="../static/css/select_level.css" rel="stylesheet">
     <script defer src="../static/js/level_select.js"></script>
     <title>Выбор уровня</title>
 </head>
-
 <body>
     <div class="background">
         <a class="comment">Выберите карту:</a>
         <div class="container">
             <div class="level-list">
                 {{ range .LevelData }}
-                <button class="level-item" id="{{ .Id }}" size="{{ .Side }}" onclick="sendData({{ .Id }})">{{ .Name
-                    }}</button>
+                    <button class="level-item" id="{{ .Id }}" size="{{ .Side }}" onclick="sendData({{ .Id }})">{{ .Name }}</button>
                 {{ end }}
             </div>
             <div class="workspace">

@@ -1,21 +1,45 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="ru">
-        <title>Страница создания комнаты</title>
-        <style>
-            *
-            {
-                padding: 0;
-                margin: 0;
-            }
-        </style>
-        <script defer src="../static/js/room_creator.js"></script>
-    </head>
-    <body>
-        <button id="create" style="margin: 20px;">Создать комнату</button>
-        <input id="num" type="number">
-        <button id="delete" style="margin: 20px;">Удалить комнату</button>
-        <button id="join" style="margin: 20px;">Join</button>
-    </body>
+
+<head>
+    <meta charset="ru">
+    <title>Страница создания комнаты</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link href="../static/css/room_creator.css" rel="stylesheet">
+    <script defer src="../static/js/room_creator.js"></script>
+</head>
+
+<body>
+    <div class="background">
+        <div class="level-name">
+            <p class="level-name__title">Введите название комнаты:</p>
+            <input id="name" class="level-name__input" type="text">
+        </div>
+        <div class="container">
+            <div class="left">
+                <div class="sizes">
+                    <p class="sizes__title">Количество участников:</p>
+                    <input class="sizes__side" id="level_side" type="number">
+                </div>
+                <div class="level-list">
+                    {{ range .LevelData }}
+                    <button class="level-item" id="{{ .Id }}" size="{{ .Side }}" onclick="sendData({{ .Id }})">{{ .Name
+                        }}</button>
+                    {{ end }}
+                </div>
+                <div>
+                    <button id="create">Создать комнату</button>
+                </div>
+            </div>
+            <div class="workspace">
+                <div id="level_field" class="field">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div>
+        <button class="exit" onclick="exit()"></button>
+    </div>
+</body>
+
 </html>
