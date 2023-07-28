@@ -102,3 +102,20 @@ function play() {
     audioButton.play();
     setTimeout(() => { window.location.href = "/level/9";}, 200);
 }
+
+// function loadMusic() {
+//     var audioPlayer document.getElementById("audioPlay");
+//     var xhr = new XMLHttpRequest();
+//     xhr.onreadystatechange = function() {
+//         if (xhr.readyState === 4 && xhr.status === 200) {
+//             audioPlayer.src = xhr.responseText;
+//             audioPlayer.play();
+//         }
+//     };
+//     xhr.open("GET", "../static/audio/fon.mp3", true);
+//     xhr.send();
+// }
+
+// window.onload = function() {
+//     loadMusic();
+// }
