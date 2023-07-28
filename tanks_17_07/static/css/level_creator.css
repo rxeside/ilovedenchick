@@ -235,12 +235,12 @@
 
 .exit
 {
-    height: 102px;
-    width: 102px;
+    height: 62px;
+    width: 62px;
     /* background-color: aqua; */
-    background-image: url(../image/exit_mini.png);
+    background-image: url(../image/exit.png);
     position: fixed;
-    bottom: 4.65%;
+    bottom: 2%;
     left: 1%;
     margin: 10px;
     border-radius: 50%;
@@ -248,14 +248,14 @@
 
 .exit:hover
 {
-    background-image: url(../image/exit_hover.png);
+    background-image: url(../image/exit_hover_new.png);
 }
 
 .exit:active
 {
     background-image: url(../image/exit_activ.png);
-    height: 92px;
-    width: 92px;
-    bottom: 5%;
+    height: 52px;
+    width: 52px;
+    bottom: 2.5%;
     left: 1.2%;
 }
