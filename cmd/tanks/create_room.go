@@ -97,7 +97,6 @@ func createNewRoom(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 		levelName := req.LevelName
 
 		var NewRoom roomdata
-		NewRoom.LastID = 0
 		NewRoom.Name = levelName
 		key := int(rand.Int31())
 		NewRoom.Tanks = make(map[*websocket.Conn]*tanktype)

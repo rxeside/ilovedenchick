@@ -36,7 +36,7 @@ func main() {
 	mux := mux.NewRouter()
 
 	mux.HandleFunc("/ws", handler)
-	mux.HandleFunc("/ws/{roomKey}", wsConnection)
+	mux.HandleFunc("/ws/{roomKey}", wsConnection(dbx))
 
 	mux.HandleFunc("/level/{levelID}", level(dbx))
 	mux.HandleFunc("/room/{roomKey}", roomPage(dbx))
@@ -46,6 +46,7 @@ func main() {
 	mux.HandleFunc("/select_level", selectLevel(dbx))
 	mux.HandleFunc("/select_room", selectRoom(dbx))
 	mux.HandleFunc("/enter_to_battle", enterToBattlePage)
+	mux.HandleFunc("/r", deleteCookie)
 
 	mux.HandleFunc("/api/save_level", saveLevel(dbx)).Methods(http.MethodPost)
 	mux.HandleFunc("/api/save_obj", saveObj(dbx)).Methods(http.MethodPost)

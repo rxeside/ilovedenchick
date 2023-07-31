@@ -1,7 +1,5 @@
 
 document.addEventListener("DOMContentLoaded", function () {
-
-    // Создание игрового поля
     
     //Создание звуков
     const audioShell = new Audio('../static/audio/shot.mp3');

@@ -17,8 +17,9 @@ document.addEventListener("DOMContentLoaded", function() {
     let bulletStep = 0.4;
     let ratio;
 
-    const sizeOnServer = 100;
     const room = document.getElementById('room');
+    const level_name = document.getElementById('level_name')
+    const sizeOnServer = 100;
     const tanksize = 0.9;
     const tankstep = 50;
     const bulletstep = 2.5;
@@ -34,7 +35,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
     const lives = document.getElementById('lives')
 
-    // Создание и отображение кирпичей на поле
     // const socket = new WebSocket("wss://" + document.location.hostname +":/ws/" + room.textContent);
     const socket = new WebSocket("ws://" + document.location.hostname +":3000/ws/" + room.textContent);
 
@@ -45,6 +45,7 @@ document.addEventListener("DOMContentLoaded", function() {
     socket.onmessage = function(event) {
         level = JSON.parse(event.data);
 
+        level_name.textContent = level.Name
         ratio = boardSide / (level.Side * sizeOnServer)
         size = boardSide / level.Side;
 
@@ -96,25 +97,27 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function updateTanks(newstate){
         for(key in newstate) {
-            let index = -1;
-            if (tanks !== undefined) {
-                index = tanks.findIndex((tank) => tank.ID === newstate[key].ID);
-            }
+            if (newstate[key].Status !== "Closed") {
+                let index = -1;
+                if (tanks !== undefined) {
+                    index = tanks.findIndex((tank) => tank.ID === newstate[key].ID);
+                }
 
-            if (index === -1) {
-                let newS = newstate[key];
-                newS.X = newS.X * ratio;
-                newS.Y = newS.Y * ratio;
-                newS.Distance = newS * ratio
-                tanks.push(newS);
-                createNewTank(newS);
-            } else {
-                tanks[index].X = newstate[key].X * ratio;
-                tanks[index].Y = newstate[key].Y * ratio;
-                tanks[index].Direction = newstate[key].Direction;
-                tanks[index].Distance = newstate[key].Distance * ratio;
-                tanks[index].Status = newstate[key].Status
-                tanks[index].Live = newstate[key].Live
+                if (index === -1) {
+                    let newS = newstate[key];
+                    newS.X = newS.X * ratio;
+                    newS.Y = newS.Y * ratio;
+                    newS.Distance = newS * ratio
+                    tanks.push(newS);
+                    createNewTank(newS);
+                } else {
+                    tanks[index].X = newstate[key].X * ratio;
+                    tanks[index].Y = newstate[key].Y * ratio;
+                    tanks[index].Direction = newstate[key].Direction;
+                    tanks[index].Distance = newstate[key].Distance * ratio;
+                    tanks[index].Status = newstate[key].Status
+                    tanks[index].Live = newstate[key].Live
+                }
             }
         };
 
@@ -122,7 +125,7 @@ document.addEventListener("DOMContentLoaded", function() {
             for (key in tanks) {
                 index = newstate.findIndex((element) => element.ID === tanks[key].ID)
 
-                if (index === -1) {
+                if ((index === -1) || (newstate[key].Status === "Closed")) {
                     const removeTank = document.getElementById("tank" + tanks[key].ID);
 
                     removeTank.remove();
@@ -535,8 +538,9 @@ document.addEventListener("DOMContentLoaded", function() {
                 const tankName = document.createElement("p");
                 const liveNum = document.createElement("p");
 
-                tankName.textContent = "Tank# " + tank.ID;
+                tankName.textContent = tank.Name + ": ";
                 liveNum.textContent = tank.Live;
+                newElt.className = "tank-live__elt";
 
                 newElt.appendChild(tankName);
                 newElt.appendChild(liveNum);

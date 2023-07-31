@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -20,7 +21,7 @@ func checkCookie(db *sqlx.DB, w http.ResponseWriter, r *http.Request) error {
 
 	userID := cookie.Value
 
-	err = searchUserOnDB(db, userID)
+	_, err = searchUserOnDB(db, userID)
 	if err != nil {
 		return err
 	}
@@ -28,7 +29,7 @@ func checkCookie(db *sqlx.DB, w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func searchUserOnDB(db *sqlx.DB, ID string) error {
+func searchUserOnDB(db *sqlx.DB, ID string) (userdata, error) {
 	const query = `
 			SELECT
 			  id,
@@ -43,8 +44,16 @@ func searchUserOnDB(db *sqlx.DB, ID string) error {
 	user := new(userdata)
 	err := row.Scan(&user.ID, &user.NickName, &user.LevelComplited)
 	if err != nil {
-		return err
+		return userdata{}, err
 	}
 
-	return nil
+	return *user, nil
+}
+
+func deleteCookie(w http.ResponseWriter, r *http.Request) {
+	http.SetCookie(w, &http.Cookie{
+		Name:    "UserCookie",
+		Path:    "/",
+		Expires: time.Now().AddDate(0, 0, -1),
+	})
 }

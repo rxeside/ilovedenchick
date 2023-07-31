@@ -73,6 +73,8 @@ func getUser(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		deleteCookie(w, r)
+
 		http.SetCookie(w, &http.Cookie{
 			Name:     "UserCookie",
 			Value:    fmt.Sprint(user.ID),
@@ -108,6 +110,11 @@ func saveUser(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			http.Error(w, "Err with unmarshal", 500)
 			log.Println(err.Error())
+			return
+		}
+
+		if emailAlreadyThere(db, newUser.Email) {
+			log.Println("Already has")
 			return
 		}
 
@@ -166,4 +173,21 @@ func createUserOnDB(db *sqlx.DB, user userRequestdata) error {
 	_, err := db.Exec(query, user.NickName, user.Email, user.Password)
 
 	return err
+}
+
+func emailAlreadyThere(db *sqlx.DB, email string) bool {
+	const query = `
+			SELECT
+			  email
+			FROM
+			  tanki_online
+			WHERE
+			  email = ?
+	`
+	_, err := db.Query(query, email)
+	if err != nil {
+		return true
+	}
+
+	return false
 }

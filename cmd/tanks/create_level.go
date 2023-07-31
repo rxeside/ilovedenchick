@@ -74,6 +74,14 @@ func saveLevel(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		cookie, err := r.Cookie("UserCookie")
+		if err != nil {
+			http.Error(w, "err with cookie", 500)
+			log.Println(err.Error())
+			return
+		}
+		req.Author = cookie.Value
+
 		err = insertLevelTodb(db, req)
 		if err != nil {
 			http.Error(w, "Error insert level", 500)
