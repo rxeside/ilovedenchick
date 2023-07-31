@@ -19,13 +19,11 @@ const (
 
 func main() {
 	cfg := mysql.Config{
-		User: "root",
-		// Passwd: "P@ssw0rd",
-		Passwd: "098poi123qweA.",
+		User:   "root",
+		Passwd: "P@ssw0rd",
 		Net:    "tcp",
 		Addr:   "localhost:3306",
-		// DBName: "tanki_online",
-		DBName: "tanks",
+		DBName: "tanki_online",
 	}
 
 	db, err := sql.Open("mysql", cfg.FormatDSN())

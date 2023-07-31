@@ -1,11 +1,12 @@
 const l_Name = document.getElementById('level_Name'); 
-    l_side = document.getElementById('level_side'); 
-    l_field = document.getElementById('level_field');
-    cell_menu = document.getElementById('cell_menu');
-    message = document.getElementById('message');
+const l_side = document.getElementById('level_side'); 
+const l_field = document.getElementById('level_field');
+const cell_menu = document.getElementById('cell_menu');
+const message = document.getElementById('message');
 
 let selectedType = null;
 let Obj_on_level = [];
+let levelIdFromBack;
 
 //музыка
 const audioButton = new Audio('../static/audio/button.mp3');
@@ -65,6 +66,7 @@ function NewSelect(id)
 }
 
 let CurrentCell = {
+    levelId: null,
     name: null,
     isDestructible: null,
     canTpass: null,
@@ -85,6 +87,7 @@ function cleaerCurrentCell()
 function addNewCell(id)
 {
     let NewCell = {
+        levelId: null,
         name: null,
         isDestructible: null,
         canTpass: null,
@@ -214,8 +217,6 @@ function editcell(id)
     console.log(Obj_on_level);
 }
 
-const XHRLevel = new XMLHttpRequest;
-
 function sendLeveldata()
 {
     audioButton.play();
@@ -228,65 +229,109 @@ function sendLeveldata()
         } 
     }
 
-    let leveldata = JSON.stringify(level);
+    const requestOption = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json'},
+        body: JSON.stringify(level)
+    };
 
-    XHRLevel.open("POST", "/api/save_level");
-    XHRLevel.send(leveldata);
+    fetch('/api/save_level', requestOption)
+        .then(Response => Response.json())
+        .then(data => {
+            console.log(data);
+            levelIdFromBack = data;
+            sendObjdata();
+        })
+        .catch(Error => {
+            console.error(Error);
+            dataError();
+        });
+
+    // let leveldata = JSON.stringify(level);
+
+    // XHRLevel.open("POST", "/api/save_level");
+    // XHRLevel.send(leveldata);
 }
 
-XHRLevel.onload = function() {
-    if(XHRLevel.status != 200)
-    {
-        dataError();
-    }
-    else
-    {
-        sendObjdata();
-    }
-}
+// XHRLevel.onload = function() {
+//     if(XHRLevel.status != 200)
+//     {
+//         dataError();
+//     }
+//     else
+//     {
+//         sendObjdata();
+//     }
+// }
 
 function sendObjdata() 
 {
-    let is_success = true
-
-    for (let i = 0; i < level.side ** 2; i++)
-    {
-        if (Obj_on_level[i] !== undefined)
-        {
-            const XHRObj = new XMLHttpRequest;
-            XHRObj.open("POST", "/api/save_obj");
+    let Obj_to_send = [];
     
-            objdata = JSON.stringify(Obj_on_level[i]);
-    
-            XHRObj.send(objdata);
-
-            XHRObj.onreadystatechange = function() {
-                if (XHRObj.readyState === XMLHttpRequest.DONE && XHRObj.status === 200)
-                {
-                    console.log(i, "- отправлен успешно");
-                }
-            }
-
-            XHRObj.onerror = function() {
-                console.error("Ошибка при: ", i)
-                is_success = false;
-            }
+    Obj_on_level.forEach(obj => {
+        if (obj !== undefined) {
+            obj.levelId = levelIdFromBack;
+            Obj_to_send.push(obj)
         }
+    });
+
+    const requestOption = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json'},
+        body: JSON.stringify(Obj_to_send)
     }
 
-    if (is_success)
-    {
-        success();
-    }
-    else
-    {
-        dataError();
-    }
+    fetch("/api/save_obj", requestOption)
+        .then(Response => {
+            if (Response.status === 200) {
+                console.log("Ok2");
+                success();
+            }
+        })
+        .catch(Error => {
+            console.error(Error);
+            dataError();
+        });
+
+    // for (let i = 0; i < level.side ** 2; i++)
+    // {
+    //     if (Obj_on_level[i] !== undefined)
+    //     {
+    //         const XHRObj = new XMLHttpRequest;
+    //         XHRObj.open("POST", "/api/save_obj");
+    
+    //         objdata = JSON.stringify(Obj_on_level[i]);
+    
+    //         XHRObj.send(objdata);
+
+    //         XHRObj.onreadystatechange = function() {
+    //             if (XHRObj.readyState === XMLHttpRequest.DONE && XHRObj.status === 200)
+    //             {
+    //                 console.log(i, "- отправлен успешно");
+    //             }
+    //         }
+
+    //         XHRObj.onerror = function() {
+    //             console.error("Ошибка при: ", i)
+    //             is_success = false;
+    //         }
+    //     }
+    // }
+
+    // if (is_success)
+    // {
+    //     success();
+    // }
+    // else
+    // {
+    //     dataError();
+    // }
 }
 
 function success()
 {
     message.classList.add('success');
+    message.classList.remove('error')
     message.textContent = "Success";
 }
 
