@@ -43,6 +43,13 @@ type objdata struct {
 
 func createRoomPage(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		err := checkCookie(db, w, r)
+		if err != nil {
+			log.Println(err.Error())
+			http.Redirect(w, r, "/enter_to_battle", http.StatusSeeOther)
+			return
+		}
+
 		levels, err := levelsSelect(db)
 		if err != nil {
 			http.Error(w, "Error", 500)

@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -43,7 +44,7 @@ func enterToBattlePage(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func searchUser(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
+func getUser(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		reqData, err := io.ReadAll(r.Body)
 		if err != nil {
@@ -72,7 +73,23 @@ func searchUser(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		fmt.Println(user)
+		http.SetCookie(w, &http.Cookie{
+			Name:     "UserCookie",
+			Value:    fmt.Sprint(user.ID),
+			HttpOnly: true,
+			Path:     "/",
+			Expires:  time.Now().AddDate(0, 0, 1),
+		})
+
+		cook, err := r.Cookie("UserCookie")
+		if err != nil {
+			log.Println(err.Error())
+			return
+		}
+
+		fmt.Printf("cook: %v\n", cook)
+
+		return
 	}
 }
 
@@ -149,4 +166,46 @@ func createUserOnDB(db *sqlx.DB, user userRequestdata) error {
 	_, err := db.Exec(query, user.NickName, user.Email, user.Password)
 
 	return err
+}
+
+func checkCookie(db *sqlx.DB, w http.ResponseWriter, r *http.Request) error {
+	cookie, err := r.Cookie("UserCookie")
+	if err != nil {
+		if err == http.ErrNoCookie {
+			return err
+		}
+
+		log.Println(err.Error())
+		return err
+	}
+
+	userID := cookie.Value
+
+	err = searchUserOnDB(db, userID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func searchUserOnDB(db *sqlx.DB, ID string) error {
+	const query = `
+			SELECT
+			  id,
+			  nickname,
+			  level_complited
+			FROM
+			  user
+			WHERE
+			  id = ?
+	`
+	row := db.QueryRow(query, ID)
+	user := new(userdata)
+	err := row.Scan(&user.ID, &user.NickName, &user.LevelComplited)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

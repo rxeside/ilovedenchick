@@ -214,36 +214,45 @@ func sendMessageAboutTanks(currRoom *roomdata) {
 
 }
 
-func roomPage(w http.ResponseWriter, r *http.Request) {
-	roomKeystr := mux.Vars(r)["roomKey"]
-	roomKey, err := strconv.Atoi(roomKeystr)
-	if err != nil {
-		http.Error(w, "Err with roomKey", 500)
-		log.Println(err.Error())
-	}
+func roomPage(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		err := checkCookie(db, w, r)
+		if err != nil {
+			log.Println(err.Error())
+			http.Redirect(w, r, "/enter_to_battle", http.StatusSeeOther)
+			return
+		}
 
-	_, ok := rooms[roomKey]
-	if !ok {
-		http.Error(w, "Room Not Found", 500)
-		return
-	}
+		roomKeystr := mux.Vars(r)["roomKey"]
+		roomKey, err := strconv.Atoi(roomKeystr)
+		if err != nil {
+			http.Error(w, "Err with roomKey", 500)
+			log.Println(err.Error())
+		}
 
-	ts, err := template.ParseFiles("pages/room.html")
-	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
-		log.Println(err.Error())
-		return
-	}
+		_, ok := rooms[roomKey]
+		if !ok {
+			http.Error(w, "Room Not Found", 500)
+			return
+		}
 
-	data := levelPage{
-		RoomKey: roomKey,
-	}
+		ts, err := template.ParseFiles("pages/room.html")
+		if err != nil {
+			http.Error(w, "Internal Server Error", 500)
+			log.Println(err.Error())
+			return
+		}
 
-	err = ts.Execute(w, data)
-	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
-		log.Println(err.Error())
-		return
+		data := levelPage{
+			RoomKey: roomKey,
+		}
+
+		err = ts.Execute(w, data)
+		if err != nil {
+			http.Error(w, "Internal Server Error", 500)
+			log.Println(err.Error())
+			return
+		}
 	}
 }
 

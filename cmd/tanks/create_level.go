@@ -32,19 +32,28 @@ type saveCellRequest struct {
 	Pos_y           int    `json:"y"`
 }
 
-func createLevel(w http.ResponseWriter, r *http.Request) {
-	ts, err := template.ParseFiles("pages/level_creator.html")
-	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
-		log.Println(err.Error())
-		return
-	}
+func createLevel(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		err := checkCookie(db, w, r)
+		if err != nil {
+			log.Println(err.Error())
+			http.Redirect(w, r, "/enter_to_battle", http.StatusSeeOther)
+			return
+		}
 
-	err = ts.Execute(w, nil)
-	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
-		log.Println(err.Error())
-		return
+		ts, err := template.ParseFiles("pages/level_creator.html")
+		if err != nil {
+			http.Error(w, "Internal Server Error", 500)
+			log.Println(err.Error())
+			return
+		}
+
+		err = ts.Execute(w, nil)
+		if err != nil {
+			http.Error(w, "Internal Server Error", 500)
+			log.Println(err.Error())
+			return
+		}
 	}
 }
 

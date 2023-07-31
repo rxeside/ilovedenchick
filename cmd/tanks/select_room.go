@@ -20,34 +20,43 @@ type selectRoomBtn struct {
 	Size int
 }
 
-func selectRoom(w http.ResponseWriter, r *http.Request) {
-	ts, err := template.ParseFiles("pages/room_select.html")
-	if err != nil {
-		http.Error(w, "Error with page", 500)
-		log.Println(err.Error())
-		return
-	}
+func selectRoom(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		err := checkCookie(db, w, r)
+		if err != nil {
+			log.Println(err.Error())
+			http.Redirect(w, r, "/enter_to_battle", http.StatusSeeOther)
+			return
+		}
 
-	var linkOfRooms []selectRoomBtn
+		ts, err := template.ParseFiles("pages/room_select.html")
+		if err != nil {
+			http.Error(w, "Error with page", 500)
+			log.Println(err.Error())
+			return
+		}
 
-	for key, room := range rooms {
-		var point selectRoomBtn
-		point.Key = key
-		point.Name = room.Name
-		point.Size = room.Level.Side
+		var linkOfRooms []selectRoomBtn
 
-		linkOfRooms = append(linkOfRooms, point)
-	}
+		for key, room := range rooms {
+			var point selectRoomBtn
+			point.Key = key
+			point.Name = room.Name
+			point.Size = room.Level.Side
 
-	data := selectRoomPage{
-		Rooms: linkOfRooms,
-	}
+			linkOfRooms = append(linkOfRooms, point)
+		}
 
-	err = ts.Execute(w, data)
-	if err != nil {
-		http.Error(w, "Error with execute", 500)
-		log.Println(err.Error())
-		return
+		data := selectRoomPage{
+			Rooms: linkOfRooms,
+		}
+
+		err = ts.Execute(w, data)
+		if err != nil {
+			http.Error(w, "Error with execute", 500)
+			log.Println(err.Error())
+			return
+		}
 	}
 }
 
