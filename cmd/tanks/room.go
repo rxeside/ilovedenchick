@@ -38,6 +38,7 @@ type tanktype struct {
 	Update    bool
 	Live      int
 	Status    string
+	Color     string
 }
 
 type bullettype struct {
@@ -111,6 +112,7 @@ func roomIsRunning(db *sqlx.DB, key int) {
 				} else if currRoom.Status == "Reset" {
 					resetRoom(db, currRoom)
 					sendMessageAboutReset(currRoom)
+					currRoom.Status = "Load"
 				} else {
 					if len(currRoom.Tanks) > 0 {
 						sendMessageForCleints(currRoom)
@@ -143,7 +145,9 @@ func sendMessageAboutReset(currRoom *roomdata) {
 			}
 		}
 
-		currRoom.Tanks[conn].Status = "Closed"
+		// currRoom.Tanks[conn].Status = "Closed"
+		currRoom.Tanks[conn].Live = 3
+		resetTank(currRoom, tank)
 		// delete(currRoom.Tanks, conn)
 		currRoom.PlayersAreLiving--
 	}
@@ -377,6 +381,22 @@ func createTank(db *sqlx.DB, conn *websocket.Conn, cookie *http.Cookie, room *ro
 		newTank.Status = "Load"
 		newTank.Direction = "1"
 		newTank.Live = 3
+		isBusy := true
+		var color string
+
+		for isBusy {
+			color = randomColor()
+
+			isBusy = false
+			for _, tank := range room.Tanks {
+				if tank.Color == color {
+					isBusy = true
+				}
+			}
+		}
+
+		newTank.Color = color
+		fmt.Println(newTank.Color)
 
 		max := len(room.PointsToSpawn)
 		spawnIndex := rand.Intn(max)
@@ -394,11 +414,34 @@ func createTank(db *sqlx.DB, conn *websocket.Conn, cookie *http.Cookie, room *ro
 		}
 
 		room.Tanks[conn] = &newTank
-		room.PlayersAreLiving++
-		room.Status = "Load"
 	}
 
+	room.PlayersAreLiving++
+	room.Status = "Load"
+
 	return tank, nil
+}
+
+func randomColor() string {
+	randInt := rand.Intn(6)
+	var color string
+
+	switch randInt {
+	case 0:
+		color = "red"
+	case 1:
+		color = "green"
+	case 2:
+		color = "gold"
+	case 3:
+		color = "grey"
+	case 4:
+		color = "blue"
+	case 5:
+		color = "magenta"
+	}
+
+	return color
 }
 
 func readMessageFromCleints(conn *websocket.Conn, currRoom *roomdata, tank *tanktype, message string, levelSize *float64) {
@@ -723,7 +766,6 @@ func hitByBullet(tank *tanktype, bullets *map[int]*bullettype) bool {
 }
 
 func hitTank(room *roomdata, tank *tanktype) {
-	fmt.Printf("tank.ID: %v\n", tank.ID)
 	tank.Distance = 0
 	tank.Live--
 

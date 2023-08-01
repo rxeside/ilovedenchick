@@ -35,8 +35,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
     const lives = document.getElementById('lives')
 
-    // const socket = new WebSocket("wss://" + document.location.hostname +":/ws/" + room.textContent);
-    const socket = new WebSocket("ws://" + document.location.hostname +":3000/ws/" + room.textContent);
+    const socket = new WebSocket("wss://" + document.location.hostname +":/ws/" + room.textContent);
+    // const socket = new WebSocket("ws://" + document.location.hostname +":3000/ws/" + room.textContent);
 
     socket.onopen = function() {
         console.log("Connected");
@@ -253,6 +253,7 @@ document.addEventListener("DOMContentLoaded", function() {
         const newTank = document.createElement("img");
         newTank.id = "tank" + element.ID;
         newTank.className = "tank";
+        newTank.classList.add("tank_" + element.Color)
         newTank.src = "../static/image/top.png";
         newTank.style.top = element.Y + "px";
         newTank.style.left = element.X + "px";
@@ -541,6 +542,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 tankName.textContent = tank.Name + ": ";
                 liveNum.textContent = tank.Live;
                 newElt.className = "tank-live__elt";
+                newElt.classList.add(tank.Color)
 
                 newElt.appendChild(tankName);
                 newElt.appendChild(liveNum);

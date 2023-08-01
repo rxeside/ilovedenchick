@@ -114,6 +114,7 @@ func saveUser(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if emailAlreadyThere(db, newUser.Email) {
+			http.Error(w, "Already has", 500)
 			log.Println("Already has")
 			return
 		}
@@ -180,11 +181,12 @@ func emailAlreadyThere(db *sqlx.DB, email string) bool {
 			SELECT
 			  email
 			FROM
-			  tanki_online
+			  user
 			WHERE
 			  email = ?
 	`
 	_, err := db.Query(query, email)
+
 	if err != nil {
 		return true
 	}
