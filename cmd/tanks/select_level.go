@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"strconv"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -14,26 +13,6 @@ import (
 type selectLevelPage struct {
 	LevelData []*leveldata
 }
-
-// type levelsdata struct {
-// 	Id          int    `db:"id"`
-// 	Name        string `db:"name"`
-// 	Side        int    `db:"side"`
-// 	Author      string `db:"author"`
-// 	IsCompleted int    `db:"is_Completed"`
-// }
-
-// type obJects struct {
-// 	Id              int    `db:"id"`
-// 	Id_Level        int    `db:"id_level"`
-// 	Name            string `db:"name"`
-// 	Is_Destructible int    `db:"is_Destructible"`
-// 	Can_T_Pass      int    `db:"can_T_pass"`
-// 	Can_B_pass      int    `db:"can_B_pass"`
-// 	ImageURL        string `db:"imageURL"`
-// 	PosX            int    `db:"pos_x"`
-// 	PosY            int    `db:"pos_y"`
-// }
 
 func getLevelObj(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -70,19 +49,21 @@ func handleLevelID(w http.ResponseWriter, r *http.Request) (int, error) {
 	}
 	defer r.Body.Close()
 
-	var numStr string
+	var numStr int
 	err = json.Unmarshal(body, &numStr)
 	if err != nil {
 		http.Error(w, "Invalid number", http.StatusBadRequest)
 		return 0, err
 	}
 
-	number, err := strconv.Atoi(numStr)
-	if err != nil {
-		return 0, err
-	}
+	// number, err := strconv.Atoi(numStr)
+	// if err != nil {
+	// 	return 0, err
+	// }
 
-	return number, nil
+	// return number, nil
+
+	return numStr, nil
 }
 
 func selectLevel(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {

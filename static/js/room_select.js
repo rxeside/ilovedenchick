@@ -1,29 +1,27 @@
-const createBtn = document.getElementById('create');
-const nameFeild = document.getElementById('name');
+const btns = document.getElementsByName("room");
+let selectedRoom;
 
-let LevelID;
-let RoomName;
-
-nameFeild.onchange = function() {
-    RoomName = nameFeild.value;
+window.onload = function() {
+    btns.forEach(btn => {
+        btn.onclick = function() {
+            selectRoom(btn.id)
+        }
+    });
 }
 
-createBtn.onclick = function() {
-    createNewRoom();
-}
-
-function sendData(buttonId) {
-    const button = document.getElementById(buttonId);
+function selectRoom(key) {
+    const button = document.getElementById(key);
     const size = button.getAttribute("size");
+    key = Number(key);
+    selectedRoom = key;
+
     const requestOption = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json'},
-        body: JSON.stringify(buttonId)
+        body: JSON.stringify(key)
     };
 
-    LevelID = buttonId;
-
-    fetch('api/getlevelobj', requestOption)
+    fetch('/api/getobjfromroom', requestOption)
         .then(Response => Response.json())
         .then(data => {
             const elements = document.querySelectorAll('.field__cell');
@@ -31,11 +29,14 @@ function sendData(buttonId) {
                 element.remove();
             });
 
+            console.log(data);
+
             let objects = [];
 
             data.forEach(element => {
                 objects[element.Pos_X + size * element.Pos_Y] = element.ImgURL;
             })
+            console.log(objects);
 
             const l_field = document.getElementById('level_field');
             l_field.style.gridTemplateColumns = "repeat(" + size + ", 1fr)";
@@ -55,19 +56,8 @@ function sendData(buttonId) {
             }
         })
         .catch(error => console.error(error));
-};
-
-function createNewRoom() {
-    let newData = {
-        Id: LevelID,
-        Name: RoomName
-    };
-
-    const requestOption  = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json'},
-        body: JSON.stringify(newData)
-    };
-
-    fetch('api/create_new_room', requestOption);
 }
+
+function joinToRoom() {
+    window.location.href = "/room/" + selectedRoom;
+};

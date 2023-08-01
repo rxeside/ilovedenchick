@@ -34,21 +34,28 @@ func main() {
 	dbx := sqlx.NewDb(db, dbDriverName)
 
 	mux := mux.NewRouter()
+
 	mux.HandleFunc("/ws", handler)
-	mux.HandleFunc("/ws/{roomKey}", wsConnection)
+	mux.HandleFunc("/ws/{roomKey}", wsConnection(dbx))
 
 	mux.HandleFunc("/level/{levelID}", level(dbx))
-	mux.HandleFunc("/room/{roomKey}", roomPage)
-	mux.HandleFunc("/create_level", createLevel)
-	mux.HandleFunc("/main", mainMenu)
-	mux.HandleFunc("/create_room", createRoomPage)
+	mux.HandleFunc("/room/{roomKey}", roomPage(dbx))
+	mux.HandleFunc("/create_level", createLevel(dbx))
+	mux.HandleFunc("/main", mainMenu(dbx))
+	mux.HandleFunc("/create_room", createRoomPage(dbx))
 	mux.HandleFunc("/select_level", selectLevel(dbx))
+	mux.HandleFunc("/select_room", selectRoom(dbx))
+	mux.HandleFunc("/enter_to_battle", enterToBattlePage)
+	mux.HandleFunc("/r", deleteCookie)
 
 	mux.HandleFunc("/api/save_level", saveLevel(dbx)).Methods(http.MethodPost)
 	mux.HandleFunc("/api/save_obj", saveObj(dbx)).Methods(http.MethodPost)
 	mux.HandleFunc("/api/create_new_room", createNewRoom(dbx)).Methods(http.MethodPost)
 	mux.HandleFunc("/api/delete_room", deleteRoom).Methods(http.MethodPost)
 	mux.HandleFunc("/api/getlevelobj", getLevelObj(dbx)).Methods((http.MethodPost))
+	mux.HandleFunc("/api/getobjfromroom", getObjFromRoom(dbx)).Methods((http.MethodPost))
+	mux.HandleFunc("/api/login", getUser(dbx)).Methods(http.MethodPost)
+	mux.HandleFunc("/api/register", saveUser(dbx)).Methods(http.MethodPost)
 
 	mux.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 

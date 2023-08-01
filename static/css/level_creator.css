@@ -3,6 +3,7 @@
     padding: 0;
     margin: 0;
     overflow-y: hidden;
+    cursor: url(../image/cursor2.png), default;
 }
 
 .left
@@ -28,6 +29,40 @@
     padding: 6% 0 0 20px;
     gap: 36px;
     opacity: 0.7;
+}
+
+.choice button{
+    width: 20%;
+}
+
+.level-data button:active {
+    width: 45%;
+    font: 400 normal 13px/30px 'Press Start 2P';
+    border-radius: 10px;
+    margin-left: 2.5%;
+}
+
+.level-data button:hover {
+    background-color: azure;
+}
+
+.choice button:active {
+    width: 18%;
+    font: 400 normal 13px/30px 'Press Start 2P';
+    border-radius: 10px;
+    margin-left: 0.5%;
+}
+
+.choice .save:active {
+    margin-right: 1.5%;
+}
+
+.choice .save:hover {
+    background-color: rgb(15, 161, 100);
+}
+
+.choice .delet:hover {
+    background-color: rgb(202, 83, 83);;
 }
 
 .level-data__btn
@@ -132,13 +167,19 @@
     box-shadow: 10px 10px 20px rgba(0, 255, 213, 0.288), -10px -10px 20px rgba(0, 255, 213, 0.288), 10px -10px 20px rgba(0, 255, 213, 0.288), -10px 10px 20px rgba(0, 255, 213, 0.288);
 }
 
-.choice
+.alert
 {
     display: flex;
     flex-direction: column;
     padding: 20px 0 0 20px;
-    gap: 30px;
+    gap: 20px;
     opacity: 0.7;
+}
+
+.choice
+{
+    flex-direction: row;
+    gap: 30px;
 }
 
 .menu a
@@ -183,10 +224,38 @@
 
 .delet
 {
+    margin-top: 8%;
     background-color: rgb(177, 67, 67);
 }
 
 .name__input
 {
     font: 400 normal 13px/25px 'Press Start 2P';
+}
+
+.exit
+{
+    height: 102px;
+    width: 102px;
+    /* background-color: aqua; */
+    background-image: url(../image/exit_mini.png);
+    position: fixed;
+    bottom: 4.65%;
+    left: 1%;
+    margin: 10px;
+    border-radius: 50%;
+}
+
+.exit:hover
+{
+    background-image: url(../image/exit_hover.png);
+}
+
+.exit:active
+{
+    background-image: url(../image/exit_activ.png);
+    height: 92px;
+    width: 92px;
+    bottom: 5%;
+    left: 1.2%;
 }
