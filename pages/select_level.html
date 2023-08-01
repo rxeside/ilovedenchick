@@ -12,7 +12,7 @@
         <div class="container">
             <div class="level-list">
                 {{ range .LevelData }}
-                    <button class="level-item" id="{{ .Id }}" size="{{ .Side }}" onclick="sendData({{ .Id }})">{{ .Name }}</button>
+                    <button class="level-item" id="{{ .Id }}" size="{{ .Size }}" onclick="sendData({{ .Id }})">{{ .Name }}</button>
                 {{ end }}
             </div>
             <div class="workspace">

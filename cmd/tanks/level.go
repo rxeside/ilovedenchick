@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"html/template"
 	"log"
 	"net/http"
@@ -11,11 +12,16 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+type levelPagedata struct {
+	LevelID   int
+	LevelSize int
+}
+
 var currLevel leveldata
 
 var objects []*objdata
 
-func level(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
+func levelPage(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		levelIDstr := mux.Vars(r)["levelID"]
 		levelID, err := strconv.Atoi(levelIDstr)
@@ -24,17 +30,17 @@ func level(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 			log.Println(err.Error())
 		}
 
-		currLevel, err = getLevelByID(db, levelID)
+		currLevel, err := getLevelByID(db, levelID)
 		if err != nil {
 			http.Error(w, "Error with getting a level by ID", 500)
 			log.Println(err.Error())
 		}
 
-		objects, err = getObjByID(db, levelID)
-		if err != nil {
-			http.Error(w, "Error with getting an object by ID", 500)
-			log.Println(err.Error())
-		}
+		// objects, err = getObjByID(db, levelID)
+		// if err != nil {
+		// 	http.Error(w, "Error with getting an object by ID", 500)
+		// 	log.Println(err.Error())
+		// }
 
 		ts, err := template.ParseFiles("pages/level.html")
 		if err != nil {
@@ -43,7 +49,11 @@ func level(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		err = ts.Execute(w, nil)
+		data := levelPagedata{
+			LevelID: currLevel.Id,
+		}
+
+		err = ts.Execute(w, data)
 		if err != nil {
 			http.Error(w, "Internal Server Error", 500)
 			log.Println(err.Error())
@@ -51,6 +61,35 @@ func level(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 }
+
+func getLevel(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		levelID, err := handleLevelID(w, r)
+		if err != nil {
+			http.Error(w, "Err with getting levelID", 500)
+			log.Println(err.Error())
+			return
+		}
+
+		level, err := getLevelByID(db, levelID)
+		if err != nil {
+			http.Error(w, "Err with getting level", 500)
+			log.Println(err.Error())
+			return
+		}
+
+		jsonData, err := json.Marshal(level)
+		if err != nil {
+			http.Error(w, "Err with json marshal", 500)
+			log.Println(err.Error())
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(jsonData)
+	}
+}
+
 func handler(w http.ResponseWriter, r *http.Request) {
 	var tank tanktype
 	var levelSide float64
@@ -79,13 +118,13 @@ func handler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			levelSide, err = getLevelSide(conn)
+			levelSide, err = getLevelSize(conn)
 			if err != nil {
 				log.Println(err.Error())
 				return
 			}
 
-			sideValue = levelSide / float64(currLevel.Side)
+			sideValue = levelSide / float64(currLevel.Size)
 
 			for _, value := range objects {
 				value.Pos_X = value.Pos_X * sideValue
@@ -104,7 +143,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getLevelSide(conn *websocket.Conn) (float64, error) {
+func getLevelSize(conn *websocket.Conn) (float64, error) {
 	_, m, err := conn.ReadMessage()
 	if err != nil {
 		return 0, err

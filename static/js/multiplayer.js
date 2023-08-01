@@ -46,8 +46,8 @@ document.addEventListener("DOMContentLoaded", function() {
         level = JSON.parse(event.data);
 
         level_name.textContent = level.Name
-        ratio = boardSide / (level.Side * sizeOnServer)
-        size = boardSide / level.Side;
+        ratio = boardSide / (level.Size * sizeOnServer)
+        size = boardSide / level.Size;
 
         step = size / tankstep;
         bulletStep = step * bulletstep;
@@ -118,20 +118,31 @@ document.addEventListener("DOMContentLoaded", function() {
                     tanks[index].Status = newstate[key].Status
                     tanks[index].Live = newstate[key].Live
                 }
-            }
-        };
+            } else {
+                let index = tanks.findIndex((tank) => tank.ID === newstate[key].ID);
 
-        if (tanks !== undefined) {
-            for (key in tanks) {
-                index = newstate.findIndex((element) => element.ID === tanks[key].ID)
-
-                if ((index === -1) || (newstate[key].Status === "Closed")) {
+                if (index !== -1) {
                     const removeTank = document.getElementById("tank" + tanks[key].ID);
 
                     removeTank.remove();
                     tanks.splice(key, 1);
                 }
             }
+        };
+
+        if (tanks !== undefined) {
+            for (key in tanks) {
+                let index = newstate.findIndex((element) => element.ID === tanks[key].ID)
+
+                if (index === -1) {
+                    const removeTank = document.getElementById("tank" + tanks[key].ID);
+
+                    removeTank.remove();
+                    tanks.splice(key, 1);
+                }
+            }
+
+            console.log(tanks);
         }
 
         for (key in tanks) {

@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
-
+    
     // Создание и отображение кирпичей на поле
     const socket = new WebSocket("ws://localhost:3000/ws");
 
@@ -401,4 +401,43 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
     }); 
+
+    //Отправка fetch запроса
+    document.addEventListener("onload", getLevelData());
+    
+    function getLevelData() {
+        const id = getLevelID()
+        console.log("Hello", id);
+    
+        const requestOption = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json'},
+            body: JSON.stringify(id)
+        }
+    
+        fetch("/api/getlevel", requestOption)
+            .then(Response => Response.json())
+            .then(data => {
+                console.log(data);
+                getObjects(requestOption);
+            })
+            .catch(Error => console.error(Error));
+    }
+
+    function getObjects(requestOption) {
+        fetch("/api/getlevelobj", requestOption)
+            .then(Response => Response.json())
+            .then(data => {
+                console.log(data);
+            })
+            .catch(error => console.error(error));
+    }
+    
+    function getLevelID() {
+        const levelData = document.getElementById("level_data");
+        let id = levelData.getAttribute("num");
+    
+        id = Number(id);
+        return id
+    } 
 });

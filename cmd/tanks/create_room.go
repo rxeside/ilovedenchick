@@ -25,7 +25,7 @@ type roomdeletenum struct {
 type leveldata struct {
 	Id          int    `db:"id"`
 	Name        string `db:"name"`
-	Side        int    `db:"side"`
+	Size        int    `db:"side"`
 	Author      string `db:"author"`
 	IsCompleted int    `db:"is_Completed"`
 }

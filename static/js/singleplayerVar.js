@@ -139,6 +139,3 @@ bot3.health = 2;
 let keyPressed = 0;
 let shootDelay = 0;
 let isPause = false;
-
-//Данные для fetch запроса
-// let url = 
