@@ -23,7 +23,7 @@ func main() {
 		Passwd: "P@ssw0rd",
 		Net:    "tcp",
 		Addr:   "localhost:3306",
-		DBName: "tanki_online",
+		DBName: "tanks",
 	}
 
 	db, err := sql.Open("mysql", cfg.FormatDSN())

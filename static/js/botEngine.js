@@ -254,8 +254,14 @@ function botShooting(bot) {
                 explosionBotShall(bot);
                 if (element.IsDestructible === 1) {
                     let removeObj = document.getElementById(i);
-                    brick[i] = undefined;
-                    removeObj.remove();
+                    
+                    if (element.Name === "Base") {
+                        console.log("LOSE by angel");
+                        lose();
+                    } else {
+                        brick[i] = undefined;
+                        removeObj.remove();
+                    }
                 }
             }
         }

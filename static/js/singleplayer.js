@@ -84,7 +84,12 @@ document.addEventListener("DOMContentLoaded", function () {
             for (let i = 0; i < brick.length; i++) {
                 brick[i].Pos_X = brick[i].Pos_X + "px";
                 brick[i].Pos_Y = brick[i].Pos_Y + "px";
-                createNewElt(brick[i], i);
+                if (brick[i].Name !== "Tank") {
+                    createNewElt(brick[i], i);
+                } else if (brick[i].Name == "Tank") {
+                    tank.style.top = brick[i].Pos_Y;
+                    tank.style.left = brick[i].Pos_X;
+                }
             };
             
         };
@@ -354,8 +359,16 @@ document.addEventListener("DOMContentLoaded", function () {
                         audioConcrete.pause();
                         audioBrickShot.play();
                         let removeObj = document.getElementById(i);
-                        brick[i] = undefined;
-                        removeObj.remove();
+                        if (element.Name === "Base") {
+                            console.log("LOSE by angel");
+                            removeObj.src = "../static/image/destroyed_base.png"
+                            lose();
+                        } else {
+                            brick[i] = undefined;
+                            removeObj.remove();
+                        }
+                        
+
                     }
 
                 }
