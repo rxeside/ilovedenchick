@@ -1,7 +1,3 @@
-// $(document).ready(function(){
-//     $("*").load("/main_menu");
-// });
-
 //Создание звуков
 const audioButton = new Audio('../static/audio/button.mp3');
 audioButton.volume = 0.8;
@@ -16,11 +12,12 @@ function clikButtonEditor() {
 
 function clikButtonSinglePlayer() {
     audioButton.play();
+    setTimeout(() => { window.location.href = "/select_level";}, 200);
 }
 
 function clikButtonEditorMultyPlayer() {
     audioButton.play();
-    // audioFon.play();
+    setTimeout(() => { window.location.href = "/select_room";}, 200);
 }
 
 document.addEventListener("mousemove", function(){

@@ -23,7 +23,7 @@ func main() {
 		Passwd: "P@ssw0rd",
 		Net:    "tcp",
 		Addr:   "localhost:3306",
-		DBName: "tanks",
+		DBName: "tanki_online",
 	}
 
 	db, err := sql.Open("mysql", cfg.FormatDSN())
@@ -38,7 +38,7 @@ func main() {
 	mux.HandleFunc("/ws", handler)
 	mux.HandleFunc("/ws/{roomKey}", wsConnection(dbx))
 
-	mux.HandleFunc("/level/{levelID}", level(dbx))
+	mux.HandleFunc("/level/{levelID}", levelPage(dbx))
 	mux.HandleFunc("/room/{roomKey}", roomPage(dbx))
 	mux.HandleFunc("/create_level", createLevel(dbx))
 	mux.HandleFunc("/main", mainMenu(dbx))
@@ -52,6 +52,7 @@ func main() {
 	mux.HandleFunc("/api/save_obj", saveObj(dbx)).Methods(http.MethodPost)
 	mux.HandleFunc("/api/create_new_room", createNewRoom(dbx)).Methods(http.MethodPost)
 	mux.HandleFunc("/api/delete_room", deleteRoom).Methods(http.MethodPost)
+	mux.HandleFunc("/api/getlevel", getLevel(dbx)).Methods((http.MethodPost))
 	mux.HandleFunc("/api/getlevelobj", getLevelObj(dbx)).Methods((http.MethodPost))
 	mux.HandleFunc("/api/getobjfromroom", getObjFromRoom(dbx)).Methods((http.MethodPost))
 	mux.HandleFunc("/api/login", getUser(dbx)).Methods(http.MethodPost)

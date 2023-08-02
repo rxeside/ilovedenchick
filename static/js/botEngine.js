@@ -254,8 +254,8 @@ function botShooting(bot) {
                 explosionBotShall(bot);
                 if (element.IsDestructible === 1) {
                     let removeObj = document.getElementById(i);
-                    
                     if (element.Name === "Base") {
+                        removeObj.src="../static/image/destroyed_base.png"
                         console.log("LOSE by angel");
                         lose();
                     } else {
@@ -324,24 +324,4 @@ function generateRandomAction() {
     }
     const actions = ['move', 'shoot'];
     return actions[Math.floor(Math.random() * actions.length)];
-}
-
-function lose() {
-    dead = true;
-    console.log("GAME OVER");
-    tank.remove();
-    setTimeout(() => { location.reload(); }, 2000);
-}
-
-function win() {
-    console.log("WIN");
-    setTimeout(() => { location.reload(); }, 2000);
-}
-
-function updateTankCount() {
-    botcountEvent.textContent = "enemys left: " + bots.length;
-}
-
-function updateHealth() {
-    tankHpEvent.textContent = "health: " + health + "hp";
 }

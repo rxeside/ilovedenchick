@@ -1,49 +1,91 @@
 document.addEventListener("DOMContentLoaded", function () {
-
-    // Создание и отображение кирпичей на поле
-    const socket = new WebSocket("ws://localhost:3000/ws");
-
-    socket.onopen = function () {
-        console.log("Connected");
-        socket.send("level");
-        socket.onmessage = function (event) {
-            level = JSON.parse(event.data);
-            sideValue = boardSide / level.Side;
-            levelSide = level.Side;
-            tank.style.height = sideValue * 0.95 + "px";
-            tank.style.width = sideValue * 0.95 + "px";
-            console.log(sideValue);
-            shell.style.height = sideValue * 0.3 + "px";
-            shell.style.width = sideValue * 0.25 + "px";
-            explosion.style.height = sideValue * 0.7 + "px";
-            explosion.style.width = sideValue * 0.7 + "px";
-            bots.forEach(bot => {
-                bot.style.height = sideValue * 0.95 + "px";
-                bot.style.width = sideValue * 0.95 + "px";
-                bot.botShell.style.height = sideValue * 0.3 + "px";
-                bot.botShell.style.width = sideValue * 0.25 + "px";
-                bot.botShotExplosion.style.height = sideValue * 0.7 + "px";
-                bot.botShotExplosion.style.width = sideValue * 0.7 + "px";
+    
+    //Отправка fetch запроса
+    document.addEventListener("onload", getLevelData());
+    
+    function getLevelData() {
+        const id = getLevelID()
+        console.log("Hello", id);
+    
+        const requestOption = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json'},
+            body: JSON.stringify(id)
+        }
+    
+        fetch("/api/getlevel", requestOption)
+            .then(Response => Response.json())
+            .then(data => {
+                console.log(data);
+                levelDataProccessing(data);
+                getObjects(requestOption);
             })
-            
-
-
-            if (sideValue > 60) {
-                step = 1;
-                console.log("step", step);
-            } else {
-                speed = 200 / sideValue;
-                botSpeed = 300 / sideValue;
-                console.log("speed", speed);
-            }
-            newAns();
-        };
-        socket.send(boardSide);
-        socket.send(marginLeft);
-        socket.send(marginTop);
+            .catch(Error => console.error(Error));
     }
 
+    function getObjects(requestOption) {
+        fetch("/api/getlevelobj", requestOption)
+            .then(Response => Response.json())
+            .then(data => {
+                console.log(data);
+                createLevel(data);
+            })
+            .catch(error => console.error(error));
+    }
+    
+    function getLevelID() {
+        const levelData = document.getElementById("level_data");
+        let id = levelData.getAttribute("num");
+    
+        id = Number(id);
+        return id
+    } 
 
+    //Обработка данных об уровне и изменение переменных по данным
+    function levelDataProccessing(data){
+        level = data;
+        sideValue = boardSide / level.Size;
+        levelSide = level.Size;
+        tank.style.height = sideValue * 0.95 + "px";
+        tank.style.width = sideValue * 0.95 + "px";
+        console.log(sideValue);
+        shell.style.height = sideValue * 0.3 + "px";
+        shell.style.width = sideValue * 0.25 + "px";
+        explosion.style.height = sideValue * 0.7 + "px";
+        explosion.style.width = sideValue * 0.7 + "px";
+        bots.forEach(bot => {
+            bot.style.height = sideValue * 0.95 + "px";
+            bot.style.width = sideValue * 0.95 + "px";
+            bot.botShell.style.height = sideValue * 0.3 + "px";
+            bot.botShell.style.width = sideValue * 0.25 + "px";
+            bot.botShotExplosion.style.height = sideValue * 0.7 + "px";
+            bot.botShotExplosion.style.width = sideValue * 0.7 + "px";
+        })
+        
+        if (sideValue > 60) {
+            step = 1;
+            console.log("step", step);
+        } else {
+            speed = 200 / sideValue;
+            botSpeed = 300 / sideValue;
+            console.log("speed", speed);
+        }
+    }
+
+    //Построение уровня
+    function createLevel(data) {
+        brick = data;
+            for (let i = 0; i < brick.length; i++) {
+                brick[i].Pos_X = brick[i].Pos_X * sideValue + "px";
+                brick[i].Pos_Y = brick[i].Pos_Y * sideValue + "px";
+                if (brick[i].Name !== "Tank") {
+                    createNewElt(brick[i], i);
+                } else if (brick[i].Name == "Tank") {
+                    tank.style.top = brick[i].Pos_Y;
+                    tank.style.left = brick[i].Pos_X;
+                }
+            };
+    }
 
     const continueBtn = document.getElementById("continueBtn");
     const exitBtn = document.getElementById("exitBtn");
@@ -78,22 +120,17 @@ document.addEventListener("DOMContentLoaded", function () {
     document.addEventListener("keydown", handleKeyPress);
 
 
-    function newAns() {
-        socket.onmessage = function (event) {
-            brick = JSON.parse(event.data);
-            for (let i = 0; i < brick.length; i++) {
-                brick[i].Pos_X = brick[i].Pos_X + "px";
-                brick[i].Pos_Y = brick[i].Pos_Y + "px";
-                if (brick[i].Name !== "Tank") {
-                    createNewElt(brick[i], i);
-                } else if (brick[i].Name == "Tank") {
-                    tank.style.top = brick[i].Pos_Y;
-                    tank.style.left = brick[i].Pos_X;
-                }
-            };
+    // function newAns() {
+    //     socket.onmessage = function (event) {
+    //         brick = JSON.parse(event.data);
+    //         for (let i = 0; i < brick.length; i++) {
+    //             brick[i].Pos_X = brick[i].Pos_X + "px";
+    //             brick[i].Pos_Y = brick[i].Pos_Y + "px";
+    //             createNewElt(brick[i], i);
+    //         };
             
-        };
-    }
+    //     };
+    // }
 
     function createNewElt(element, i) {
         let obj = document.createElement("img");
@@ -360,15 +397,13 @@ document.addEventListener("DOMContentLoaded", function () {
                         audioBrickShot.play();
                         let removeObj = document.getElementById(i);
                         if (element.Name === "Base") {
-                            console.log("LOSE by angel");
                             removeObj.src = "../static/image/destroyed_base.png"
+                            console.log("LOSE by angel");
                             lose();
                         } else {
                             brick[i] = undefined;
                             removeObj.remove();
                         }
-                        
-
                     }
 
                 }
@@ -413,5 +448,25 @@ document.addEventListener("DOMContentLoaded", function () {
                     shooting();
             }
         }
-    }); 
+    });
 });
+
+function lose() {
+    dead = true;
+    console.log("GAME OVER");
+    tank.remove();
+    setTimeout(() => { location.reload(); }, 2000);
+}
+
+function win() {
+    console.log("WIN");
+    setTimeout(() => { window.location.href = "/select_level"; }, 2000);
+}
+
+function updateTankCount() {
+    botcountEvent.textContent = "enemys left: " + bots.length;
+}
+
+function updateHealth() {
+    tankHpEvent.textContent = "health: " + health + "hp";
+}

@@ -25,7 +25,7 @@ type roomdeletenum struct {
 type leveldata struct {
 	Id          int    `db:"id"`
 	Name        string `db:"name"`
-	Side        int    `db:"side"`
+	Size        int    `db:"side"`
 	Author      string `db:"author"`
 	IsCompleted int    `db:"is_Completed"`
 }
@@ -81,6 +81,7 @@ func createNewRoom(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		reqData, err := io.ReadAll(r.Body)
 		if err != nil {
+			http.Error(w, "Err with request", 500)
 			log.Println(err.Error())
 			return
 		}
@@ -89,6 +90,7 @@ func createNewRoom(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 
 		err = json.Unmarshal(reqData, &req)
 		if err != nil {
+			http.Error(w, "Err with unmarshal", 500)
 			log.Println(err.Error())
 			return
 		}
@@ -104,12 +106,14 @@ func createNewRoom(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 
 		NewRoom.Level, err = getLevelByID(db, levelID)
 		if err != nil {
+			http.Error(w, "Err with getting level", 500)
 			log.Println(err.Error())
 			return
 		}
 
 		NewRoom.Objects, err = getObjByID(db, levelID)
 		if err != nil {
+			http.Error(w, "Err with getting objects", 500)
 			log.Println(err.Error())
 			return
 		}
@@ -131,13 +135,14 @@ func createNewRoom(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 		rooms[key] = &NewRoom
 		fmt.Printf("key: %v\n", key)
 
-		roomIsRunning(db, key)
+		go func() {
+			roomIsRunning(db, key)
+		}()
 
 		return
 	}
 }
 
-// Нужно будет пересмотреть, перед удалением нужно будет завершить ту функцию на функционирование комнаты
 func deleteRoom(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Delete")
 	reqData, err := io.ReadAll(r.Body)

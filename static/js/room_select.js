@@ -9,6 +9,10 @@ window.onload = function() {
     });
 }
 
+function createNewRoom() {
+    window.location.href = "/create_room";
+}
+
 function selectRoom(key) {
     const button = document.getElementById(key);
     const size = button.getAttribute("size");

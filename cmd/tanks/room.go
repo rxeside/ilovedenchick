@@ -23,7 +23,7 @@ const (
 	bullet_width = 0.25 * size
 )
 
-type levelPage struct {
+type roomPagedata struct {
 	RoomKey  int
 	RoomName string
 }
@@ -250,7 +250,7 @@ func roomPage(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		data := levelPage{
+		data := roomPagedata{
 			RoomKey:  roomKey,
 			RoomName: room.Name,
 		}
@@ -298,7 +298,7 @@ func wsConnection(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		levelSize := float64(currRoom.Level.Side) * size
+		levelSize := float64(currRoom.Level.Size) * size
 
 		err = conn.WriteJSON(currRoom.Level)
 		if err != nil {
@@ -474,6 +474,7 @@ func readMessageFromCleints(conn *websocket.Conn, currRoom *roomdata, tank *tank
 
 		if tank.Status != "Moving" {
 			tank.Status = "Moving"
+
 			go func() {
 				moveTank(tank, currRoom.Objects, *levelSize)
 			}()

@@ -33,10 +33,15 @@ document.addEventListener("DOMContentLoaded", function() {
         Right: false
     }
 
-    const lives = document.getElementById('lives')
+    const lives = document.getElementById('lives');
+    let socket;
 
-    const socket = new WebSocket("wss://" + document.location.hostname +":/ws/" + room.textContent);
-    // const socket = new WebSocket("ws://" + document.location.hostname +":3000/ws/" + room.textContent);
+    if (window.location.hostname === "localhost")
+    {
+        socket = new WebSocket("ws://" + document.location.hostname +":3000/ws/" + room.textContent);
+    } else {
+        socket = new WebSocket("wss://" + document.location.hostname +":/ws/" + room.textContent);
+    }
 
     socket.onopen = function() {
         console.log("Connected");
@@ -46,8 +51,8 @@ document.addEventListener("DOMContentLoaded", function() {
         level = JSON.parse(event.data);
 
         level_name.textContent = level.Name
-        ratio = boardSide / (level.Side * sizeOnServer)
-        size = boardSide / level.Side;
+        ratio = boardSide / (level.Size * sizeOnServer)
+        size = boardSide / level.Size;
 
         step = size / tankstep;
         bulletStep = step * bulletstep;
@@ -118,14 +123,23 @@ document.addEventListener("DOMContentLoaded", function() {
                     tanks[index].Status = newstate[key].Status
                     tanks[index].Live = newstate[key].Live
                 }
+            } else {
+                let index = tanks.findIndex((tank) => tank.ID === newstate[key].ID);
+
+                if (index !== -1) {
+                    const removeTank = document.getElementById("tank" + tanks[key].ID);
+
+                    removeTank.remove();
+                    tanks.splice(key, 1);
+                }
             }
         };
 
         if (tanks !== undefined) {
             for (key in tanks) {
-                index = newstate.findIndex((element) => element.ID === tanks[key].ID)
+                let index = newstate.findIndex((element) => element.ID === tanks[key].ID)
 
-                if ((index === -1) || (newstate[key].Status === "Closed")) {
+                if (index === -1) {
                     const removeTank = document.getElementById("tank" + tanks[key].ID);
 
                     removeTank.remove();

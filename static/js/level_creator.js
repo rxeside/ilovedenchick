@@ -246,23 +246,7 @@ function sendLeveldata()
             console.error(Error);
             dataError();
         });
-
-    // let leveldata = JSON.stringify(level);
-
-    // XHRLevel.open("POST", "/api/save_level");
-    // XHRLevel.send(leveldata);
 }
-
-// XHRLevel.onload = function() {
-//     if(XHRLevel.status != 200)
-//     {
-//         dataError();
-//     }
-//     else
-//     {
-//         sendObjdata();
-//     }
-// }
 
 function sendObjdata() 
 {
@@ -292,40 +276,6 @@ function sendObjdata()
             console.error(Error);
             dataError();
         });
-
-    // for (let i = 0; i < level.side ** 2; i++)
-    // {
-    //     if (Obj_on_level[i] !== undefined)
-    //     {
-    //         const XHRObj = new XMLHttpRequest;
-    //         XHRObj.open("POST", "/api/save_obj");
-    
-    //         objdata = JSON.stringify(Obj_on_level[i]);
-    
-    //         XHRObj.send(objdata);
-
-    //         XHRObj.onreadystatechange = function() {
-    //             if (XHRObj.readyState === XMLHttpRequest.DONE && XHRObj.status === 200)
-    //             {
-    //                 console.log(i, "- отправлен успешно");
-    //             }
-    //         }
-
-    //         XHRObj.onerror = function() {
-    //             console.error("Ошибка при: ", i)
-    //             is_success = false;
-    //         }
-    //     }
-    // }
-
-    // if (is_success)
-    // {
-    //     success();
-    // }
-    // else
-    // {
-    //     dataError();
-    // }
 }
 
 function success()

@@ -42,7 +42,7 @@ func selectRoom(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 			var point selectRoomBtn
 			point.Key = key
 			point.Name = room.Name
-			point.Size = room.Level.Side
+			point.Size = room.Level.Size
 
 			linkOfRooms = append(linkOfRooms, point)
 		}

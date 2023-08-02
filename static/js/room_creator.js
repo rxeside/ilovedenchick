@@ -69,5 +69,17 @@ function createNewRoom() {
         body: JSON.stringify(newData)
     };
 
-    fetch('api/create_new_room', requestOption);
+    fetch('/api/create_new_room', requestOption)
+        .then(res => {
+            if (res.status == 200) {
+                console.log("Всё отлично");
+                window.location.href = "/select_room"
+            } else {
+                console.log("Что то не то");
+            }
+        });
+}
+
+function exit() {
+    window.location.href = "/select_level"
 }
