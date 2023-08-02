@@ -35,8 +35,8 @@ func main() {
 
 	mux := mux.NewRouter()
 
-	mux.HandleFunc("/ws", handler)
 	mux.HandleFunc("/ws/{roomKey}", wsConnection(dbx))
+	mux.HandleFunc("/ws/rooms", wsRooms)
 
 	mux.HandleFunc("/level/{levelID}", levelPage(dbx))
 	mux.HandleFunc("/room/{roomKey}", roomPage(dbx))

@@ -1,6 +1,7 @@
 //музыка
 const audioButton = new Audio('../static/audio/button.mp3');
 audioButton.volume = 0.8;
+let currLevel;
 
 function back() {
     audioButton.play();
@@ -18,6 +19,8 @@ function sendData(buttonId) {
         headers: { 'Content-Type': 'application/json'},
         body: JSON.stringify(buttonId)
     };
+
+    currLevel = buttonId;
 
     fetch('api/getlevelobj', requestOption)
         .then(Response => Response.json())
@@ -62,5 +65,5 @@ function back() {
 
 function play() {
     audioButton.play();
-    setTimeout(() => { window.location.href = "/level/9";}, 200);
+    setTimeout(() => { window.location.href = "/level/" + currLevel;}, 200);
 }

@@ -33,10 +33,14 @@ document.addEventListener("DOMContentLoaded", function() {
         Right: false
     }
 
-    const lives = document.getElementById('lives')
+    const lives = document.getElementById('lives');
+    let socket;
 
-    const socket = new WebSocket("wss://" + document.location.hostname +":/ws/" + room.textContent);
-    // const socket = new WebSocket("ws://" + document.location.hostname +":3000/ws/" + room.textContent);
+    if (window.location.hostname === "localhost") {
+        socket = new WebSocket("ws://" + document.location.hostname +":3000/ws/" + room.textContent);
+    } else {
+        socket = new WebSocket("wss://" + document.location.hostname +":/ws/" + room.textContent);
+    }
 
     socket.onopen = function() {
         console.log("Connected");
@@ -141,8 +145,6 @@ document.addEventListener("DOMContentLoaded", function() {
                     tanks.splice(key, 1);
                 }
             }
-
-            console.log(tanks);
         }
 
         for (key in tanks) {
@@ -565,3 +567,7 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 });
+
+function exit() {
+    window.location.href = "/select_room";
+}

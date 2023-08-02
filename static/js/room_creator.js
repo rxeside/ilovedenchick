@@ -1,8 +1,13 @@
 const createBtn = document.getElementById('create');
 const nameFeild = document.getElementById('name');
+const numOfPlayers = document.getElementById('num_of_players');
+
+const min = 2;
+const max = 6;
 
 let LevelID;
 let RoomName;
+let maxNum;
 
 nameFeild.onchange = function() {
     RoomName = nameFeild.value;
@@ -10,6 +15,20 @@ nameFeild.onchange = function() {
 
 createBtn.onclick = function() {
     createNewRoom();
+}
+
+numOfPlayers.onchange = function() {
+    if (numOfPlayers.value < min) {
+        numOfPlayers.value = min;
+    } else if (numOfPlayers.value > max) {
+        numOfPlayers.value = max;
+    }
+
+    maxNum = Number(numOfPlayers.value)
+}
+
+document.onload = function() {
+    numOfPlayers.value = 2;
 }
 
 function sendData(buttonId) {
@@ -60,7 +79,8 @@ function sendData(buttonId) {
 function createNewRoom() {
     let newData = {
         Id: LevelID,
-        Name: RoomName
+        Name: RoomName,
+        Max: maxNum
     };
 
     const requestOption  = {
@@ -69,5 +89,17 @@ function createNewRoom() {
         body: JSON.stringify(newData)
     };
 
-    fetch('api/create_new_room', requestOption);
+    fetch('/api/create_new_room', requestOption)
+        .then(res => {
+            if (res.status == 200) {
+                console.log("Всё отлично");
+                window.location.href = "/select_room"
+            } else {
+                console.log("Что то не то");
+            }
+        });
+}
+
+function exit() {
+    window.location.href = "/select_room"
 }

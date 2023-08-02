@@ -6,9 +6,12 @@
         <script src="../static/js/room_select.js"></script>
     </head>
     <body>
-        {{ range .Rooms }}
-            <button class="btn-room" id="{{ .Key }}" size="{{ .Size }}" name="room">{{ .Name }}</button>
-        {{ end }}
+        <div>
+            {{ range .Rooms }}
+                <button class="btn-room" id="{{ .Key }}" size="{{ .Size }}" name="room">{{ .Name }}</button>
+            {{ end }}
+            <button id="create_new" class="btn-room" onclick="createNewRoom()">Создать новую комнуту</button>
+        </div>
         <div class="workspace">
             <div id="level_field" class="field"></div>
         </div>

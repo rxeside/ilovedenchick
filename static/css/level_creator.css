@@ -238,7 +238,8 @@
     height: 102px;
     width: 102px;
     /* background-color: aqua; */
-    background-image: url(../image/exit_mini.png);
+    background: url(../image/exit_mini.png) no-repeat;
+    background-size: cover;
     position: fixed;
     bottom: 4.65%;
     left: 1%;
@@ -248,12 +249,14 @@
 
 .exit:hover
 {
-    background-image: url(../image/exit_hover.png);
+    background: url(../image/exit_hover.png) no-repeat;
+    background-size: cover;
 }
 
 .exit:active
 {
-    background-image: url(../image/exit_activ.png);
+    background: url(../image/exit_activ.png) no-repeat;
+    background-size: cover;
     height: 92px;
     width: 92px;
     bottom: 5%;

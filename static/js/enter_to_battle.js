@@ -34,10 +34,11 @@ login.onsubmit = function() {
         body: JSON.stringify(data)
     };
 
-    fetch('api/login', requestOption)
-        .then((res) => {
+    fetch('/api/login', requestOption)
+        .then(res => {
             if (res.status == 200) {
                 console.log("Всё отлично");
+                window.location.href = "/main"
             } else {
                 console.log("Что то не то");
             }
@@ -66,10 +67,11 @@ register.onsubmit = function() {
         body: JSON.stringify(data)
     };
 
-    fetch('api/register', requestOption)
-        .then((res) => {
+    fetch('/api/register', requestOption)
+        .then(res => {
             if (res.status == 200) {
                 console.log("Всё отлично");
+                changeForm("login")
             } else {
                 console.log("Что то не то");
             }

@@ -14,8 +14,9 @@ import (
 )
 
 type roomdatarequest struct {
-	LevelID   int    `json:"Id"`
-	LevelName string `json:"Name"`
+	LevelID    int    `json:"Id"`
+	LevelName  string `json:"Name"`
+	MaxPlayers int    `json:"Max"`
 }
 
 type roomdeletenum struct {
@@ -81,6 +82,7 @@ func createNewRoom(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		reqData, err := io.ReadAll(r.Body)
 		if err != nil {
+			http.Error(w, "Err with request", 500)
 			log.Println(err.Error())
 			return
 		}
@@ -89,27 +91,32 @@ func createNewRoom(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 
 		err = json.Unmarshal(reqData, &req)
 		if err != nil {
+			http.Error(w, "Err with unmarshal", 500)
 			log.Println(err.Error())
 			return
 		}
 
 		levelID := req.LevelID
 		levelName := req.LevelName
+		MaxPlayers := req.MaxPlayers
 
 		var NewRoom roomdata
 		NewRoom.Name = levelName
 		key := int(rand.Int31())
 		NewRoom.Tanks = make(map[*websocket.Conn]*tanktype)
 		NewRoom.Bullets = make(map[int]*bullettype)
+		NewRoom.MaxPlayers = MaxPlayers
 
 		NewRoom.Level, err = getLevelByID(db, levelID)
 		if err != nil {
+			http.Error(w, "Err with getting level", 500)
 			log.Println(err.Error())
 			return
 		}
 
 		NewRoom.Objects, err = getObjByID(db, levelID)
 		if err != nil {
+			http.Error(w, "Err with getting objects", 500)
 			log.Println(err.Error())
 			return
 		}
@@ -131,13 +138,14 @@ func createNewRoom(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 		rooms[key] = &NewRoom
 		fmt.Printf("key: %v\n", key)
 
-		roomIsRunning(db, key)
+		go func() {
+			roomIsRunning(db, key)
+		}()
 
 		return
 	}
 }
 
-// Нужно будет пересмотреть, перед удалением нужно будет завершить ту функцию на функционирование комнаты
 func deleteRoom(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Delete")
 	reqData, err := io.ReadAll(r.Body)

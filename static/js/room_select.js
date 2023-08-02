@@ -61,3 +61,7 @@ function selectRoom(key) {
 function joinToRoom() {
     window.location.href = "/room/" + selectedRoom;
 };
+
+function createNewRoom() {
+    window.location.href = "/create_room"
+}
