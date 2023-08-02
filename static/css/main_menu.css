@@ -2,6 +2,7 @@
 {
     padding: 0;
     margin: 0;
+    cursor: url(../image/cursor2.png), default;
 }
 
 .background
@@ -13,10 +14,11 @@
 }
 
 .title{
-    font: 400 normal 102px/30px 'Press Start 2P';
+    font: 400 normal 70px/30px 'Press Start 2P';
     color: rgb(255, 81, 0);
     display: flex;
     padding: 9% 14%;
+    text-shadow: 15px 5px 10px rgba(0, 0, 0, 0.664); 
 }
 
 .modes
@@ -26,6 +28,22 @@
     gap: 55px;
     margin-left: 23%;
     margin-top: 1%;
+}
+
+.modes button:hover {
+    box-shadow: 15px 15px 25px rgba(255, 81, 0, 0.411), -15px -15px 25px rgba(255, 81, 0, 0.411), 15px -15px 25px rgba(255, 81, 0, 0.411), -15px 15px 25px rgba(255, 81, 0, 0.411);
+    color: rgba(255, 81, 0, 0.89);
+    /* background-color: rgb(185, 124, 96);
+    color: rgb(160, 81, 45);; */
+}
+
+.modes button:active {
+    color: rgb(160, 66, 23);
+    box-shadow: none;
+    width: 60%;
+    font: 400 normal 50px/30px 'Press Start 2P';
+    margin-left: 2.5%;
+    background-color: rgba(179, 117, 89, 0.753);
 }
 
 .modes__btn

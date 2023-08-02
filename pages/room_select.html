@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="ru">
+        <title>Выбор комнаты</title>
+        <script src="../static/js/room_select.js"></script>
+    </head>
+    <body>
+        <div>
+            {{ range .Rooms }}
+                <button class="btn-room" id="{{ .Key }}" size="{{ .Size }}" name="room">{{ .Name }}</button>
+            {{ end }}
+            <button id="create_new" class="btn-room" onclick="createNewRoom()">Создать новую комнуту</button>
+        </div>
+        <div class="workspace">
+            <div id="level_field" class="field"></div>
+        </div>
+        <button style="margin: 30px; background-color: red;" onclick="joinToRoom()">Join</button>
+    </body>
+</html>

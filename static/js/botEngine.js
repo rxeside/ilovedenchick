@@ -1,17 +1,26 @@
 let bots = [bot1, bot2, bot3];
-
+let botcountEvent = document.getElementById("botCount");
+updateTankCount();
+let tankHpEvent = document.getElementById("tankHp");
+updateHealth();
+let textWin = document.getElementById("textWin")
+// 
 // Обработка движения бота
 function updateBot() {
     console.log(bots);
     if (bots.length == 0){
-        console.log("WIN");
-        setTimeout(() => { location.reload(); }, 2000);
+        win();
     }
+    updateTankCount(); 
+    
     bots.forEach(bot => {   
         currentBot = bots.indexOf(bot);
         let action = generateRandomAction();
         console.log("action: ", action);
         if (action == 'move') {
+            if (isPause) {
+                return;
+            }
             clearInterval(bot.botMovement);
             bot.botMovement = 0;
             bot.direction = getRandomDirection();
@@ -19,19 +28,19 @@ function updateBot() {
             bot.botMovement = setInterval(function () {
                 bot.seeTank = false;
 
-                if ((parseFloat(bot.style.top) > parseFloat(tank.style.top) + parseFloat(tank.style.height)) && (parseFloat(bot.style.left) + 20 * step < parseFloat(tank.style.left) + parseFloat(tank.style.width)) && (parseFloat(bot.style.left) + parseFloat(bot.style.width) - 20 * step > parseFloat(tank.style.left))) {
+                if ((parseFloat(bot.style.top) > parseFloat(tank.style.top) + parseFloat(tank.style.height)) && (parseFloat(bot.style.left) + 30 * step < parseFloat(tank.style.left) + parseFloat(tank.style.width)) && (parseFloat(bot.style.left) + parseFloat(bot.style.width) - 30 * step > parseFloat(tank.style.left))) {
                     bot.direction = "up";
                     bot.seeTank = true;
                 }
-                if ((parseFloat(bot.style.top) + parseFloat(bot.style.height) < parseFloat(tank.style.top)) && (parseFloat(bot.style.left) + 20 * step < parseFloat(tank.style.left) + parseFloat(tank.style.width)) && (parseFloat(bot.style.left) + parseFloat(bot.style.width) - 20 * step > parseFloat(tank.style.left))) {
+                if ((parseFloat(bot.style.top) + parseFloat(bot.style.height) < parseFloat(tank.style.top)) && (parseFloat(bot.style.left) + 30 * step < parseFloat(tank.style.left) + parseFloat(tank.style.width)) && (parseFloat(bot.style.left) + parseFloat(bot.style.width) - 30 * step > parseFloat(tank.style.left))) {
                     bot.direction = "down";
                     bot.seeTank = true;
                 }
-                if (((parseFloat(tank.style.top) + parseFloat(tank.style.width) > parseFloat(bot.style.top) + 20 * step) && (parseFloat(tank.style.top) < parseFloat(bot.style.top) + parseFloat(bot.style.height) - 20 * step)) && ((parseFloat(tank.style.left) < (parseFloat(bot.style.left) + parseFloat(bot.style.width))))) {
+                if (((parseFloat(tank.style.top) + parseFloat(tank.style.width) > parseFloat(bot.style.top) + 30 * step) && (parseFloat(tank.style.top) < parseFloat(bot.style.top) + parseFloat(bot.style.height) - 30 * step)) && ((parseFloat(tank.style.left) < (parseFloat(bot.style.left) + parseFloat(bot.style.width))))) {
                     bot.direction = "left";
                     bot.seeTank = true;
                 }
-                if (((parseFloat(tank.style.top) + parseFloat(tank.style.width) > parseFloat(bot.style.top) + 20 * step) && (parseFloat(tank.style.top) < parseFloat(bot.style.top) + parseFloat(bot.style.height) - 20 * step)) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width) + step) > parseFloat(bot.style.left)))) {
+                if (((parseFloat(tank.style.top) + parseFloat(tank.style.width) > parseFloat(bot.style.top) + 30 * step) && (parseFloat(tank.style.top) < parseFloat(bot.style.top) + parseFloat(bot.style.height) - 30 * step)) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width) + step) > parseFloat(bot.style.left)))) {
                     bot.direction = "right"
                     bot.seeTank = true;
                 }
@@ -62,6 +71,9 @@ function updateBot() {
                         bot.src = '../static/image/botTop1.png';
                     }
                     if (can_move) {
+                        if (isPause) {
+                            return;
+                        }
                         bot.style.top = (parseFloat(bot.style.top) - step) + "px";
                     }
                 } if (bot.direction == 'down') {
@@ -82,7 +94,7 @@ function updateBot() {
                     });
 
                     bot.botShell.directionNew = 2;
-                    if (bot.botSkinStatus === 0) {
+                    if ((bot.botSkinStatus === 0) && (!isPause)) {
                         bot.botSkinStatus = 1;
                         bot.src = '../static/image/botDown.png';
                     } else if (bot.botSkinStatus === 1) {
@@ -90,6 +102,9 @@ function updateBot() {
                         bot.src = '../static/image/botDown1.png';
                     }
                     if (can_move) {
+                        if (isPause) {
+                            return;
+                        }
                         bot.style.top = (parseFloat(bot.style.top) + step) + "px";
                     }
                 } if (bot.direction == 'left') {
@@ -111,14 +126,17 @@ function updateBot() {
                     });
 
                     bot.botShell.directionNew = 3;
-                    if (bot.botSkinStatus === 0) {
+                    if ((bot.botSkinStatus === 0) && (!isPause)) {
                         bot.botSkinStatus = 1;
                         bot.src = '../static/image/botLeft.png';
-                    } else if (bot.botSkinStatus === 1) {
+                    } else if ((bot.botSkinStatus === 1) && (!isPause)) {
                         bot.botSkinStatus = 0;
                         bot.src = '../static/image/botLeft1.png';
                     }
                     if (can_move) {
+                        if (isPause) {
+                            return;
+                        }
                         bot.style.left = (parseFloat(bot.style.left) - step) + "px";
                     }
                 } if (bot.direction == 'right') {
@@ -147,6 +165,9 @@ function updateBot() {
                         bot.src = '../static/image/botRight1.png';
                     }
                     if (can_move) {
+                        if (isPause) {
+                            return;
+                        }
                         bot.style.left = (parseFloat(bot.style.left) + step) + "px";
                     }
                 }
@@ -162,7 +183,7 @@ function startBot() {
     // Обновляем состояние игры каждые 2 секунд
 
         setInterval(updateBot, 2000);
-
+         
 }
 startBot();
 
@@ -176,49 +197,52 @@ function botDelaying(bot) {
 function botShotDirection(bot) {
     if (bot.botShell.update == 0) {
         bot.botShell.direction = bot.botShell.directionNew;
-
-        if (bot.botShell.direction == 1) {
-            bot.botShell.src = "../static/image/ShellTop.png";
-            bot.botShell.style.top = (parseInt(bot.style.top) - parseInt(bot.botShell.style.height) * 0.5) + "px";
-            bot.botShell.style.left = (parseInt(bot.style.left) + parseInt(bot.style.width) * 0.5 - parseInt(bot.botShell.style.width) * 0.5) + "px";
+        if (!isPause) {
+            if (bot.botShell.direction == 1) {
+                bot.botShell.src = "../static/image/ShellTop.png";
+                bot.botShell.style.top = (parseInt(bot.style.top) - parseInt(bot.botShell.style.height) * 0.5) + "px";
+                bot.botShell.style.left = (parseInt(bot.style.left) + parseInt(bot.style.width) * 0.5 - parseInt(bot.botShell.style.width) * 0.5) + "px";
+            }
+            if (bot.botShell.direction == 2) {
+                bot.botShell.src = "../static/image/ShellDown.png";
+                bot.botShell.style.top = (parseInt(bot.style.top) + parseInt(bot.style.height) - parseInt(bot.botShell.style.height) * 0.5) + "px";
+                bot.botShell.style.left = (parseInt(bot.style.left) + parseInt(bot.style.width) * 0.5 - parseInt(bot.botShell.style.width) * 0.5) + "px";
+            }
+            if (bot.botShell.direction == 3) {
+                bot.botShell.src = "../static/image/ShellLeft.png";
+                bot.botShell.style.top = (parseInt(bot.style.top) + parseInt(bot.style.height) * 0.5 - parseInt(bot.botShell.style.height) * 0.5) + "px";
+                bot.botShell.style.left = (parseInt(bot.style.left) - parseInt(bot.style.width) * 0.5) + "px";
+            }
+            if (bot.botShell.direction == 4) {
+                bot.botShell.src = "../static/image/ShellRight.png";
+                bot.botShell.style.top = (parseInt(bot.style.top) + parseInt(bot.style.height) * 0.5 - parseInt(bot.botShell.style.height) * 0.5) + "px";
+                bot.botShell.style.left = (parseInt(bot.style.left) + parseInt(bot.style.width) - parseInt(bot.botShell.style.width) * 0.5) + "px";
+            }
+            if (bot.botShootDelay == 0) 
+                botShooting(bot);
         }
-        if (bot.botShell.direction == 2) {
-            bot.botShell.src = "../static/image/ShellDown.png";
-            bot.botShell.style.top = (parseInt(bot.style.top) + parseInt(bot.style.height) - parseInt(bot.botShell.style.height) * 0.5) + "px";
-            bot.botShell.style.left = (parseInt(bot.style.left) + parseInt(bot.style.width) * 0.5 - parseInt(bot.botShell.style.width) * 0.5) + "px";
-        }
-        if (bot.botShell.direction == 3) {
-            bot.botShell.src = "../static/image/ShellLeft.png";
-            bot.botShell.style.top = (parseInt(bot.style.top) + parseInt(bot.style.height) * 0.5 - parseInt(bot.botShell.style.height) * 0.5) + "px";
-            bot.botShell.style.left = (parseInt(bot.style.left) - parseInt(bot.style.width) * 0.5) + "px";
-        }
-        if (bot.botShell.direction == 4) {
-            bot.botShell.src = "../static/image/ShellRight.png";
-            bot.botShell.style.top = (parseInt(bot.style.top) + parseInt(bot.style.height) * 0.5 - parseInt(bot.botShell.style.height) * 0.5) + "px";
-            bot.botShell.style.left = (parseInt(bot.style.left) + parseInt(bot.style.width) - parseInt(bot.botShell.style.width) * 0.5) + "px";
-        }
-        if (bot.botShootDelay == 0) 
-            botShooting(bot);
     }
 }
 
 function botShooting(bot) {
     gameBoard.appendChild(bot.botShell);
-    updateBotShall(bot);
+    if (!isPause) {
+        updateBotShall(bot);
+    }
     bot.botShell.update = 1;
     if ((parseInt(bot.botShell.style.top) < 0) || ((parseInt(bot.botShell.style.top) + 16) >= boardSide) || (parseInt(bot.botShell.style.left) < 0) || (parseInt(bot.botShell.style.left) >= boardSide - 16)) {
         explosionBotShall(bot);
     }
 
 
+
     if ((((parseInt(bot.botShell.style.top) + bot.botShell.height) > parseInt(tank.style.top)) && (parseInt(bot.botShell.style.top) < (parseInt(tank.style.top) + sideValue))) && (((parseInt(bot.botShell.style.left) + bot.botShell.width) > parseInt(tank.style.left)) && (parseInt(bot.botShell.style.left) < (parseInt(tank.style.left) + sideValue)))) {
         explosionBotShall(bot);
         health -= 1;
+        
+        updateHealth();
         if (health == 0) {
-            dead = true;
-            console.log("GAME OVER");
-            tank.remove();
-            setTimeout(() => { location.reload(); }, 2000);
+            lose();
 
         }
     }
@@ -231,8 +255,14 @@ function botShooting(bot) {
                 explosionBotShall(bot);
                 if (element.IsDestructible === 1) {
                     let removeObj = document.getElementById(i);
-                    brick[i] = undefined;
-                    removeObj.remove();
+                    if (element.Name === "Base") {
+                        removeObj.src="../static/image/destroyed_base.png"
+                        console.log("LOSE by angel");
+                        lose();
+                    } else {
+                        brick[i] = undefined;
+                        removeObj.remove();
+                    }
                 }
             }
         }
@@ -281,12 +311,18 @@ function explosionBotShall(bot) {
 
 // Функция для генерации случайного направления
 function getRandomDirection() {
+    if (isPause) {
+        return;
+    }
     const directions = ['up', 'down', 'left', 'right'];
     return directions[Math.floor(Math.random() * directions.length)];
 }
 
 // Функция для генерации случайного действия
 function generateRandomAction() {
+    if (isPause) {
+        return;
+    }
     const actions = ['move', 'shoot'];
     return actions[Math.floor(Math.random() * actions.length)];
 }

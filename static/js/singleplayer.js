@@ -1,60 +1,136 @@
 document.addEventListener("DOMContentLoaded", function () {
-
-    // Создание и отображение кирпичей на поле
-    const socket = new WebSocket("ws://localhost:3000/ws");
-
-    socket.onopen = function () {
-        console.log("Connected");
-        socket.send("level");
-        socket.onmessage = function (event) {
-            level = JSON.parse(event.data);
-            sideValue = boardSide / level.Side;
-            tank.style.height = sideValue * 0.95 + "px";
-            tank.style.width = sideValue * 0.95 + "px";
-            console.log(sideValue);
-            shell.style.height = sideValue * 0.3 + "px";
-            shell.style.width = sideValue * 0.25 + "px";
-            explosion.style.height = sideValue * 0.7 + "px";
-            explosion.style.width = sideValue * 0.7 + "px";
-
-            bots.forEach(bot => {
-                bot.style.height = sideValue * 0.95 + "px";
-                bot.style.width = sideValue * 0.95 + "px";
-                bot.botShell.style.height = sideValue * 0.3 + "px";
-                bot.botShell.style.width = sideValue * 0.25 + "px";
-                bot.botShotExplosion.style.height = sideValue * 0.7 + "px";
-                bot.botShotExplosion.style.width = sideValue * 0.7 + "px";
+    
+    //Отправка fetch запроса
+    document.addEventListener("onload", getLevelData());
+    
+    function getLevelData() {
+        const id = getLevelID()
+        console.log("Hello", id);
+    
+        const requestOption = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json'},
+            body: JSON.stringify(id)
+        }
+    
+        fetch("/api/getlevel", requestOption)
+            .then(Response => Response.json())
+            .then(data => {
+                console.log(data);
+                levelDataProccessing(data);
+                getObjects(requestOption);
             })
-            
-
-
-            if (sideValue > 60) {
-                step = 1;
-                console.log("step", step);
-            } else {
-                speed = 200 / sideValue;
-                botSpeed = 300 / sideValue;
-                console.log("speed", speed);
-            }
-            newAns();
-        };
-        socket.send(boardSide);
-        socket.send(marginLeft);
-        socket.send(marginTop);
+            .catch(Error => console.error(Error));
     }
 
+    function getObjects(requestOption) {
+        fetch("/api/getlevelobj", requestOption)
+            .then(Response => Response.json())
+            .then(data => {
+                console.log(data);
+                createLevel(data);
+            })
+            .catch(error => console.error(error));
+    }
+    
+    function getLevelID() {
+        const levelData = document.getElementById("level_data");
+        let id = levelData.getAttribute("num");
+    
+        id = Number(id);
+        return id
+    } 
 
-    function newAns() {
-        socket.onmessage = function (event) {
-            brick = JSON.parse(event.data);
+    //Обработка данных об уровне и изменение переменных по данным
+    function levelDataProccessing(data){
+        level = data;
+        sideValue = boardSide / level.Size;
+        levelSide = level.Size;
+        tank.style.height = sideValue * 0.95 + "px";
+        tank.style.width = sideValue * 0.95 + "px";
+        console.log(sideValue);
+        shell.style.height = sideValue * 0.3 + "px";
+        shell.style.width = sideValue * 0.25 + "px";
+        explosion.style.height = sideValue * 0.7 + "px";
+        explosion.style.width = sideValue * 0.7 + "px";
+        bots.forEach(bot => {
+            bot.style.height = sideValue * 0.95 + "px";
+            bot.style.width = sideValue * 0.95 + "px";
+            bot.botShell.style.height = sideValue * 0.3 + "px";
+            bot.botShell.style.width = sideValue * 0.25 + "px";
+            bot.botShotExplosion.style.height = sideValue * 0.7 + "px";
+            bot.botShotExplosion.style.width = sideValue * 0.7 + "px";
+        })
+        
+        if (sideValue > 60) {
+            step = 1;
+            console.log("step", step);
+        } else {
+            speed = 200 / sideValue;
+            botSpeed = 300 / sideValue;
+            console.log("speed", speed);
+        }
+    }
+
+    //Построение уровня
+    function createLevel(data) {
+        brick = data;
             for (let i = 0; i < brick.length; i++) {
-                brick[i].Pos_X = brick[i].Pos_X + "px";
-                brick[i].Pos_Y = brick[i].Pos_Y + "px";
-                createNewElt(brick[i], i);
+                brick[i].Pos_X = brick[i].Pos_X * sideValue + "px";
+                brick[i].Pos_Y = brick[i].Pos_Y * sideValue + "px";
+                if (brick[i].Name !== "Tank") {
+                    createNewElt(brick[i], i);
+                } else if (brick[i].Name == "Tank") {
+                    tank.style.top = brick[i].Pos_Y;
+                    tank.style.left = brick[i].Pos_X;
+                }
             };
-            
-        };
     }
+
+    const continueBtn = document.getElementById("continueBtn");
+    const exitBtn = document.getElementById("exitBtn");
+    function handleKeyPress(event) {
+        if (event.key === "p" || event.keyCode === 80) {
+          isPause = !isPause;
+          const menu = document.getElementById("menu");
+        if (menu.style.display === "none") {
+            menu.style.display = "block";
+            overlay.style.display = "block";
+        }
+        else {
+            menu.style.display = "none";
+            overlay.style.display = "none";
+        }
+        function continueAction() {
+            console.log("Нажата кнопка 'Продолжить'");
+            menu.style.display = "none";
+            overlay.style.display = "none";
+            isPause = false;
+            return;
+        }
+          
+          function exitAction() {
+            console.log("Нажата кнопка 'Выход'");
+          }
+        continueBtn.addEventListener("click", continueAction);
+        exitBtn.addEventListener("click", exitAction);
+        }
+      }
+      
+    document.addEventListener("keydown", handleKeyPress);
+
+
+    // function newAns() {
+    //     socket.onmessage = function (event) {
+    //         brick = JSON.parse(event.data);
+    //         for (let i = 0; i < brick.length; i++) {
+    //             brick[i].Pos_X = brick[i].Pos_X + "px";
+    //             brick[i].Pos_Y = brick[i].Pos_Y + "px";
+    //             createNewElt(brick[i], i);
+    //         };
+            
+    //     };
+    // }
 
     function createNewElt(element, i) {
         let obj = document.createElement("img");
@@ -88,7 +164,9 @@ document.addEventListener("DOMContentLoaded", function () {
     })
 
     function moveTank(key) {
-        
+        if (isPause) {
+            return;
+        }
         if (dead == true)
             return;
         if ((key === "ArrowUp")) {
@@ -284,7 +362,9 @@ document.addEventListener("DOMContentLoaded", function () {
         if (dead == true)
             return;
         gameBoard.appendChild(shell);
-        updateShall();
+        if (!isPause) {
+            updateShall(); 
+        }
         shell.update = 1;
         console.log("shot");
         if ((parseInt(shell.style.top) < 0) || ((parseInt(shell.style.top) + 16) >= boardSide) || (parseInt(shell.style.left) < 0) || (parseInt(shell.style.left) >= boardSide - 16)) {
@@ -300,6 +380,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         bot.remove();
                         deadBot = bots.indexOf(bot);
                         bots.splice(deadBot, 1);
+                        updateTankCount(); 
                     }
                     console.log(bot);
                 }
@@ -315,8 +396,14 @@ document.addEventListener("DOMContentLoaded", function () {
                         audioConcrete.pause();
                         audioBrickShot.play();
                         let removeObj = document.getElementById(i);
-                        brick[i] = undefined;
-                        removeObj.remove();
+                        if (element.Name === "Base") {
+                            removeObj.src = "../static/image/destroyed_base.png"
+                            console.log("LOSE by angel");
+                            lose();
+                        } else {
+                            brick[i] = undefined;
+                            removeObj.remove();
+                        }
                     }
 
                 }
@@ -335,28 +422,55 @@ document.addEventListener("DOMContentLoaded", function () {
         if ((shot == "KeyZ" || shot == "Space") && (shell.update == 0)) {
             shell.direction = shell.directionNew;
             audioShell.play();
-            if (shell.direction == 1) {
-                shell.src = "../static/image/ShellTop.png";
-                shell.style.top = (parseInt(tank.style.top) - parseInt(shell.style.height) * 0.5) + "px";
-                shell.style.left = (parseInt(tank.style.left) + parseInt(tank.style.width) * 0.5 - parseInt(shell.style.width) * 0.5) + "px";
+            if (!isPause) {
+                if (shell.direction == 1) {
+                    shell.src = "../static/image/ShellTop.png";
+                    shell.style.top = (parseInt(tank.style.top) - parseInt(shell.style.height) * 0.5) + "px";
+                    shell.style.left = (parseInt(tank.style.left) + parseInt(tank.style.width) * 0.5 - parseInt(shell.style.width) * 0.5) + "px";
+                }
+                if (shell.direction == 2) {
+                    shell.src = "../static/image/ShellDown.png";
+                    shell.style.top = (parseInt(tank.style.top) + parseInt(tank.style.height) - parseInt(shell.style.height) * 0.5) + "px";
+                    shell.style.left = (parseInt(tank.style.left) + parseInt(tank.style.width) * 0.5 - parseInt(shell.style.width) * 0.5) + "px";
+                    }
+                if (shell.direction == 3) {
+                    shell.src = "../static/image/ShellLeft.png";
+                    shell.style.top = (parseInt(tank.style.top) + parseInt(tank.style.height) * 0.5 - parseInt(shell.style.height) * 0.5) + "px";
+                    shell.style.left = (parseInt(tank.style.left) - parseInt(shell.style.width) * 0.5) + "px";
+                    
+                }
+                if (shell.direction == 4) {
+                    shell.src = "../static/image/ShellRight.png";
+                    shell.style.top = (parseInt(tank.style.top) + parseInt(tank.style.height) * 0.5 - parseInt(shell.style.height) * 0.5) + "px";
+                    shell.style.left = (parseInt(tank.style.left) + parseInt(tank.style.width) - parseInt(shell.style.width) * 0.5) + "px";
+                }
+                if (shootDelay == 0)
+                    shooting();
             }
-            if (shell.direction == 2) {
-                shell.src = "../static/image/ShellDown.png";
-                shell.style.top = (parseInt(tank.style.top) + parseInt(tank.style.height) - parseInt(shell.style.height) * 0.5) + "px";
-                shell.style.left = (parseInt(tank.style.left) + parseInt(tank.style.width) * 0.5 - parseInt(shell.style.width) * 0.5) + "px";
-            }
-            if (shell.direction == 3) {
-                shell.src = "../static/image/ShellLeft.png";
-                shell.style.top = (parseInt(tank.style.top) + parseInt(tank.style.height) * 0.5 - parseInt(shell.style.height) * 0.5) + "px";
-                shell.style.left = (parseInt(tank.style.left) - parseInt(shell.style.width) * 0.5) + "px";
-            }
-            if (shell.direction == 4) {
-                shell.src = "../static/image/ShellRight.png";
-                shell.style.top = (parseInt(tank.style.top) + parseInt(tank.style.height) * 0.5 - parseInt(shell.style.height) * 0.5) + "px";
-                shell.style.left = (parseInt(tank.style.left) + parseInt(tank.style.width) - parseInt(shell.style.width) * 0.5) + "px";
-            }
-            if (shootDelay == 0)
-                shooting();
         }
-    }); 
+    });
 });
+
+function lose() {
+    dead = true;
+    console.log("GAME OVER");
+    textWin.style.color = 'red';
+    textWin.textContent = "YOU LOSE";
+    tank.remove();
+    setTimeout(() => { location.reload(); }, 2000);
+}
+
+function win() {
+    console.log("WIN");
+    textWin.textContent = "YOU WIN";
+    setTimeout(() => { window.location.href = "/select_level"; }, 2000);
+}
+
+function updateTankCount() {
+    botcountEvent.textContent = "enemys left: " + bots.length;
+}
+
+function updateHealth() {
+    tankHpEvent.textContent = "health: " + health + "hp";
+}
+

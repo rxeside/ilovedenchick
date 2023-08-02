@@ -1,11 +1,19 @@
 const l_Name = document.getElementById('level_Name'); 
-    l_side = document.getElementById('level_side'); 
-    l_field = document.getElementById('level_field');
-    cell_menu = document.getElementById('cell_menu');
-    message = document.getElementById('message');
+const l_side = document.getElementById('level_side'); 
+const l_field = document.getElementById('level_field');
+const cell_menu = document.getElementById('cell_menu');
+const message = document.getElementById('message');
 
 let selectedType = null;
 let Obj_on_level = [];
+let levelIdFromBack;
+
+//музыка
+const audioButton = new Audio('../static/audio/button.mp3');
+audioButton.volume = 0.8;
+const audioFon = new Audio('../static/audio/fon.mp3');
+audioFon.volume = 0.6;
+audioFon.loop = true;
 
 const level = {
     name: "",
@@ -25,6 +33,8 @@ l_side.onchange = function() {
 //Функция обновление поля
 function updateField()
 {
+    audioButton.play();
+    audioFon.play();
     if ((level.side != null))
     {
         //Задаём нашему полю столбцы и строки
@@ -56,6 +66,7 @@ function NewSelect(id)
 }
 
 let CurrentCell = {
+    levelId: null,
     name: null,
     isDestructible: null,
     canTpass: null,
@@ -76,6 +87,7 @@ function cleaerCurrentCell()
 function addNewCell(id)
 {
     let NewCell = {
+        levelId: null,
         name: null,
         isDestructible: null,
         canTpass: null,
@@ -140,6 +152,12 @@ function changeIcon(id)
         case 'Water':
             cell.src = "../static/image/water.png";
             break;
+        case 'Base':
+            cell.src = "../static/image/base1.png";
+            break;
+        case 'Tank':
+            cell.src = "../static/image/tank_mini.png";
+            break;
     }
 }
 
@@ -176,6 +194,18 @@ function editcell(id)
                 CurrentCell.canBpass = 1;
                 CurrentCell.imgURL = "../static/image/water.png";
                 break;
+            case 'Base':
+                CurrentCell.isDestructible = 1;
+                CurrentCell.canTpass = 0;
+                CurrentCell.canBpass = 0;
+                CurrentCell.imgURL = "../static/image/base1.png";
+                break;
+            case 'Tank':
+                CurrentCell.isDestructible = 0;
+                CurrentCell.canTpass = 1;
+                CurrentCell.canBpass = 1;
+                CurrentCell.imgURL = "../static/image/tank_mini.png";
+                break;
         }
         addNewCell(id);
     }
@@ -187,10 +217,9 @@ function editcell(id)
     console.log(Obj_on_level);
 }
 
-const XHRLevel = new XMLHttpRequest;
-
 function sendLeveldata()
 {
+    audioButton.play();
     for(key in level)
     {
         if (level[key] === "")
@@ -200,65 +229,59 @@ function sendLeveldata()
         } 
     }
 
-    let leveldata = JSON.stringify(level);
+    const requestOption = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json'},
+        body: JSON.stringify(level)
+    };
 
-    XHRLevel.open("POST", "/api/save_level");
-    XHRLevel.send(leveldata);
-}
-
-XHRLevel.onload = function() {
-    if(XHRLevel.status != 200)
-    {
-        dataError();
-    }
-    else
-    {
-        sendObjdata();
-    }
+    fetch('/api/save_level', requestOption)
+        .then(Response => Response.json())
+        .then(data => {
+            console.log(data);
+            levelIdFromBack = data;
+            sendObjdata();
+        })
+        .catch(Error => {
+            console.error(Error);
+            dataError();
+        });
 }
 
 function sendObjdata() 
 {
-    let is_success = true
-
-    for (let i = 0; i < level.side ** 2; i++)
-    {
-        if (Obj_on_level[i] !== undefined)
-        {
-            const XHRObj = new XMLHttpRequest;
-            XHRObj.open("POST", "/api/save_obj");
+    let Obj_to_send = [];
     
-            objdata = JSON.stringify(Obj_on_level[i]);
-    
-            XHRObj.send(objdata);
-
-            XHRObj.onreadystatechange = function() {
-                if (XHRObj.readyState === XMLHttpRequest.DONE && XHRObj.status === 200)
-                {
-                    console.log(i, "- отправлен успешно");
-                }
-            }
-
-            XHRObj.onerror = function() {
-                console.error("Ошибка при: ", i)
-                is_success = false;
-            }
+    Obj_on_level.forEach(obj => {
+        if (obj !== undefined) {
+            obj.levelId = levelIdFromBack;
+            Obj_to_send.push(obj)
         }
+    });
+
+    const requestOption = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json'},
+        body: JSON.stringify(Obj_to_send)
     }
 
-    if (is_success)
-    {
-        success();
-    }
-    else
-    {
-        dataError();
-    }
+    fetch("/api/save_obj", requestOption)
+        .then(Response => {
+            if (Response.status === 200) {
+                console.log("Ok2");
+                success();
+            }
+        })
+        .catch(Error => {
+            console.error(Error);
+            dataError();
+        });
 }
 
 function success()
 {
     message.classList.add('success');
+    message.classList.remove('error')
     message.textContent = "Success";
 }
 
@@ -266,4 +289,13 @@ function dataError()
 {
     message.classList.add('error');
     message.textContent = "Error";
+}
+
+function deletMap() {
+    audioButton.play();
+}
+
+function exit() {
+    audioButton.play();
+    setTimeout(() => { window.location.href = "/main";}, 200);
 }

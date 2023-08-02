@@ -8,6 +8,7 @@ console.log("marginLeft: ", marginLeft);
 let marginTop = innerHeight - boardSide;
 gameBoard.style.top = marginTop / 2 + "px";
 gameBoard.style.left = marginLeft + "px";
+let levelSide;
 let brick;
 let level;
 let sideValue;
@@ -55,8 +56,8 @@ explosion.src = '../static/image/explosion1.png';
 // Создание танка
 let tank = document.createElement("img");
 tank.className = "tank";
-tank.style.top = (boardSide / 2 - 40) + "px";
-tank.style.left = (boardSide / 2 - 40) + "px";
+// tank.style.top = (boardSide / 2 - 40) + "px";
+// tank.style.left = (boardSide / 2 - 40) + "px";
 tank.src = '../static/image/top.png';
 let status = 0;
 let dead = false;
@@ -84,7 +85,7 @@ bot1.botShotExplosion.src = '../static/image/explosion1.png';
 bot1.seeTank = false;
 bot1.direction;
 bot1.botShootDelay = 0;
-bot1.health = 2;  
+bot1.health = 1;  
 
 
 
@@ -108,7 +109,7 @@ bot2.botShotExplosion.src = '../static/image/explosion1.png';
 bot2.seeTank = false;
 bot2.direction;
 bot2.botShootDelay = 0;
-bot2.health = 2;
+bot2.health = 1;
 
 
 
@@ -132,10 +133,9 @@ bot3.botShotExplosion.src = '../static/image/explosion1.png';
 bot3.seeTank = false;
 bot3.direction;
 bot3.botShootDelay = 0;  
-bot3.health = 2;
+bot3.health = 1;
 
 // Прочие переменные для танка
 let keyPressed = 0;
 let shootDelay = 0;
-
-
+let isPause = false;

@@ -3,16 +3,17 @@
 <head>
     <title>Tank Battle</title>
     <link href="../static/css/level.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         *{
             margin: 0;
+            padding: 0;
+            overflow: hidden;
         }
 
         #game-board {
-            /* margin: auto; */
             position: absolute;
             overflow: hidden;
-            /* background-color: #ddd; */
             background: url(../static/image/zemlyaNew.png);
             box-shadow: 15px 15px 25px rgba(0, 0, 0, 0.411), -15px -15px 25px rgba(0, 0, 0, 0.411), 15px -15px 25px rgba(0, 0, 0, 0.411), -15px 15px 25px rgba(0, 0, 0, 0.411);
         }
@@ -62,12 +63,91 @@
         .bot2 {
             position: absolute;
         }
+
+        #menu {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50%;
+            height: 50%;
+            background-color: #ff0000;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            z-index: 999;
+        }
+
+        #menuBtn {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* Прозрачный черный цвет */
+            z-index: 998; /* Устанавливаем наибольший z-index, чтобы затемнение было поверх остальных элементов */
+        }
+
+        .menuButton {
+            width: 50%;
+            height: 40%;
+            margin-bottom: 10px;
+        }
+
+        #botCount {
+            position: absolute;
+            font-family: 'Press Start 2P';
+            font-size: 20px;
+            margin-top: 2%;
+            left: 90%;
+            top: 1%;
+            overflow: hidden;
+        }
+        
+        #tankHp {
+            position: absolute;
+            font-family: 'Press Start 2P';
+            font-size: 20px;
+            left: 90%;
+            top: 15%;
+            overflow: hidden;
+        }
+        
+        #textWin {
+            position: absolute;
+            font-family: 'Press Start 2P';
+            font-size: 50px;
+            margin-top: 10%;
+            margin-left: 40%;
+            overflow: hidden;
+            color: rgb(0, 165, 8);
+        }
+
     </style>
 </head>
 <body>
+    <div id="level_data" num="{{ .LevelID }}"></div>
+    <div id="tankHp"></div>
+    <div id="botCount"></div>
     <div class="background"> 
         <div id="game-board"></div>
+        <div id="textWin"></div>
     </div>
+    
+    <div id="menu" style="display: none;">
+        <button class="menuButton" id="continueBtn">Продолжить</button>
+        <button class="menuButton" id="exitBtn">Выход</button>
+    </div>
+    <div id="overlay" style="display: none;"></div>
+    <canvas id="canvas"></canvas>
     <script src="../static/js/singleplayerVar.js"></script>
     <script src="../static/js/singleplayer.js"></script>
     <script src="../static/js/botEngine.js"></script>    

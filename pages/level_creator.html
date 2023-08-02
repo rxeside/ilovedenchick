@@ -45,16 +45,29 @@
                     <img src="../static/image/water.png">
                     <a id="Water" onclick="selectType('Water')">Выкопать пруд</a>
                 </div>
+                <div>
+                    <img src="../static/image/base1.png">
+                    <a id="Base" onclick="selectType('Base')">Построить базу</a>
+                </div>
+                <div>
+                    <img src="../static/image/tank_mini.png">
+                    <a id="Tank" onclick="selectType('Tank')">Место старта</a>
+                </div>
             </div>
-            <div class="choice">
-                <button class="save level-data__btn" onclick="sendLeveldata()">Сохранить уровень</button>
-                <button class="delet level-data__btn">Удалить уровень</button>
+            <div class="alert">
+                <div class="choice">
+                    <button class="save level-data__btn" onclick="sendLeveldata()">Сохранить</button>
+                    <button class="delet level-data__btn" onclick="deletMap()">Удалить</button>
+                </div>
                 <p id="message" class="message">Message</p>
             </div>
         </div>
         <div class="workspace">
             <div id="level_field" class="field">
             </div>
+        </div>
+        <div>
+            <button class="exit" onclick="exit()"></button>
         </div>
     </div>
 </body>

@@ -6,17 +6,17 @@
     <title>Главная страница</title>
     <link href="../static/css/main_menu.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <script defer src="../static/js/main_menu.js"></script>
 </head>
 
 <body>
     <div class="background">
-        <p class="title">Название Игры</p>
+        <p class="title">Танковый армагедон</p>
         <div class="modes">
-            <a class="modes__btn">Одинокий танк</a>
-            <a class="modes__btn">Битва с друзьями</a>
-            <a class="modes__btn" href="/create_level">Создать карту</a>
+            <button class="modes__btn" onclick="clikButtonSinglePlayer()">Одинокий танк</button>
+            <button class="modes__btn" onclick="clikButtonEditorMultyPlayer()">Битва с друзьями</button>
+            <button class="modes__btn" onclick="clikButtonEditor()">Создать карту</button>
         </div>
     </div>
 </body>
-
 </html>
