@@ -60,6 +60,7 @@ type roomdata struct {
 	Bullets          map[int]*bullettype
 	PointsToSpawn    []*positionstruct
 	PlayersAreLiving int
+	MaxPlayers       int
 	Status           string
 }
 
@@ -243,6 +244,25 @@ func roomPage(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		cookie, err := r.Cookie("UserCookie")
+		userId, err := strconv.Atoi(cookie.Value)
+		if err != nil {
+			log.Println(err.Error())
+			return
+		}
+
+		find := false
+
+		for _, tank := range room.Tanks {
+			if tank.ID == userId {
+				find = true
+			}
+		}
+
+		if len(room.Tanks) >= room.MaxPlayers && !find {
+			http.Redirect(w, r, "/select_room", http.StatusSeeOther)
+		}
+
 		ts, err := template.ParseFiles("pages/room.html")
 		if err != nil {
 			http.Error(w, "Internal Server Error", 500)
@@ -285,15 +305,18 @@ func wsConnection(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 		}
 
 		currRoom := rooms[roomKey]
+		if currRoom == nil {
+			return
+		}
 
 		cookie, err := r.Cookie("UserCookie")
 		if err != nil {
-			http.Redirect(w, r, "/enter_to_battle", http.StatusSeeOther)
+			log.Println(err.Error())
 			return
 		}
 
 		tank, err := createTank(db, conn, cookie, currRoom)
-		if err != nil {
+		if err != nil || tank == nil {
 			log.Println(err.Error())
 			return
 		}
@@ -344,7 +367,9 @@ func wsConnection(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 			}
 
 			message := string(m)
-			readMessageFromCleints(conn, currRoom, tank, message, &levelSize)
+			if currRoom.Status == "Game" {
+				readMessageFromCleints(conn, currRoom, tank, message, &levelSize)
+			}
 		}
 	}
 }
@@ -367,6 +392,12 @@ func createTank(db *sqlx.DB, conn *websocket.Conn, cookie *http.Cookie, room *ro
 	}
 
 	if !find {
+		if len(room.Tanks) >= room.MaxPlayers {
+			return nil, nil
+		}
+
+		fmt.Println("dvsd")
+
 		var newTank tanktype
 		tank = &newTank
 		newTank.ID = ID
@@ -401,23 +432,18 @@ func createTank(db *sqlx.DB, conn *websocket.Conn, cookie *http.Cookie, room *ro
 		max := len(room.PointsToSpawn)
 		spawnIndex := rand.Intn(max)
 
-		if max > 0 {
-			for index, value := range room.PointsToSpawn {
-				if index == spawnIndex {
-					newTank.X = value.X
-					newTank.Y = value.Y
-				}
+		for index, value := range room.PointsToSpawn {
+			if index == spawnIndex {
+				newTank.X = value.X
+				newTank.Y = value.Y
 			}
-		} else {
-			newTank.X = 0
-			newTank.Y = 0
 		}
 
 		room.Tanks[conn] = &newTank
 	}
 
 	room.PlayersAreLiving++
-	room.Status = "Load"
+	room.Status = "Game"
 
 	return tank, nil
 }
@@ -467,6 +493,7 @@ func readMessageFromCleints(conn *websocket.Conn, currRoom *roomdata, tank *tank
 			log.Println(err.Error())
 			return
 		}
+
 		dir := string(m)
 		tank.Direction = dir
 		tank.Distance = findDistance(currRoom.Objects, tank, tank.Direction, *levelSize)
@@ -785,16 +812,11 @@ func resetTank(room *roomdata, tank *tanktype) {
 	max := len(room.PointsToSpawn)
 	spawnIndex := rand.Intn(max)
 
-	if max > 0 {
-		for index, value := range room.PointsToSpawn {
-			if index == spawnIndex {
-				tank.X = value.X
-				tank.Y = value.Y
-			}
+	for index, value := range room.PointsToSpawn {
+		if index == spawnIndex {
+			tank.X = value.X
+			tank.Y = value.Y
 		}
-	} else {
-		tank.X = 0
-		tank.Y = 0
 	}
 
 	return

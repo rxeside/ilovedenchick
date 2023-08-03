@@ -7,6 +7,11 @@ const message = document.getElementById('message');
 let selectedType = null;
 let Obj_on_level = [];
 let levelIdFromBack;
+let is_build = false;
+let baseId = -1;
+
+const maxside = 51;
+const minside = 5;
 
 //музыка
 const audioButton = new Audio('../static/audio/button.mp3');
@@ -17,7 +22,7 @@ audioFon.loop = true;
 
 const level = {
     name: "",
-    side: "",
+    side: "21",
     author: "User"
 };
 
@@ -27,6 +32,13 @@ l_Name.onchange = function() {
 }
 
 l_side.onchange = function() {
+    if (l_side.value < minside) {
+        l_side.value = minside;
+    } else if (l_side.value > maxside) {
+        l_side.value = maxside;
+    }
+
+    is_build = false;
     level.side = l_side.value;
 }
 
@@ -35,32 +47,51 @@ function updateField()
 {
     audioButton.play();
     audioFon.play();
-    if ((level.side != null))
-    {
-        //Задаём нашему полю столбцы и строки
-        l_field.style.gridTemplateColumns = "repeat(" + level.side + ", 1fr)";
-        l_field.style.gridTemplateRows = "repeat(" + level.side + ", 1fr)";
-        //Создание элементов поля
-        for (let i = 0; i < level.side ** 2; i++)
-        {
-            const newElement = document.createElement('img');
-            newElement.id = i;
-            newElement.name = "None";
-            newElement.onclick = function() {
-                let id = this.id;
-                NewSelect(id);
-            }
-            newElement.src = "../static/image/grey.png";
-            newElement.classList.add('field__cell');
-            l_field.insertBefore(newElement, l_field.children[i]);
-        }
 
-        openMenu();
+    if ((l_side < minside) || (l_side > maxside) || is_build) {
+        return
     }
+
+    is_build = true;
+    deleteMap();
+
+    //Задаём нашему полю столбцы и строки
+    l_field.style.gridTemplateColumns = "repeat(" + level.side + ", 1fr)";
+    l_field.style.gridTemplateRows = "repeat(" + level.side + ", 1fr)";
+    //Создание элементов поля
+    for (let i = 0; i < level.side ** 2; i++)
+    {
+        const newElement = document.createElement('img');
+        newElement.id = i;
+        newElement.name = "None";
+        newElement.onclick = function() {
+            let id = this.id;
+            NewSelect(id);
+        }
+        if ((i === 0) || (i === Number(level.side) - 1) || (i === Math.floor((Number(level.side) - 1) / 2))) {
+            newElement.src = "../static/image/botDown.png"
+        } else {
+            newElement.src = "../static/image/grey.png";
+        }
+        newElement.classList.add('field__cell');
+        l_field.insertBefore(newElement, l_field.children[i]);
+    }
+
+    openMenu();
 }
 
 function NewSelect(id) 
 {
+    if (selectedType === "Base") {
+        if (baseId !== -1) {
+            const elt = document.getElementById(baseId);
+            
+            elt.src = "../static/image/grey.png";
+            Obj_on_level[baseId] = undefined;
+        }
+
+        baseId = id;
+    }
     changeIcon(id);
     editcell(id);
 }
@@ -224,7 +255,7 @@ function sendLeveldata()
     {
         if (level[key] === "")
         {
-            dataError();
+            dataError("name");
             return;
         } 
     }
@@ -244,7 +275,7 @@ function sendLeveldata()
         })
         .catch(Error => {
             console.error(Error);
-            dataError();
+            dataError("server");
         });
 }
 
@@ -269,30 +300,56 @@ function sendObjdata()
         .then(Response => {
             if (Response.status === 200) {
                 console.log("Ok2");
-                success();
+                exit();
             }
         })
         .catch(Error => {
             console.error(Error);
-            dataError();
+            dataError("server");
         });
 }
 
-function success()
+function dataError(type)
 {
-    message.classList.add('success');
-    message.classList.remove('error')
-    message.textContent = "Success";
+    let message = "Error";
+
+    switch (type) {
+        case "server":
+            message = "Ошибка при сохранении в базе данных";
+            break;
+        case "name":
+            message = "Название уровня должно быть не меньше 2 символов и не больше 20";
+            break;
+    }
+
+    alert(message)
 }
 
-function dataError()
-{
-    message.classList.add('error');
-    message.textContent = "Error";
+function clearMap() {
+    audioButton.play(); 
+    Obj_on_level = [];
+
+    for (let i = 0; i < level.side ** 2; i++) {
+        const elt = document.getElementById(i);
+
+        if (elt !== null) {
+            elt.src = "../static/image/grey.png";
+
+            elt.name = "None";
+        }
+    }    
 }
 
-function deletMap() {
-    audioButton.play();
+function deleteMap() {
+    let i = 0;
+    let elt = document.getElementById(i);
+    Obj_on_level = [];
+
+    while (elt !== null) {
+        elt.remove();
+        i++;
+        elt = document.getElementById(i);
+    }
 }
 
 function exit() {

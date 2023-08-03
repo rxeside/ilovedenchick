@@ -3,6 +3,17 @@ const audioButton = new Audio('../static/audio/button.mp3');
 audioButton.volume = 0.8;
 let currLevel;
 
+const btns = document.getElementsByName("level");
+
+window.onload = function() {
+    btns.forEach(btn => {
+        btn.onclick = function() {
+            let id = Number(btn.id); 
+            sendData(id);
+        }
+    });
+}
+
 function back() {
     audioButton.play();
 }
@@ -14,11 +25,15 @@ function play() {
 function sendData(buttonId) {
     const button = document.getElementById(buttonId);
     const size = button.getAttribute("size");
+    const name = button.getAttribute("levelname");
     const requestOption = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json'},
         body: JSON.stringify(buttonId)
     };
+
+    const levelName = document.getElementById("level_name");
+    levelName.textContent = name;
 
     currLevel = buttonId;
 

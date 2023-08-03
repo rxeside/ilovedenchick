@@ -2,7 +2,7 @@
 {
     padding: 0;
     margin: 0;
-    overflow-y: hidden;
+    overflow: hidden;
 }
 
 .room-data
@@ -50,6 +50,27 @@
 {
     display: flex;
     font: 400 normal 14px/26px "Press Start 2P";
+}
+
+.exit-btn
+{
+    position: absolute;
+    bottom: 1.65%;
+    left: 3%;
+    font: 400 normal 24px/40px 'Press Start 2P';
+    width: 10%;
+    border-radius: 10px;
+    background-color: darkgray;
+}
+
+.exit-btn:hover
+{
+    background-color: lightgrey;
+}
+
+.exit-btn:active
+{
+    background-color: grey;
 }
 
 .red

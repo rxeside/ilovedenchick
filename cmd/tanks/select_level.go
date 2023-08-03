@@ -56,13 +56,6 @@ func handleLevelID(w http.ResponseWriter, r *http.Request) (int, error) {
 		return 0, err
 	}
 
-	// number, err := strconv.Atoi(numStr)
-	// if err != nil {
-	// 	return 0, err
-	// }
-
-	// return number, nil
-
 	return numStr, nil
 }
 

@@ -9,10 +9,6 @@ window.onload = function() {
     });
 }
 
-function createNewRoom() {
-    window.location.href = "/create_room";
-}
-
 function selectRoom(key) {
     const button = document.getElementById(key);
     const size = button.getAttribute("size");
@@ -65,3 +61,11 @@ function selectRoom(key) {
 function joinToRoom() {
     window.location.href = "/room/" + selectedRoom;
 };
+
+function createNewRoom() {
+    window.location.href = "/create_room"
+}
+
+function exit() {
+    window.location.href = "/main"
+}

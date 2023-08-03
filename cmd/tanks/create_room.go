@@ -14,8 +14,9 @@ import (
 )
 
 type roomdatarequest struct {
-	LevelID   int    `json:"Id"`
-	LevelName string `json:"Name"`
+	LevelID    int    `json:"Id"`
+	LevelName  string `json:"Name"`
+	MaxPlayers int    `json:"Max"`
 }
 
 type roomdeletenum struct {
@@ -97,12 +98,14 @@ func createNewRoom(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 
 		levelID := req.LevelID
 		levelName := req.LevelName
+		MaxPlayers := req.MaxPlayers
 
 		var NewRoom roomdata
 		NewRoom.Name = levelName
 		key := int(rand.Int31())
 		NewRoom.Tanks = make(map[*websocket.Conn]*tanktype)
 		NewRoom.Bullets = make(map[int]*bullettype)
+		NewRoom.MaxPlayers = MaxPlayers
 
 		NewRoom.Level, err = getLevelByID(db, levelID)
 		if err != nil {
@@ -118,6 +121,12 @@ func createNewRoom(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		for index, value := range NewRoom.Objects {
+			if value.Name == "Base" {
+				NewRoom.Objects = append(NewRoom.Objects[:index], NewRoom.Objects[index+1:]...)
+			}
+		}
+
 		for _, value := range NewRoom.Objects {
 			value.Pos_X = value.Pos_X * size
 			value.Pos_Y = value.Pos_Y * size
@@ -127,6 +136,52 @@ func createNewRoom(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 				NewPos.Y = value.Pos_Y
 
 				NewRoom.PointsToSpawn = append(NewRoom.PointsToSpawn, &NewPos)
+			}
+		}
+
+		if len(NewRoom.PointsToSpawn) == 0 {
+			var NewPos1 positionstruct
+			NewPos1.X = float64((NewRoom.Level.Size-1)/2) * size
+			NewPos1.Y = 0
+			NewRoom.PointsToSpawn = append(NewRoom.PointsToSpawn, &NewPos1)
+
+			for index, value := range NewRoom.Objects {
+				if value.Pos_X == NewPos1.X && value.Pos_Y == NewPos1.Y {
+					NewRoom.Objects = append(NewRoom.Objects[:index], NewRoom.Objects[index+1:]...)
+				}
+			}
+
+			var NewPos2 positionstruct
+			NewPos2.X = 0
+			NewPos2.Y = float64((NewRoom.Level.Size-1)/2) * size
+			NewRoom.PointsToSpawn = append(NewRoom.PointsToSpawn, &NewPos2)
+
+			for index, value := range NewRoom.Objects {
+				if value.Pos_X == NewPos2.X && value.Pos_Y == NewPos2.Y {
+					NewRoom.Objects = append(NewRoom.Objects[:index], NewRoom.Objects[index+1:]...)
+				}
+			}
+
+			var NewPos3 positionstruct
+			NewPos3.X = float64((NewRoom.Level.Size-1)/2) * size
+			NewPos3.Y = float64(NewRoom.Level.Size-1) * size
+			NewRoom.PointsToSpawn = append(NewRoom.PointsToSpawn, &NewPos3)
+
+			for index, value := range NewRoom.Objects {
+				if value.Pos_X == NewPos3.X && value.Pos_Y == NewPos3.Y {
+					NewRoom.Objects = append(NewRoom.Objects[:index], NewRoom.Objects[index+1:]...)
+				}
+			}
+
+			var NewPos4 positionstruct
+			NewPos4.X = float64(NewRoom.Level.Size-1) * size
+			NewPos4.Y = float64((NewRoom.Level.Size-1)/2) * size
+			NewRoom.PointsToSpawn = append(NewRoom.PointsToSpawn, &NewPos4)
+
+			for index, value := range NewRoom.Objects {
+				if value.Pos_X == NewPos4.X && value.Pos_Y == NewPos4.Y {
+					NewRoom.Objects = append(NewRoom.Objects[:index], NewRoom.Objects[index+1:]...)
+				}
 			}
 		}
 

@@ -74,16 +74,37 @@ document.addEventListener("DOMContentLoaded", function () {
 
     //Построение уровня
     function createLevel(data) {
+        let tankThere = false;
         brick = data;
             for (let i = 0; i < brick.length; i++) {
                 brick[i].Pos_X = brick[i].Pos_X * sideValue + "px";
                 brick[i].Pos_Y = brick[i].Pos_Y * sideValue + "px";
+                if ((!tankThere)) {
+                    tank.style.top = brick[brick.length/2].Pos_Y;
+                    tank.style.left = brick[brick.length/2].Pos_X;
+                    
+                }
                 if (brick[i].Name !== "Tank") {
+                    if (i == brick.length/2) {
+                        continue;
+                    }
                     createNewElt(brick[i], i);
                 } else if (brick[i].Name == "Tank") {
                     tank.style.top = brick[i].Pos_Y;
                     tank.style.left = brick[i].Pos_X;
-                }
+                    tankThere = true;
+                } 
+                // if (tankThere == false) {
+                //     tank.style.top = (boardSide / 2 - 20) + "px";
+                //     tank.style.left = (boardSide / 2 - 20) + "px";
+                //     console.log("7-8");
+                //     // if ((tank.style.top >= brick[i].Pos_Y + 40) && (tank.style.left >= brick[i].Pos_X+40)) {
+                //     //     removeSpawnObj = document.getElementById[i];
+                //     //     brick[i] = undefined;
+                //     //     removeSpawnObj.remove();
+                //     //     console.log("7-89");
+                //     // }
+                // }
             };
     }
 

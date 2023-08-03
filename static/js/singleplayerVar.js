@@ -62,7 +62,7 @@ tank.src = '../static/image/top.png';
 let status = 0;
 let dead = false;
 let health = 3;
-
+// let tankThere = false;
 
 
 let bot1 = document.createElement("img");

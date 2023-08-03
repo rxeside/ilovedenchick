@@ -19,11 +19,11 @@
             <div class="left">
                 <div class="sizes">
                     <p class="sizes__title">Количество участников:</p>
-                    <input class="sizes__side" id="level_side" type="number">
+                    <input class="sizes__side" id="num_of_players" type="number">
                 </div>
                 <div class="level-list">
                     {{ range .LevelData }}
-                        <button class="level-item" id="{{ .Id }}" size="{{ .Size }}" onclick="sendData({{ .Id }})">{{ .Name }}</button>
+                        <button class="level-item" id="{{ .Id }}" size="{{ .Size }}" name="level">{{ .Name }}</button>
                     {{ end }}
                 </div>
                 <div>
