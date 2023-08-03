@@ -84,6 +84,7 @@ document.addEventListener("DOMContentLoaded", function() {
     function getObjects() {
         socket.onmessage = function(event) {
             brick = JSON.parse(event.data);
+            console.log(brick);
 
             createObjects(brick)
             
@@ -293,8 +294,8 @@ document.addEventListener("DOMContentLoaded", function() {
         explosion.src = "../static/image/explosion1.png";
         explosion.className = "explosion";
         
-        explosion.style.width = size + "px";
-        explosion.style.height = size + "px";
+        explosion.style.width = size * 0.8 + "px";
+        explosion.style.height = size * 0.8 + "px";
         
         const explosionPos = size / 2.5;
         explosion.style.top = parseFloat(bullet.style.top) - explosionPos + "px";

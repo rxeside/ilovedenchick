@@ -432,16 +432,11 @@ func createTank(db *sqlx.DB, conn *websocket.Conn, cookie *http.Cookie, room *ro
 		max := len(room.PointsToSpawn)
 		spawnIndex := rand.Intn(max)
 
-		if max > 0 {
-			for index, value := range room.PointsToSpawn {
-				if index == spawnIndex {
-					newTank.X = value.X
-					newTank.Y = value.Y
-				}
+		for index, value := range room.PointsToSpawn {
+			if index == spawnIndex {
+				newTank.X = value.X
+				newTank.Y = value.Y
 			}
-		} else {
-			newTank.X = 0
-			newTank.Y = 0
 		}
 
 		room.Tanks[conn] = &newTank
@@ -817,16 +812,11 @@ func resetTank(room *roomdata, tank *tanktype) {
 	max := len(room.PointsToSpawn)
 	spawnIndex := rand.Intn(max)
 
-	if max > 0 {
-		for index, value := range room.PointsToSpawn {
-			if index == spawnIndex {
-				tank.X = value.X
-				tank.Y = value.Y
-			}
+	for index, value := range room.PointsToSpawn {
+		if index == spawnIndex {
+			tank.X = value.X
+			tank.Y = value.Y
 		}
-	} else {
-		tank.X = 0
-		tank.Y = 0
 	}
 
 	return

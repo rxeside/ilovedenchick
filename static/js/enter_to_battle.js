@@ -15,10 +15,16 @@ function changeForm(type) {
 
 login.onsubmit = function() {
     event.preventDefault();
-    let email = login.email.value
-    let pass = login.pass.value
+    let email = login.email.value;
+    let pass = login.pass.value;
+
+    if ((pass.length < 3) || (pass.length > 5)) {
+        dataError("passLen");
+        return
+    }
 
     if (!emailIsValid(email)) {
+        dataError("emailNotValidate");
         return
     }
     
@@ -40,6 +46,7 @@ login.onsubmit = function() {
                 console.log("Всё отлично");
                 window.location.href = "/main"
             } else {
+                dataError("server")
                 console.log("Что то не то");
             }
         });
@@ -51,7 +58,18 @@ register.onsubmit = function() {
     let pass = register.pass.value;
     let nickname = register.nickname.value
 
+    if ((nickname.length < 2) || (nickname.length > 20)) {
+        dataError("nickLen");
+        return
+    }
+
+    if ((pass.length < 3) || (pass.length > 5)) {
+        dataError("passLen");
+        return
+    }
+
     if (!emailIsValid(email)) {
+        dataError("emailNotValidate");
         return
     }
 
@@ -73,6 +91,7 @@ register.onsubmit = function() {
                 console.log("Всё отлично");
                 changeForm("login")
             } else {
+                dataError("server")
                 console.log("Что то не то");
             }
         });
@@ -81,4 +100,26 @@ register.onsubmit = function() {
 function emailIsValid(email) {
     const pattern = /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$/;
     return pattern.test(email)
+}
+
+function dataError(type) {
+    let message = "Error";
+
+    switch (type) {
+        case "passLen":
+            message = "Пароль должен быть не меньше 3 символов и не больше 20"
+            break;
+    
+        case "emailNotValidate":
+            message = "Невалидный email";
+            break;
+        case "server":
+            message = "Ошибка с сервером"
+            break;
+        case "nickLen":
+            message = "Имя должно быть не меньше 2 символов и не больше 20";
+            break;
+    }
+
+    alert(message);
 }

@@ -23,7 +23,7 @@
                 </div>
                 <div class="level-list">
                     {{ range .LevelData }}
-                        <button class="level-item" id="{{ .Id }}" size="{{ .Size }}" onclick="sendData({{ .Id }})">{{ .Name }}</button>
+                        <button class="level-item" id="{{ .Id }}" size="{{ .Size }}" name="level">{{ .Name }}</button>
                     {{ end }}
                 </div>
                 <div>

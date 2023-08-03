@@ -454,12 +454,15 @@ document.addEventListener("DOMContentLoaded", function () {
 function lose() {
     dead = true;
     console.log("GAME OVER");
+    textWin.style.color = 'red';
+    textWin.textContent = "YOU LOSE";
     tank.remove();
     setTimeout(() => { location.reload(); }, 2000);
 }
 
 function win() {
     console.log("WIN");
+    textWin.textContent = "YOU WIN";
     setTimeout(() => { window.location.href = "/select_level"; }, 2000);
 }
 
@@ -470,3 +473,4 @@ function updateTankCount() {
 function updateHealth() {
     tankHpEvent.textContent = "health: " + health + "hp";
 }
+

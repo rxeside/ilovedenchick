@@ -1,13 +1,24 @@
 const createBtn = document.getElementById('create');
 const nameFeild = document.getElementById('name');
 const numOfPlayers = document.getElementById('num_of_players');
+const btns = document.getElementsByName("level");
+
 
 const min = 2;
 const max = 6;
 
-let LevelID;
-let RoomName;
-let maxNum;
+let LevelID = -1;
+let RoomName = "";
+let maxNum = 4;
+
+window.onload = function() {
+    btns.forEach(btn => {
+        btn.onclick = function() {
+            let id = Number(btn.id) 
+            sendData(id)
+        }
+    });
+}
 
 nameFeild.onchange = function() {
     RoomName = nameFeild.value;
@@ -28,7 +39,7 @@ numOfPlayers.onchange = function() {
 }
 
 document.onload = function() {
-    numOfPlayers.value = 2;
+    numOfPlayers.value = 4;
 }
 
 function sendData(buttonId) {
@@ -39,7 +50,7 @@ function sendData(buttonId) {
         headers: { 'Content-Type': 'application/json'},
         body: JSON.stringify(buttonId)
     };
-
+    
     LevelID = buttonId;
 
     fetch('api/getlevelobj', requestOption)
@@ -83,6 +94,21 @@ function createNewRoom() {
         Max: maxNum
     };
 
+    if (newData.Id === -1) {
+        dataError("level");
+        return
+    }
+
+    if ((newData.Name.length < 2) || (newData.Name.length > 30)) {
+        dataError("name");
+        return
+    }
+
+    if ((newData.Max < 2) || (newData.Max > 6)) {
+        dataError("max");
+        return
+    }
+
     const requestOption  = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json'},
@@ -102,4 +128,22 @@ function createNewRoom() {
 
 function exit() {
     window.location.href = "/select_room"
+}
+
+function dataError(type) {
+    let message = "Error";
+
+    switch (type) {
+        case "level":
+            message = "Выберите уровень";
+            break;
+        case "name":
+            message = "Название уровня должно быть не меньше 2 символов и не больше 20";
+            break;
+        case "max":
+            message = "Максимальное количество игроков должно быть 2-6"
+            break;
+    }
+
+    alert(message)
 }

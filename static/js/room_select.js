@@ -65,3 +65,7 @@ function joinToRoom() {
 function createNewRoom() {
     window.location.href = "/create_room"
 }
+
+function exit() {
+    window.location.href = "/main"
+}
