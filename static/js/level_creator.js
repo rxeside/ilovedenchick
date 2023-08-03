@@ -10,7 +10,7 @@ let levelIdFromBack;
 let is_build = false;
 let baseId = -1;
 
-const maxside = 51;
+const maxside = 41;
 const minside = 5;
 
 //музыка
@@ -251,13 +251,9 @@ function editcell(id)
 function sendLeveldata()
 {
     audioButton.play();
-    for(key in level)
-    {
-        if (level[key] === "")
-        {
-            dataError("name");
-            return;
-        } 
+    if ((level.name.length < 2) || (level.name.length > 20)) {
+        dataError("name");
+        return
     }
 
     const requestOption = {

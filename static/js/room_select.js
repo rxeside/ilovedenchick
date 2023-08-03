@@ -7,6 +7,12 @@ window.onload = function() {
             selectRoom(btn.id)
         }
     });
+
+    if (btns.length >= 10) {
+        const button = document.getElementById("create_new");
+
+        button.remove();
+    }
 }
 
 function selectRoom(key) {

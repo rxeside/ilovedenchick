@@ -17,17 +17,17 @@ login.onsubmit = function() {
     event.preventDefault();
     let email = login.email.value;
     let pass = login.pass.value;
-
-    if ((pass.length < 3) || (pass.length > 5)) {
-        dataError("passLen");
-        return
-    }
-
+    
     if (!emailIsValid(email)) {
         dataError("emailNotValidate");
         return
     }
-    
+
+    if ((pass.length < 3) || (pass.length > 20)) {
+        dataError("passLen");
+        return
+    }
+
     const data = {
         Nickname: "",
         Email: email,
@@ -63,13 +63,13 @@ register.onsubmit = function() {
         return
     }
 
-    if ((pass.length < 3) || (pass.length > 5)) {
-        dataError("passLen");
+    if (!emailIsValid(email)) {
+        dataError("emailNotValidate");
         return
     }
 
-    if (!emailIsValid(email)) {
-        dataError("emailNotValidate");
+    if ((pass.length < 3) || (pass.length > 20)) {
+        dataError("passLen");
         return
     }
 

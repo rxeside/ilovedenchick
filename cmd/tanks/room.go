@@ -240,7 +240,7 @@ func roomPage(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 
 		room, ok := rooms[roomKey]
 		if !ok {
-			http.Error(w, "Room Not Found", 500)
+			http.Redirect(w, r, "/select_room", http.StatusSeeOther)
 			return
 		}
 
