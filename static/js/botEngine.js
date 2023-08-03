@@ -3,6 +3,7 @@ let botcountEvent = document.getElementById("botCount");
 updateTankCount();
 let tankHpEvent = document.getElementById("tankHp");
 updateHealth();
+let textWin = document.getElementById("textWin")
 // 
 // Обработка движения бота
 function updateBot() {

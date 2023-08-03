@@ -8,7 +8,6 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/gorilla/websocket"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -16,10 +15,6 @@ type levelPagedata struct {
 	LevelID   int
 	LevelSize int
 }
-
-var currLevel leveldata
-
-var objects []*objdata
 
 func levelPage(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -35,12 +30,6 @@ func levelPage(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Error with getting a level by ID", 500)
 			log.Println(err.Error())
 		}
-
-		// objects, err = getObjByID(db, levelID)
-		// if err != nil {
-		// 	http.Error(w, "Error with getting an object by ID", 500)
-		// 	log.Println(err.Error())
-		// }
 
 		ts, err := template.ParseFiles("pages/level.html")
 		if err != nil {
@@ -88,72 +77,4 @@ func getLevel(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(jsonData)
 	}
-}
-
-func handler(w http.ResponseWriter, r *http.Request) {
-	var tank tanktype
-	var levelSide float64
-	var sideValue float64
-
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Println(err.Error())
-		return
-	}
-
-	for {
-		_, m, err := conn.ReadMessage()
-		if err != nil {
-			log.Println(err.Error())
-			return
-		}
-
-		message := string(m[:])
-
-		switch message {
-		case "level":
-			err = conn.WriteJSON(currLevel)
-			if err != nil {
-				log.Println(err.Error())
-				return
-			}
-
-			levelSide, err = getLevelSize(conn)
-			if err != nil {
-				log.Println(err.Error())
-				return
-			}
-
-			sideValue = levelSide / float64(currLevel.Size)
-
-			for _, value := range objects {
-				value.Pos_X = value.Pos_X * sideValue
-				value.Pos_Y = value.Pos_Y * sideValue
-			}
-
-			tank.X = levelSide/2 - sideValue
-			tank.Y = levelSide/2 - sideValue
-
-			err = conn.WriteJSON(objects)
-			if err != nil {
-				log.Println(err.Error())
-				return
-			}
-		}
-	}
-}
-
-func getLevelSize(conn *websocket.Conn) (float64, error) {
-	_, m, err := conn.ReadMessage()
-	if err != nil {
-		return 0, err
-	}
-
-	str := string(m[:])
-	value, err := strconv.ParseFloat(str, 64)
-	if err != nil {
-		return 0, err
-	}
-
-	return value, nil
 }
