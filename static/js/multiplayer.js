@@ -8,6 +8,8 @@ document.addEventListener("DOMContentLoaded", function() {
     let marginTop = innerHeight - boardSide;
     gameBoard.style.top = marginTop / 2 + "px";
     gameBoard.style.left = marginLeft + "px";
+
+    //Некоторые глобальныепеременные
     let brick = [];
     let tanks = [];
     let bullets = [];
@@ -25,6 +27,26 @@ document.addEventListener("DOMContentLoaded", function() {
     const bulletstep = 2.5;
     const bulletwidth = 0.25;
     const bulletlen = 0.3;
+
+    //Звуки
+    const audioBullet = new Audio('../static/audio/shot.mp3');
+    audioBullet.volume = 0.2;
+    const audioTankRide = new Audio('../static/audio/tank_ride.mp3');
+    audioTankRide.loop = true;
+    audioTankRide.volume = 0.035;
+    const audioTankStarted = new Audio('../static/audio/tank_started.mp3');
+    audioTankStarted.loop = true;
+    audioTankStarted.volume = 0.2;
+    const audioBrickShot = new Audio('../static/audio_battle_sity/brick_shot.mp3');
+    audioBrickShot.volume = 0.6;
+    const audioConcrete = new Audio('../static/audio/concrete_shot.mp3');
+    audioConcrete.volume = 0.7;
+    const audioExpllosion = new Audio('../static/audio/projectile_explosion.mp3');
+    audioExpllosion.volume = 0.6;
+    const audioExpllosion1 = new Audio('../static/audio/projectile_explosion1.mp3');
+    audioExpllosion.volume = 0.6;
+    const audioExpllosion2 = new Audio('../static/audio/projectile_explosion2.mp3');
+    audioExpllosion.volume = 0.6;
 
     const keypressed = {
         Up: false,
@@ -170,6 +192,8 @@ document.addEventListener("DOMContentLoaded", function() {
         for (key in newstate) {
             let eltRemove = document.getElementById(newstate[key]);
             if (eltRemove != null) {
+                audioConcrete.pause();
+                audioBrickShot.play();
                 eltRemove.remove();
             }
         }
@@ -203,6 +227,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function bulletLive(currBullet, bulletId) {
         const bulletElt = document.getElementById("bullet" + bulletId);
+        audioBullet.play();
         let bulletTimerID = setInterval(function() {
 
             if(bulletElt !== null) {
@@ -253,6 +278,7 @@ document.addEventListener("DOMContentLoaded", function() {
     function removeBullet(bulletId) {
         const bullet = document.getElementById("bullet" + bulletId);
         if (bullet !== null) {
+            bulletExplosion(bullet);
             bullet.remove();
         }
         if (bullets[bulletId] !== undefined) {
@@ -260,6 +286,36 @@ document.addEventListener("DOMContentLoaded", function() {
                 bullets[bulletId] = undefined;
             }
         }
+    }
+
+    function bulletExplosion(bullet) {
+        const explosion = document.createElement('img');
+        explosion.src = "../static/image/explosion1.png";
+        explosion.className = "explosion";
+        
+        explosion.style.width = size + "px";
+        explosion.style.height = size + "px";
+        
+        const explosionPos = size / 2.5;
+        explosion.style.top = parseFloat(bullet.style.top) - explosionPos + "px";
+        explosion.style.left = parseFloat(bullet.style.left) - explosionPos + "px";
+
+        audioExpllosion.play();
+
+        gameBoard.appendChild(explosion);
+        audioConcrete.play();
+
+        setTimeout(() => {
+            explosion.src = "../static/image/explosion2.png";
+        }, 80);
+
+        setTimeout(() => {
+            explosion.src = "../static/image/explosion3.png";
+        }, 160);
+
+        setTimeout(() => {
+            gameBoard.removeChild(explosion);
+        }, 240);
     }
 
     function createNewTank(element) {
@@ -426,13 +482,16 @@ document.addEventListener("DOMContentLoaded", function() {
         socket.send("stopMoving");
         is_move = false;
         distance = 0;
+        audioTankRide.pause()
     }
 
     function sendDir()
     {
         is_move = true;
+        audioTankStarted.play();
         socket.send("move");
         socket.send(direction);
+        audioTankRide.play();
     }
 
     function checkPressed() {
