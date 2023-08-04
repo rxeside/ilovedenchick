@@ -99,7 +99,7 @@ function createNewRoom() {
         return
     }
 
-    if ((newData.Name.length < 2) || (newData.Name.length > 30)) {
+    if ((newData.Name.length < 2) || (newData.Name.length > 20)) {
         dataError("name");
         return
     }

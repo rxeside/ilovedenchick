@@ -98,8 +98,3 @@ func getObjFromRoom(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
-
-func wsRooms(w http.ResponseWriter, r *http.Request) {
-
-	return
-}

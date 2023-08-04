@@ -80,6 +80,11 @@ func createRoomPage(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 
 func createNewRoom(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if len(rooms) >= 10 {
+			http.Error(w, "Max rooms = 10", 500)
+			return
+		}
+
 		reqData, err := io.ReadAll(r.Body)
 		if err != nil {
 			http.Error(w, "Err with request", 500)

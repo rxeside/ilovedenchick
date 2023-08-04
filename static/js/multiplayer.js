@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", function() {
     let step = 0.4;
     let bulletStep = 0.4;
     let ratio;
+    let play = true;
 
     const room = document.getElementById('room');
     const level_name = document.getElementById('level_name')
@@ -96,9 +97,8 @@ document.addEventListener("DOMContentLoaded", function() {
         socket.onmessage = function(event) {
             let newState = JSON.parse(event.data);
             if (newState === "Reset") {
-                deleteObjects();
-                location.reload();
-                // createObjects(newState.Objects);
+                tankWin();
+                setTimeout(() => location.reload(), 5000)
                 return
             } else if (newState.Message === "Bullets") {
                 updateBullets(newState.Bullets);
@@ -124,7 +124,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function updateTanks(newstate){
         for(key in newstate) {
-            if (newstate[key].Status !== "Closed") {
+            if ((newstate[key].Status !== "Closed") && (newstate[key].Status !== "Dead")) {
                 let index = -1;
                 if (tanks !== undefined) {
                     index = tanks.findIndex((tank) => tank.ID === newstate[key].ID);
@@ -187,6 +187,20 @@ document.addEventListener("DOMContentLoaded", function() {
         }
 
         updateLives();
+    }
+
+    function tankWin() {
+        play = false;
+        const winText = document.getElementById("win_text");
+
+        winText.classList.remove("hidden");
+
+        tanks.forEach(tank => {
+            if (tank.Live > 0) {
+                winText.textContent = tank.Name + " выиграл";
+                winText.classList.add(tank.Color)
+            }
+        });
     }
 
     function destroyObjects(newstate) {
@@ -390,9 +404,9 @@ document.addEventListener("DOMContentLoaded", function() {
     let is_move = false;
 
     document.addEventListener("keydown", function(event) {
-        let key = event.key;
+        let key = event.code;
 
-        if (key == "c") {
+        if (key == "KeyC") {
             socket.send("Close");
             console.log("Close");
         }
@@ -438,8 +452,11 @@ document.addEventListener("DOMContentLoaded", function() {
                     sendDir();
                 }
                 break;
-            case "z": 
-                socket.send("Fire");
+            case "Space":
+            case "KeyZ":
+                if(play){
+                    socket.send("Fire");
+                }
                 break;
         }
     });
@@ -480,6 +497,9 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     function stopMove() {
+        if (!play) {
+            return
+        }
         socket.send("stopMoving");
         is_move = false;
         distance = 0;
@@ -488,6 +508,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function sendDir()
     {
+        if (!play) {
+            return
+        }
         is_move = true;
         audioTankStarted.play();
         socket.send("move");

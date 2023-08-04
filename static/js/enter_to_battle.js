@@ -17,17 +17,17 @@ login.onsubmit = function() {
     event.preventDefault();
     let email = login.email.value;
     let pass = login.pass.value;
-
-    if ((pass.length < 3) || (pass.length > 5)) {
-        dataError("passLen");
-        return
-    }
-
+    
     if (!emailIsValid(email)) {
         dataError("emailNotValidate");
         return
     }
-    
+
+    if ((pass.length < 3) || (pass.length > 20)) {
+        dataError("passLen");
+        return
+    }
+
     const data = {
         Nickname: "",
         Email: email,
@@ -46,7 +46,7 @@ login.onsubmit = function() {
                 console.log("Всё отлично");
                 window.location.href = "/main"
             } else {
-                dataError("server")
+                dataError("none")
                 console.log("Что то не то");
             }
         });
@@ -63,13 +63,13 @@ register.onsubmit = function() {
         return
     }
 
-    if ((pass.length < 3) || (pass.length > 5)) {
-        dataError("passLen");
+    if (!emailIsValid(email)) {
+        dataError("emailNotValidate");
         return
     }
 
-    if (!emailIsValid(email)) {
-        dataError("emailNotValidate");
+    if ((pass.length < 3) || (pass.length > 20)) {
+        dataError("passLen");
         return
     }
 
@@ -118,6 +118,9 @@ function dataError(type) {
             break;
         case "nickLen":
             message = "Имя должно быть не меньше 2 символов и не больше 20";
+            break;
+        case "none":
+            message = "Неправильный логин или пароль"
             break;
     }
 

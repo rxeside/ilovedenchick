@@ -58,11 +58,12 @@ let tank = document.createElement("img");
 tank.className = "tank";
 // tank.style.top = (boardSide / 2 - 40) + "px";
 // tank.style.left = (boardSide / 2 - 40) + "px";
+
 tank.src = '../static/image/top.png';
 let status = 0;
 let dead = false;
 let health = 3;
-
+// let tankThere = false;
 
 
 let bot1 = document.createElement("img");

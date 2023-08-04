@@ -5,37 +5,38 @@
         <title>В битву!!</title>
         <script defer src="../static/js/enter_to_battle.js"></script>
         <link href="../static/css/enter_to_battle.css" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     </head>
     <body>
         <div id="container">
             <div class="block">
                 <div class="block__btns">
-                    <button class="block__btn" onclick="changeForm('login')">Авторизация</button>
-                    <button class="block__btn" onclick="changeForm('register')">Регистрация</button>
+                    <button class="block__btn_left" onclick="changeForm('login')">Авторизация</button>
+                    <button class="block__btn_right" onclick="changeForm('register')">Регистрация</button>
                 </div>
                 <form id="login" class="login">
                     <div class="login__email">
-                        <p>Ваш email</p>
-                        <input id="login_email" name="email" type="text">
+                        <p class="title">Ваш email</p>
+                        <input id="login_email" class="input" name="email" type="text">
                     </div>
                     <div class="login__pass">
-                        <p>Пароль</p>
-                        <input id="login_pass" name="pass" type="password">
+                        <p class="title">Пароль</p>
+                        <input id="login_pass" class="input" name="pass" type="password">
                     </div>
                     <button id="login_btn">Войти</button>
                 </form>
                 <form id="register" class="register hide">
                     <div class="register__name">
-                        <p>Ваш никнейм</p>
-                        <input id="register_name" name="nickname" type="text">
+                        <p class="title">Ваш никнейм</p>
+                        <input id="register_name" class="input" name="nickname" type="text">
                     </div>
                     <div class="register__email">
-                        <p>Ваш email</p>
-                        <input id="register_email" name="email" type="text">
+                        <p class="title">Ваш email</p>
+                        <input id="register_email" class="input" name="email" type="text">
                     </div>
                     <div class="register__pass">
-                        <p>Пароль</p>
-                        <input id="register_pass" name="pass" type="password">
+                        <p class="title">Пароль</p>
+                        <input id="register_pass" class="input" name="pass" type="password">
                     </div>
                     <button id="register_btn">Зарегистрироваться</button>
                 </form>

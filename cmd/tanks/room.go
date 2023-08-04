@@ -111,8 +111,10 @@ func roomIsRunning(db *sqlx.DB, key int) {
 					delete(rooms, key)
 					return
 				} else if currRoom.Status == "Reset" {
-					resetRoom(db, currRoom)
+					sendMessageForCleints(currRoom)
 					sendMessageAboutReset(currRoom)
+					time.Sleep(5 * time.Second)
+					resetRoom(db, currRoom)
 					currRoom.Status = "Load"
 				} else {
 					if len(currRoom.Tanks) > 0 {
@@ -146,11 +148,10 @@ func sendMessageAboutReset(currRoom *roomdata) {
 			}
 		}
 
-		// currRoom.Tanks[conn].Status = "Closed"
 		currRoom.Tanks[conn].Live = 3
-		resetTank(currRoom, tank)
-		// delete(currRoom.Tanks, conn)
 		currRoom.PlayersAreLiving--
+		tank.Status = "Closed"
+		resetTank(currRoom, tank)
 	}
 
 	return
@@ -240,7 +241,7 @@ func roomPage(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 
 		room, ok := rooms[roomKey]
 		if !ok {
-			http.Error(w, "Room Not Found", 500)
+			http.Redirect(w, r, "/select_room", http.StatusSeeOther)
 			return
 		}
 
@@ -797,12 +798,16 @@ func hitTank(room *roomdata, tank *tanktype) {
 	tank.Distance = 0
 	tank.Live--
 
+	fmt.Printf("room.PlayersAreLiving: %v\n", room.PlayersAreLiving)
+
 	if tank.Live > 0 {
 		resetTank(room, tank)
 	} else {
 		tank.Status = "Dead"
 		room.PlayersAreLiving--
-		room.Status = "Reset"
+		if room.PlayersAreLiving >= 1 {
+			room.Status = "Reset"
+		}
 	}
 
 	return
@@ -827,6 +832,8 @@ func resetRoom(db *sqlx.DB, room *roomdata) {
 	room.Bullets = make(map[int]*bullettype)
 	room.PlayersAreLiving = 0
 
+	fmt.Printf("len(room.Tanks): %v\n", len(room.Tanks))
+
 	var err error
 	room.Objects, err = getObjByID(db, room.Level.Id)
 	if err != nil {
@@ -834,9 +841,31 @@ func resetRoom(db *sqlx.DB, room *roomdata) {
 		return
 	}
 
+	for index, value := range room.Objects {
+		if value.Name == "Base" {
+			room.Objects = append(room.Objects[:index], room.Objects[index+1:]...)
+		}
+	}
+
+	pointHave := false
+
 	for _, value := range room.Objects {
 		value.Pos_Y *= size
 		value.Pos_X *= size
+
+		if value.Name == "Tank" {
+			pointHave = true
+		}
+	}
+
+	if !pointHave {
+		for _, value := range room.PointsToSpawn {
+			for index, obj := range room.Objects {
+				if obj.Pos_X == value.X && obj.Pos_Y == value.Y {
+					room.Objects = append(room.Objects[:index], room.Objects[index+1:]...)
+				}
+			}
+		}
 	}
 
 	fmt.Println("Reset")
