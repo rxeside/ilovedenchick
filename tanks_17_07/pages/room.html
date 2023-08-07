@@ -2,7 +2,8 @@
 <html>
 <head>
     <title>Tank Battle</title>
-    <link href="../static/css/level.css" rel="stylesheet">
+    <link href="../static/css/room.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         *{
             margin: 0;
@@ -43,6 +44,7 @@
 
         .explosion {
             position: absolute;
+            z-index: 6;
         }
 
         .botShotExplosion {
@@ -60,12 +62,17 @@
     <script src="../static/js/multiplayer.js"></script>
 </head>
 <body>
+    <p id="win_text" class="win-text hidden">Кто-то победил</p>
+    <div class="room-data">
+        <p class="room-data__name">{{ .RoomName }}</p>
+        <p id="level_name" class="room-data__level-name"></p>
+    </div>
     <p id="room" style="position: absolute; visibility: hidden;">{{ .RoomKey }}</p>
     <div class="background"> 
         <div id="game-board"></div>
     </div>
-    
     <div id="lives" class="tank-live">
     </div>
+    <button class="exit-btn" onclick="exit()">Выйти</button>
 </body>
 </html>

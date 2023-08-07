@@ -1,14 +1,43 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="ru">
-        <title>Выбор комнаты</title>
-        <script src="../static/js/room_select.js"></script>
-        <style src="../static/css/room_select.css"></style>
-    </head>
-    <body>
-        {{ range .Rooms }}
-            <p>{{ .Name }}</p>
-        {{ end }}
-    </body>
+
+<head>
+    <meta charset="ru">
+    <title>Выбор комнаты</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <script src="../static/js/room_select.js"></script>
+    <link href="../static/css/room_select.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="background">
+        <div class="title">Выберите комнату</div>
+        <div class="container">
+            <div class="left">
+                <div class="room-list">
+                    <div>
+                        {{ range .Rooms }}
+                        <button class="btn-room" id="{{ .Key }}" size="{{ .Size }}" name="room">{{ .Name }}</button>
+                        {{ end }}
+                    </div>
+                </div>
+                <div>
+                    <button id="create_new" class="btn-room" onclick="createNewRoom()">Создать новую комнуту</button>
+                </div>
+                <div>
+                    <button class="join" onclick="joinToRoom()">Присоединиться</button>
+                    <button class="exit" onclick="exit()"></button>
+                </div>
+            </div>
+            <div class="workspace">
+                <div id="level_field" class="field"></div>
+            </div>
+            <!-- <div>
+                <button style="margin: 30px; background-color: red;" onclick="joinToRoom()">Join</button>
+                <button onclick="exit()">Выйти</button>
+            </div> -->
+        </div>
+    </div>
+</body>
+
 </html>
