@@ -2,7 +2,7 @@
 {
     padding: 0;
     margin: 0;
-    overflow-y: hidden;
+    overflow: hidden;
     cursor: url(../image/cursor2.png), default;
 }
 
@@ -235,12 +235,13 @@
 
 .exit
 {
-    height: 62px;
-    width: 62px;
+    height: 102px;
+    width: 102px;
     /* background-color: aqua; */
-    background-image: url(../image/exit.png);
+    background: url(../image/exit_mini.png) no-repeat;
+    background-size: cover;
     position: fixed;
-    bottom: 2%;
+    bottom: 4.65%;
     left: 1%;
     margin: 10px;
     border-radius: 50%;
@@ -248,14 +249,16 @@
 
 .exit:hover
 {
-    background-image: url(../image/exit_hover_new.png);
+    background: url(../image/exit_hover.png) no-repeat;
+    background-size: cover;
 }
 
 .exit:active
 {
-    background-image: url(../image/exit_activ.png);
-    height: 52px;
-    width: 52px;
-    bottom: 2.5%;
+    background: url(../image/exit_activ.png) no-repeat;
+    background-size: cover;
+    height: 92px;
+    width: 92px;
+    bottom: 5%;
     left: 1.2%;
 }

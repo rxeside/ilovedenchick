@@ -1,0 +1,152 @@
+*
+{
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+}
+
+.win-text
+{
+    position: absolute;
+    font-family: 'Press Start 2P';
+    font-size: 50px;
+    top: 15%;
+    left: 32%;
+    z-index: 10;
+}
+
+.hidden
+{
+    visibility: hidden;
+}
+
+.room-data
+{
+    position: absolute;
+    top: 10%;
+    left: 3%;
+    font: 400 normal 18px/38px 'Press Start 2P';
+    color: white;
+}
+
+.arr
+{
+    display: grid;
+    grid-template-columns: repeat(8, 120px);
+    grid-template-rows: repeat(8, 120px);
+    background-color: black;
+}
+
+.arr__cell
+{
+    height: 100%;
+    width: 100%;
+}
+
+.background
+{
+    background: url(../image/main_str_fon.jpg) no-repeat;
+    width: 100%;
+    min-height: 969px;
+    background-size: cover;
+}
+
+.tank-live
+{
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 30%;
+    left: 80%;
+    color: white;
+}
+
+.tank-live__elt
+{
+    display: flex;
+    font: 400 normal 14px/26px "Press Start 2P";
+}
+
+.exit-btn
+{
+    position: absolute;
+    bottom: 1.65%;
+    left: 3%;
+    font: 400 normal 24px/40px 'Press Start 2P';
+    width: 10%;
+    border-radius: 10px;
+    background-color: darkgray;
+}
+
+.exit-btn:hover
+{
+    background-color: lightgrey;
+}
+
+.exit-btn:active
+{
+    width: 9%;
+    margin-left: 0.5%;
+    background-color: grey;
+    font: 400 normal 22px/40px 'Press Start 2P';
+}
+
+.red
+{
+    color: salmon;
+}
+
+.tank_red
+{
+    filter: hue-rotate(330deg);
+}
+
+.green
+{
+    color: limegreen;
+}
+
+.tank_green
+{
+    filter: hue-rotate(30deg);
+}
+
+.gold
+{
+    color: gold;
+}
+
+.tank_gold
+{
+    filter: hue-rotate(0);
+}
+
+.grey
+{
+    color: silver;
+}
+
+.tank_grey
+{
+    filter: grayscale(1);
+}
+
+.magenta
+{
+    color: magenta;
+}
+
+.tank_magenta
+{
+    filter: hue-rotate(230deg);
+}
+
+.blue
+{
+    color: blue;
+}
+
+.tank_blue
+{
+    filter: hue-rotate(190deg);
+}

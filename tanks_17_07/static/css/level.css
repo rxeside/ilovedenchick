@@ -1,29 +1,63 @@
-*
-{
+* {
     padding: 0;
     margin: 0;
-    overflow-y: hidden;
-    cursor: url(../image/cursor2.png), default;
+    overflow: hidden;
 }
 
-.arr
-{
+.arr {
     display: grid;
     grid-template-columns: repeat(8, 120px);
     grid-template-rows: repeat(8, 120px);
     background-color: black;
 }
 
-.arr__cell
-{
+.arr__cell {
     height: 100%;
     width: 100%;
 }
 
-.background
-{
+.background {
     background: url(../image/main_str_fon.jpg) no-repeat;
     width: 100%;
     min-height: 969px;
     background-size: cover;
+}
+
+#menu {
+    position: absolute;
+    top: 40%;
+    left: 38%;
+    color: aliceblue;
+    font: 400 normal 100px/100px 'Press Start 2P';
+}
+
+.exit
+{
+    height: 62px;
+    width: 62px;
+    /* background-color: aqua; */
+    background-image: url(../image/exit.png);
+    position: fixed;
+    bottom: 2%;
+    left: 1%;
+    margin: 10px;
+    border-radius: 50%;
+}
+
+.exit:hover
+{
+    background-image: url(../image/exit_hover.png);
+}
+
+.exit:active
+{
+    background-image: url(../image/exit_activ.png);
+    height: 52px;
+    width: 52px;
+    bottom: 2.5%;
+    left: 1.2%;
+}
+
+#level_data{
+    color: aliceblue;
 }
