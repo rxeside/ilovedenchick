@@ -1,7 +1,8 @@
 //музыка
 const audioButton = new Audio('../static/audio/button.mp3');
 audioButton.volume = 0.8;
-let currLevel;
+
+let currLevel = -1;
 
 const btns = document.getElementsByName("level");
 
@@ -12,14 +13,6 @@ window.onload = function() {
             sendData(id);
         }
     });
-}
-
-function back() {
-    audioButton.play();
-}
-
-function play() {
-    audioButton.play();
 }
 
 function sendData(buttonId) {
@@ -79,6 +72,9 @@ function back() {
 }
 
 function play() {
+    if (currLevel === -1) {
+        return
+    }
     audioButton.play();
     setTimeout(() => { window.location.href = "/level/" + currLevel;}, 200);
 }

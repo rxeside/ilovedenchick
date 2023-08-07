@@ -2,7 +2,7 @@
 {
     padding: 0;
     margin: 0;
-    overflow: hidden;
+    overflow-y: hidden;
     cursor: url(../image/cursor2.png), default;
 }
 
@@ -88,7 +88,7 @@
     opacity: 0.7;
     padding: 4px;
     border-radius: 5px;
-    width: 72%;
+    width: 74%;
     box-shadow: 5px 5px 10px rgba(255, 102, 0, 0.288), -5px -5px 10px rgba(255, 102, 0, 0.288), 5px -5px 10px rgba(255, 102, 0, 0.288), -5px 5px 10px rgba(255, 102, 0, 0.288);
 }
 
@@ -110,7 +110,7 @@
     opacity: 0.7;
     padding: 4px 4px 4px 4px;
     border-radius: 5px;
-    width: 63%;
+    width: 65%;
     box-shadow: 5px 5px 10px rgba(255, 102, 0, 0.288), -5px -5px 10px rgba(255, 102, 0, 0.288), 5px -5px 10px rgba(255, 102, 0, 0.288), -5px 5px 10px rgba(255, 102, 0, 0.288);
 }
 
@@ -235,13 +235,12 @@
 
 .exit
 {
-    height: 102px;
-    width: 102px;
+    height: 62px;
+    width: 62px;
     /* background-color: aqua; */
-    background: url(../image/exit_mini.png) no-repeat;
-    background-size: cover;
+    background-image: url(../image/exit.png);
     position: fixed;
-    bottom: 4.65%;
+    bottom: 2%;
     left: 1%;
     margin: 10px;
     border-radius: 50%;
@@ -249,16 +248,14 @@
 
 .exit:hover
 {
-    background: url(../image/exit_hover.png) no-repeat;
-    background-size: cover;
+    background-image: url(../image/exit_hover_new.png);
 }
 
 .exit:active
 {
-    background: url(../image/exit_activ.png) no-repeat;
-    background-size: cover;
-    height: 92px;
-    width: 92px;
-    bottom: 5%;
+    background-image: url(../image/exit_activ.png);
+    height: 52px;
+    width: 52px;
+    bottom: 2.5%;
     left: 1.2%;
 }

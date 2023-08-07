@@ -641,6 +641,10 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 });
 
+const audioButton = new Audio('../static/audio/button.mp3');
+audioButton.volume = 0.8;
+
 function exit() {
-    window.location.href = "/select_room";
+    audioButton.play();
+    setTimeout(() => { window.location.href = "/select_room";}, 200);
 }

@@ -45,6 +45,8 @@ document.addEventListener("DOMContentLoaded", function () {
     function levelDataProccessing(data){
         level = data;
         sideValue = boardSide / level.Size;
+        bot2.style.left = ((level.Size - 1) / 2) * sideValue + "px";
+        bot3.style.left = boardSide - sideValue + "px";
         levelSide = level.Size;
         tank.style.height = sideValue * 0.95 + "px";
         tank.style.width = sideValue * 0.95 + "px";
@@ -76,39 +78,39 @@ document.addEventListener("DOMContentLoaded", function () {
     function createLevel(data) {
         let tankThere = false;
         brick = data;
+        for (let i = 0; i < brick.length; i++) {
+            if (((brick[i].Pos_X === 0) || ((brick[i].Pos_X === (level.Size - 1) / 2)) || (brick[i].Pos_X === (level.Size - 1))) && (brick[i].Pos_Y === 0)) {
+                brick[i] = undefined;
+                continue;
+            }
+            brick[i].Pos_X = brick[i].Pos_X * sideValue + "px";
+            brick[i].Pos_Y = brick[i].Pos_Y * sideValue + "px";
+            if (brick[i].Name !== "Tank") {
+                createNewElt(brick[i], i);
+            } else if (brick[i].Name == "Tank") {
+                tank.style.top = brick[i].Pos_Y;
+                tank.style.left = brick[i].Pos_X;
+                tankThere = true;
+            } 
+        };
+        
+        if (!tankThere) {
+            let x = Math.floor((level.Size - 1) / 2) * sideValue + "px";
+            let y = Math.floor(level.Size - 1) * sideValue + "px";
+            console.log(x, ' ', y);
             for (let i = 0; i < brick.length; i++) {
-                brick[i].Pos_X = brick[i].Pos_X * sideValue + "px";
-                brick[i].Pos_Y = brick[i].Pos_Y * sideValue + "px";
-                if (brick[i].Name !== "Tank") {
-                    if (i == brick.length/2) {
-                        continue;
-                    }
-                    createNewElt(brick[i], i);
-                } else if (brick[i].Name == "Tank") {
-                    tank.style.top = brick[i].Pos_Y;
-                    tank.style.left = brick[i].Pos_X;
-                    tankThere = true;
-                } 
-            };
-            
-            if (!tankThere) {
-                let x = Math.floor((level.Size - 1) / 2) * sideValue + "px";
-                let y = Math.floor(level.Size - 1) * sideValue + "px";
-
-                console.log(x, ' ', y);
-
-                for (let i = 0; i < brick.length; i++) {
+                if (brick[i] !== undefined) {
                     if ((brick[i].Pos_X == x) && (brick[i].Pos_Y == y)) {
                         const removeObj = document.getElementById(i);
                         removeObj.remove();
-
                         brick[i] = undefined;
                     }
                 }
-
-                tank.style.top = y;
-                tank.style.left = x;
             }
+
+            tank.style.top = y;
+            tank.style.left = x;
+        }
     }
 
     const continueBtn = document.getElementById("continueBtn");
@@ -135,6 +137,7 @@ document.addEventListener("DOMContentLoaded", function () {
           
           function exitAction() {
             console.log("Нажата кнопка 'Выход'");
+            window.location.href = "/select_level"
           }
         continueBtn.addEventListener("click", continueAction);
         exitBtn.addEventListener("click", exitAction);
@@ -142,19 +145,6 @@ document.addEventListener("DOMContentLoaded", function () {
       }
       
     document.addEventListener("keydown", handleKeyPress);
-
-
-    // function newAns() {
-    //     socket.onmessage = function (event) {
-    //         brick = JSON.parse(event.data);
-    //         for (let i = 0; i < brick.length; i++) {
-    //             brick[i].Pos_X = brick[i].Pos_X + "px";
-    //             brick[i].Pos_Y = brick[i].Pos_Y + "px";
-    //             createNewElt(brick[i], i);
-    //         };
-            
-    //     };
-    // }
 
     function createNewElt(element, i) {
         let obj = document.createElement("img");
@@ -204,9 +194,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             })
 
+            if (parseFloat(tank.style.top) <= 0) {
+                can_move = false;
+            }
+
             brick.forEach(element => {
                 if (element != undefined) {
-                    if ((((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(tank.style.top) < (parseFloat(element.Pos_Y) + parseFloat(tank.style.width) + step))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(tank.style.left) < (parseFloat(element.Pos_X) + parseFloat(tank.style.width)))) || ((parseFloat(tank.style.top) <= 0))) {
+                    if ((((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(tank.style.top) < (parseFloat(element.Pos_Y) + parseFloat(tank.style.width) + step))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(tank.style.left) < (parseFloat(element.Pos_X) + parseFloat(tank.style.width))))) {
                         if (element.CanTPass === 0)
                             can_move = false;
 
@@ -236,10 +230,15 @@ document.addEventListener("DOMContentLoaded", function () {
                         can_move = false;
                     }
                 }
-            })
+            });
+
+            if (parseFloat(tank.style.top) + parseFloat(tank.style.width) >= boardSide) {
+                can_move = false;
+            }
+
             brick.forEach(element => {
                 if (element != undefined) {
-                    if ((((parseFloat(tank.style.top) + parseFloat(tank.style.width) + step) > parseFloat(element.Pos_Y)) && (parseFloat(tank.style.top) < (parseFloat(element.Pos_Y) + parseFloat(tank.style.width)))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(tank.style.left) < (parseFloat(element.Pos_X) + parseFloat(tank.style.width)))) || ((parseFloat(tank.style.top) + parseFloat(tank.style.width) >= boardSide))) {
+                    if ((((parseFloat(tank.style.top) + parseFloat(tank.style.width) + step) > parseFloat(element.Pos_Y)) && (parseFloat(tank.style.top) < (parseFloat(element.Pos_Y) + parseFloat(tank.style.width)))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(tank.style.left) < (parseFloat(element.Pos_X) + parseFloat(tank.style.width))))) {
                         if (element.CanTPass === 0)
                             can_move = false;
                     }
@@ -270,9 +269,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             })
 
+            if (parseFloat(tank.style.left) <= 0) {
+                can_move = false;
+            }
+
             brick.forEach(element => {
                 if (element != undefined) {
-                    if ((((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(tank.style.top) < (parseFloat(element.Pos_Y) + parseFloat(tank.style.width)))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(tank.style.left) < (parseFloat(element.Pos_X) + parseFloat(tank.style.width) + step))) || ((parseFloat(tank.style.left) <= 0))) {
+                    if ((((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(tank.style.top) < (parseFloat(element.Pos_Y) + parseFloat(tank.style.width)))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(tank.style.left) < (parseFloat(element.Pos_X) + parseFloat(tank.style.width) + step)))) {
                         if (element.CanTPass === 0)
                             can_move = false;
                     }
@@ -301,9 +304,14 @@ document.addEventListener("DOMContentLoaded", function () {
                     }
                 }
             })
+
+            if (parseFloat(tank.style.left) + parseFloat(tank.style.width) >= boardSide) {
+                can_move = false
+            }
+
             brick.forEach(element => {
                 if (element != undefined) {
-                    if ((((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(tank.style.top) < (parseFloat(element.Pos_Y) + parseFloat(tank.style.width)))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width) + step) > parseFloat(element.Pos_X)) && (parseFloat(tank.style.left) < (parseFloat(element.Pos_X) + parseFloat(tank.style.width)))) || ((parseFloat(tank.style.left) + parseFloat(tank.style.width) >= boardSide))) {
+                    if ((((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(tank.style.top) < (parseFloat(element.Pos_Y) + parseFloat(tank.style.width)))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width) + step) > parseFloat(element.Pos_X)) && (parseFloat(tank.style.left) < (parseFloat(element.Pos_X) + parseFloat(tank.style.width))))) {
                         if (element.CanTPass === 0)
                             can_move = false;
                     }
@@ -326,7 +334,7 @@ document.addEventListener("DOMContentLoaded", function () {
         document.addEventListener('keyup', (event) => {
             if (keyPressed) {
                 var key = event.key;
-                if (key == "ArrowUp" || "ArrowDown" || "ArrowRight" || "ArrowLeft") {
+                if (key == "ArrowUp" || key == "ArrowDown" || key == "ArrowRight" || key == "ArrowLeft") {
                     clearInterval(keyPressed);
                     keyPressed = 0;
                 }
@@ -401,9 +409,29 @@ document.addEventListener("DOMContentLoaded", function () {
                     explosionShall();
                     bot.health -= 1;
                     if (bot.health == 0) {
-                        bot.remove();
                         deadBot = bots.indexOf(bot);
-                        bots.splice(deadBot, 1);
+                        botsNum--;
+                        if (botsNum < 3) {
+                            bot.remove();
+                            bots.splice(deadBot, 1);
+                        } else {
+                            bot.health = 1;
+                            bot.style.top = 1 + "px";
+
+                            let pos = Math.floor(Math.random() * 3);
+
+                            switch (pos) {
+                                case 0:
+                                    bot.style.left = 1 + "px";
+                                    break;
+                                case 1:
+                                    bot.style.left = ((level.Size - 1) / 2) * sideValue + "px";
+                                    break;
+                                case 2:
+                                    bot.style.left = boardSide - sideValue + "px";
+                                    break;
+                            }
+                        }
                         updateTankCount(); 
                     }
                     console.log(bot);
@@ -491,10 +519,14 @@ function win() {
 }
 
 function updateTankCount() {
-    botcountEvent.textContent = "enemys left: " + bots.length;
+    botcountEvent.textContent = "enemys left: " + botsNum;
 }
 
 function updateHealth() {
     tankHpEvent.textContent = "health: " + health + "hp";
 }
 
+function exit() {
+    audioButton.play();
+    setTimeout(() => { window.location.href = "/select_level";}, 200);
+}

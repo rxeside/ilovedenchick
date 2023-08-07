@@ -64,28 +64,6 @@
             position: absolute;
         }
 
-        #menu {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 50%;
-            height: 50%;
-            background-color: #ff0000;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            z-index: 999;
-        }
-
-        #menuBtn {
-            margin-top: 10px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-
         #overlay {
             position: fixed;
             top: 0;
@@ -134,6 +112,7 @@
     </style>
 </head>
 <body>
+    <button class="exit" onclick="exit()"></button>
     <div id="level_data" num="{{ .LevelID }}"></div>
     <div id="tankHp"></div>
     <div id="botCount"></div>
@@ -142,9 +121,7 @@
         <div id="textWin"></div>
     </div>
     
-    <div id="menu" style="display: none;">
-        <button class="menuButton" id="continueBtn">Продолжить</button>
-        <button class="menuButton" id="exitBtn">Выход</button>
+    <div id="menu" style="display: none;"> pause
     </div>
     <div id="overlay" style="display: none;"></div>
     <canvas id="canvas"></canvas>

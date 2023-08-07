@@ -11,7 +11,7 @@
     background: url(../image/fon_new.jpg
     ) no-repeat;
     width: 100%;
-    min-height: 969px;
+    height: 100vh;
     background-size: cover;
     display: grid;
     grid-template-rows: 8% 92%;

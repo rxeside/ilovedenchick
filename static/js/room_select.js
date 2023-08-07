@@ -1,5 +1,8 @@
 const btns = document.getElementsByName("room");
-let selectedRoom;
+let selectedRoom = -1;
+
+const audioButton = new Audio('../static/audio/button.mp3');
+audioButton.volume = 0.8;
 
 window.onload = function() {
     btns.forEach(btn => {
@@ -65,13 +68,19 @@ function selectRoom(key) {
 }
 
 function joinToRoom() {
-    window.location.href = "/room/" + selectedRoom;
+    if (selectedRoom == -1)  {
+        return
+    }
+    audioButton.play();
+    setTimeout(() => { window.location.href = "/room/" + selectedRoom;}, 200);
 };
 
 function createNewRoom() {
-    window.location.href = "/create_room"
+    audioButton.play();
+    setTimeout(() => { window.location.href = "/create_room";}, 200);
 }
 
 function exit() {
-    window.location.href = "/main"
+    audioButton.play();
+    setTimeout(() => { window.location.href = "/main";}, 200);
 }

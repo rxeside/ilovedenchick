@@ -1,6 +1,9 @@
 let login = document.getElementById("login");
 let register = document.getElementById("register");
 
+const audioButton = new Audio('../static/audio/button.mp3');
+audioButton.volume = 0.8;
+
 function changeForm(type) {
     if ((type == "login") && (login.classList.contains("hide"))) {
         login.classList.remove("hide");
@@ -10,6 +13,7 @@ function changeForm(type) {
         register.classList.remove("hide");
     }
 
+    audioButton.play();
     return
 }
 

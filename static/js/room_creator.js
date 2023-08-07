@@ -3,6 +3,8 @@ const nameFeild = document.getElementById('name');
 const numOfPlayers = document.getElementById('num_of_players');
 const btns = document.getElementsByName("level");
 
+const audioButton = new Audio('../static/audio/button.mp3');
+audioButton.volume = 0.8;
 
 const min = 2;
 const max = 6;
@@ -88,6 +90,7 @@ function sendData(buttonId) {
 };
 
 function createNewRoom() {
+    audioButton.play();
     let newData = {
         Id: LevelID,
         Name: RoomName,
@@ -127,7 +130,8 @@ function createNewRoom() {
 }
 
 function exit() {
-    window.location.href = "/select_room"
+    audioButton.play();
+    setTimeout(() => { window.location.href = "/select_room";}, 200);
 }
 
 function dataError(type) {

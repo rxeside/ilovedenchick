@@ -38,6 +38,8 @@ const audioExpllosion1 = new Audio('../static/audio/projectile_explosion1.mp3');
 audioExpllosion.volume = 0.6;
 const audioExpllosion2 = new Audio('../static/audio/projectile_explosion2.mp3');
 audioExpllosion.volume = 0.6;
+const audioButton = new Audio('../static/audio/button.mp3');
+audioButton.volume = 0.8;
 let r = 1;
 
 //Создание снаряда
@@ -65,11 +67,13 @@ let dead = false;
 let health = 3;
 // let tankThere = false;
 
+//Боты
+let botsNum = 15;
 
 let bot1 = document.createElement("img");
 bot1.className = "bot1";
-bot1.style.top = (boardSide / 4 - 40) + "px";
-bot1.style.left = (boardSide / 2 - 40) + "px";
+bot1.style.top = 1 + "px";
+bot1.style.left = 1 + "px";
 bot1.src = '../static/image/botTop.png';
 gameBoard.appendChild(bot1);
 bot1.botMovement = 0;
@@ -92,8 +96,7 @@ bot1.health = 1;
 
 let bot2 = document.createElement("img");
 bot2.className = "bot2";
-bot2.style.top = (boardSide / 6 - 40) + "px";
-bot2.style.left = (boardSide / 6 - 100) + "px";
+bot2.style.top = 1 + "px";
 bot2.src = '../static/image/botTop.png';
 gameBoard.appendChild(bot2);
 bot2.botMovement = 0;
@@ -116,8 +119,7 @@ bot2.health = 1;
 
 let bot3 = document.createElement("img");
 bot3.className = "bot2";
-bot3.style.top = (boardSide / 6 - 40) + "px";
-bot3.style.left = (boardSide / 2 + 100) + "px";
+bot3.style.top = 1 + "px";
 bot3.src = '../static/image/botTop.png';
 gameBoard.appendChild(bot3);
 bot3.botMovement = 0;

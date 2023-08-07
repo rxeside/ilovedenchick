@@ -47,16 +47,20 @@ function updateBot() {
 
                 if (bot.direction == 'up') {
                     let can_move = true;
+                    if (parseFloat(bot.style.top) <= 0) {
+                        can_move = false;
+                        bot.direction = getRandomDirection();
+                    }
                     brick.forEach(element => {
                         if (element != undefined) {
                             if (((parseFloat(tank.style.top) + parseFloat(tank.style.height) < parseFloat(bot.style.top) + parseFloat(bot.style.height)) && (parseFloat(tank.style.top) + parseFloat(tank.style.height) + step > parseFloat(bot.style.top)) && (parseFloat(tank.style.left) + parseFloat(tank.style.width) > parseFloat(bot.style.left)) && (parseFloat(tank.style.left) < parseFloat(bot.style.left) + parseFloat(bot.style.width)))) {
                                 can_move = false;
                             }
-                            if ((((parseFloat(bot.style.top) + parseFloat(bot.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(bot.style.top) < (parseFloat(element.Pos_Y) + parseFloat(bot.style.width) + step))) && (((parseFloat(bot.style.left) + parseFloat(bot.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(bot.style.left) < (parseFloat(element.Pos_X) + parseFloat(bot.style.width)))) || ((parseFloat(bot.style.top) <= 0))) {
+                            if ((((parseFloat(bot.style.top) + parseFloat(bot.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(bot.style.top) < (parseFloat(element.Pos_Y) + parseFloat(bot.style.width) + step))) && (((parseFloat(bot.style.left) + parseFloat(bot.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(bot.style.left) < (parseFloat(element.Pos_X) + parseFloat(bot.style.width))))) {
                                 if (element.CanTPass === 0) {
                                     can_move = false;
                                     if (!bot.seeTank)
-                                        bot.direction = "down";
+                                        bot.direction = getRandomDirection();
                                 }
                             }
                         }
@@ -81,13 +85,17 @@ function updateBot() {
                     if (((parseFloat(tank.style.top) > parseFloat(bot.style.top)) && (parseFloat(tank.style.top) - step < parseFloat(bot.style.top) + parseFloat(bot.style.height)) && (parseFloat(tank.style.left) + parseFloat(tank.style.width) > parseFloat(bot.style.left)) && (parseFloat(tank.style.left) < parseFloat(bot.style.left) + parseFloat(bot.style.width)))) {
                         can_move = false;
                     }
+                    if (parseFloat(bot.style.top) + parseFloat(bot.style.width) >= boardSide) {
+                        can_move = false;
+                        bot.direction = getRandomDirection();
+                    }
                     brick.forEach(element => {
                         if (element != undefined) {
-                            if ((((parseFloat(bot.style.top) + parseFloat(bot.style.width) + step) > parseFloat(element.Pos_Y)) && (parseFloat(bot.style.top) < (parseFloat(element.Pos_Y) + parseFloat(bot.style.width)))) && (((parseFloat(bot.style.left) + parseFloat(bot.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(bot.style.left) < (parseFloat(element.Pos_X) + parseFloat(bot.style.width)))) || ((parseFloat(bot.style.top) + parseFloat(bot.style.width) >= boardSide))) {
+                            if ((((parseFloat(bot.style.top) + parseFloat(bot.style.width) + step) > parseFloat(element.Pos_Y)) && (parseFloat(bot.style.top) < (parseFloat(element.Pos_Y) + parseFloat(bot.style.width)))) && (((parseFloat(bot.style.left) + parseFloat(bot.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(bot.style.left) < (parseFloat(element.Pos_X) + parseFloat(bot.style.width))))) {
                                 if (element.CanTPass === 0) {
                                     can_move = false;
                                     if (!bot.seeTank)
-                                        bot.direction = "up";
+                                        bot.direction = getRandomDirection();
                                 }
                             }
                         }
@@ -112,13 +120,17 @@ function updateBot() {
                     if ((((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(bot.style.top)) && (parseFloat(tank.style.top) < (parseFloat(bot.style.top) + parseFloat(bot.style.height)))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width) + 2 * step) > parseFloat(bot.style.left)) && (parseFloat(tank.style.left) < (parseFloat(bot.style.left) + parseFloat(bot.style.width))))) {
                         can_move = false;
                     }
+                    if (parseFloat(bot.style.left) <= 0) {
+                        can_move = false;
+                        bot.direction = getRandomDirection();
+                    }
                     brick.forEach(element => {
                         if (element != undefined) {
-                            if ((((parseFloat(bot.style.top) + parseFloat(bot.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(bot.style.top) < (parseFloat(element.Pos_Y) + parseFloat(bot.style.width)))) && (((parseFloat(bot.style.left) + parseFloat(bot.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(bot.style.left) < (parseFloat(element.Pos_X) + parseFloat(bot.style.width) + step))) || ((parseFloat(bot.style.left) <= 0))) {
+                            if ((((parseFloat(bot.style.top) + parseFloat(bot.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(bot.style.top) < (parseFloat(element.Pos_Y) + parseFloat(bot.style.width)))) && (((parseFloat(bot.style.left) + parseFloat(bot.style.width)) > parseFloat(element.Pos_X)) && (parseFloat(bot.style.left) < (parseFloat(element.Pos_X) + parseFloat(bot.style.width) + step)))) {
                                 if (element.CanTPass === 0) {
                                     can_move = false;
                                     if (!bot.seeTank) {
-                                        bot.direction = "right";
+                                        bot.direction = getRandomDirection();
                                     }
                                 }
                             }
@@ -144,13 +156,17 @@ function updateBot() {
                     if ((((parseFloat(tank.style.top) + parseFloat(tank.style.width)) > parseFloat(bot.style.top)) && (parseFloat(tank.style.top) < (parseFloat(bot.style.top) + parseFloat(tank.style.width)))) && (((parseFloat(tank.style.left) + parseFloat(tank.style.width)) > parseFloat(bot.style.left)) && (parseFloat(tank.style.left) < (parseFloat(bot.style.left) + parseFloat(tank.style.width) + step)))) {
                         can_move = false;
                     }
+                    if (parseFloat(bot.style.left) + parseFloat(bot.style.width) >= boardSide) {
+                        can_move = false;
+                        bot.direction = getRandomDirection();
+                    }
                     brick.forEach(element => {
                         if (element != undefined) {
-                            if ((((parseFloat(bot.style.top) + parseFloat(bot.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(bot.style.top) < (parseFloat(element.Pos_Y) + parseFloat(bot.style.width)))) && (((parseFloat(bot.style.left) + parseFloat(bot.style.width) + step) > parseFloat(element.Pos_X)) && (parseFloat(bot.style.left) < (parseFloat(element.Pos_X) + parseFloat(bot.style.width)))) || ((parseFloat(bot.style.left) + parseFloat(bot.style.width) >= boardSide))) {
+                            if ((((parseFloat(bot.style.top) + parseFloat(bot.style.width)) > parseFloat(element.Pos_Y)) && (parseFloat(bot.style.top) < (parseFloat(element.Pos_Y) + parseFloat(bot.style.width)))) && (((parseFloat(bot.style.left) + parseFloat(bot.style.width) + step) > parseFloat(element.Pos_X)) && (parseFloat(bot.style.left) < (parseFloat(element.Pos_X) + parseFloat(bot.style.width))))) {
                                 if (element.CanTPass === 0) {
                                     can_move = false;
                                     if (!bot.seeTank)
-                                        bot.direction = "left";
+                                        bot.direction = getRandomDirection();
                                 }
                             }
                         }
