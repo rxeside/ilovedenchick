@@ -52,16 +52,20 @@ type bullettype struct {
 }
 
 type roomdata struct {
-	Name             string
-	Level            leveldata
-	Objects          []*objdata
-	ObjToRemove      []int
-	Tanks            map[*websocket.Conn]*tanktype
-	Bullets          map[int]*bullettype
-	PointsToSpawn    []*positionstruct
-	PlayersAreLiving int
-	MaxPlayers       int
-	Status           string
+	Name          string
+	Level         leveldata
+	Objects       []*objdata
+	ObjToRemove   []int
+	Tanks         map[*websocket.Conn]*tanktype
+	Bullets       map[int]*bullettype
+	PointsToSpawn []*positionstruct
+	MaxPlayers    int
+	Status        string
+}
+
+type messageAboutReset struct {
+	Message string
+	ID      int
 }
 
 type messageAboutBullets struct {
@@ -86,7 +90,7 @@ func roomIsRunning(db *sqlx.DB, key int) {
 
 	ticker := time.NewTicker(33 * time.Millisecond)
 
-	for currRoom.PlayersAreLiving == 0 {
+	for len(currRoom.Tanks) == 0 {
 	}
 
 	go func() {
@@ -136,8 +140,14 @@ func sendMessageForCleints(currRoom *roomdata) {
 }
 
 func sendMessageAboutReset(currRoom *roomdata) {
-	var Message string
-	Message = "Reset"
+	var Message messageAboutReset
+	Message.Message = "Reset"
+
+	for _, tank := range currRoom.Tanks {
+		if tank.Status != "Dead" {
+			Message.ID = tank.ID
+		}
+	}
 
 	for conn, tank := range currRoom.Tanks {
 		if tank.Status != "Closed" {
@@ -149,8 +159,9 @@ func sendMessageAboutReset(currRoom *roomdata) {
 		}
 
 		currRoom.Tanks[conn].Live = 3
-		currRoom.PlayersAreLiving--
+
 		tank.Status = "Closed"
+		tank.Distance = 0
 		resetTank(currRoom, tank)
 	}
 
@@ -169,7 +180,6 @@ func sendMessageAboutObj(currRoom *roomdata, ObjtoRemove *[]int) {
 				log.Println(err)
 				value.Status = "Closed"
 				// delete(currRoom.Tanks, conn)
-				currRoom.PlayersAreLiving--
 			}
 		}
 	}
@@ -189,7 +199,6 @@ func sendMessageAboutBullets(currRoom *roomdata, Bullets *map[int]*bullettype) {
 				log.Println(err)
 				value.Status = "Closed"
 				// delete(currRoom.Tanks, conn)
-				currRoom.PlayersAreLiving--
 			}
 		}
 	}
@@ -214,8 +223,6 @@ func sendMessageAboutTanks(currRoom *roomdata) {
 			if err != nil {
 				log.Println(err)
 				value.Status = "Closed"
-				// delete(currRoom.Tanks, conn)
-				currRoom.PlayersAreLiving--
 			}
 			value.Update = false
 		}
@@ -339,10 +346,12 @@ func wsConnection(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 		go func() {
 			ticker := time.NewTicker(25 * time.Millisecond)
 			for range ticker.C {
-				isHit := hitByBullet(tank, &currRoom.Bullets)
+				if tank.Status != "Dead" && tank.Live > 0 {
+					isHit := hitByBullet(tank, &currRoom.Bullets)
 
-				if isHit {
-					hitTank(currRoom, tank)
+					if isHit {
+						hitTank(currRoom, tank)
+					}
 				}
 
 				if tank.Status == "Closed" {
@@ -368,7 +377,7 @@ func wsConnection(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 			}
 
 			message := string(m)
-			if currRoom.Status == "Game" {
+			if currRoom.Status == "Game" && tank.Status != "Dead" {
 				readMessageFromCleints(conn, currRoom, tank, message, &levelSize)
 			}
 		}
@@ -442,9 +451,10 @@ func createTank(db *sqlx.DB, conn *websocket.Conn, cookie *http.Cookie, room *ro
 
 		room.Tanks[conn] = &newTank
 	}
-
-	room.PlayersAreLiving++
+	tank.Distance = 0
 	room.Status = "Game"
+
+	fmt.Printf("room: %v\n", room)
 
 	return tank, nil
 }
@@ -798,14 +808,20 @@ func hitTank(room *roomdata, tank *tanktype) {
 	tank.Distance = 0
 	tank.Live--
 
-	fmt.Printf("room.PlayersAreLiving: %v\n", room.PlayersAreLiving)
-
 	if tank.Live > 0 {
 		resetTank(room, tank)
 	} else {
 		tank.Status = "Dead"
-		room.PlayersAreLiving--
-		if room.PlayersAreLiving >= 1 {
+
+		playersAreLive := 0
+
+		for _, tank := range room.Tanks {
+			if tank.Status != "Dead" {
+				playersAreLive++
+			}
+		}
+
+		if playersAreLive <= 1 {
 			room.Status = "Reset"
 		}
 	}
@@ -830,9 +846,6 @@ func resetTank(room *roomdata, tank *tanktype) {
 func resetRoom(db *sqlx.DB, room *roomdata) {
 	room.ObjToRemove = nil
 	room.Bullets = make(map[int]*bullettype)
-	room.PlayersAreLiving = 0
-
-	fmt.Printf("len(room.Tanks): %v\n", len(room.Tanks))
 
 	var err error
 	room.Objects, err = getObjByID(db, room.Level.Id)

@@ -96,8 +96,11 @@ document.addEventListener("DOMContentLoaded", function() {
     function answersFromServer() {
         socket.onmessage = function(event) {
             let newState = JSON.parse(event.data);
-            if (newState === "Reset") {
-                tankWin();
+            if (newState.Message === "Reset") {
+                for (key in tanks) {
+                    tanks[key].Distance = 0;
+                }
+                tankWin(newState.ID);
                 setTimeout(() => location.reload(), 5000)
                 return
             } else if (newState.Message === "Bullets") {
@@ -189,18 +192,16 @@ document.addEventListener("DOMContentLoaded", function() {
         updateLives();
     }
 
-    function tankWin() {
+    function tankWin(id) {
         play = false;
         const winText = document.getElementById("win_text");
 
         winText.classList.remove("hidden");
 
-        tanks.forEach(tank => {
-            if (tank.Live > 0) {
-                winText.textContent = tank.Name + " выиграл";
-                winText.classList.add(tank.Color)
-            }
-        });
+        const index = tanks.findIndex((element) => element.ID === id);
+        
+        winText.textContent = tanks[index].Name + " выиграл";
+        winText.classList.add(tanks[index].Color);
     }
 
     function destroyObjects(newstate) {
@@ -594,17 +595,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 }
                 break;
         }
-    }
-
-    function deleteObjects() {
-        for (key in brick) {
-            const element = document.getElementById(brick[key].ID);
-            if (element !== null) {
-                element.remove();
-            }
-        }
-    
-        brick = null
     }
 
     function updateLives() {
