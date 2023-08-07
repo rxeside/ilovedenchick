@@ -10,8 +10,6 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-var levelID int
-
 type IDdata struct {
 	ID int `db:"id"`
 }
@@ -23,6 +21,7 @@ type saveLevelRequest struct {
 }
 
 type saveCellRequest struct {
+	LevelID         int    `json:"levelId"`
 	Name            string `json:"name"`
 	Is_Destructible int    `json:"isDestructible"`
 	CanTPass        int    `json:"canTpass"`
@@ -32,19 +31,28 @@ type saveCellRequest struct {
 	Pos_y           int    `json:"y"`
 }
 
-func createLevel(w http.ResponseWriter, r *http.Request) {
-	ts, err := template.ParseFiles("pages/level_creator.html")
-	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
-		log.Println(err.Error())
-		return
-	}
+func createLevel(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		err := checkCookie(db, w, r)
+		if err != nil {
+			log.Println(err.Error())
+			http.Redirect(w, r, "/enter_to_battle", http.StatusSeeOther)
+			return
+		}
 
-	err = ts.Execute(w, nil)
-	if err != nil {
-		http.Error(w, "Internal Server Error", 500)
-		log.Println(err.Error())
-		return
+		ts, err := template.ParseFiles("pages/level_creator.html")
+		if err != nil {
+			http.Error(w, "Internal Server Error", 500)
+			log.Println(err.Error())
+			return
+		}
+
+		err = ts.Execute(w, nil)
+		if err != nil {
+			http.Error(w, "Internal Server Error", 500)
+			log.Println(err.Error())
+			return
+		}
 	}
 }
 
@@ -66,6 +74,14 @@ func saveLevel(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		cookie, err := r.Cookie("UserCookie")
+		if err != nil {
+			http.Error(w, "err with cookie", 500)
+			log.Println(err.Error())
+			return
+		}
+		req.Author = cookie.Value
+
 		err = insertLevelTodb(db, req)
 		if err != nil {
 			http.Error(w, "Error insert level", 500)
@@ -73,12 +89,24 @@ func saveLevel(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		err, levelID = getLastID(db)
+		err, levelID := getLastID(db)
 		if err != nil {
 			http.Error(w, "Error with ID", 500)
 			log.Println(err.Error())
 			return
 		}
+
+		jsonData, err := json.Marshal(levelID)
+		if err != nil {
+			http.Error(w, "Error with marshal json", 500)
+			log.Println(err.Error())
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(jsonData)
+
+		return
 	}
 }
 
@@ -119,32 +147,46 @@ func getLastID(db *sqlx.DB) (error, int) {
 
 func saveObj(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		err, lastID := getLastID(db)
+		if err != nil {
+			http.Error(w, "Err with lasrID", 500)
+			log.Println(err.Error())
+			return
+		}
+
 		reqData, err := io.ReadAll(r.Body)
 		if err != nil {
+			_ = deleteLevel(db, lastID)
 			http.Error(w, "Error with data", 500)
 			log.Println(err.Error())
 			return
 		}
 
-		var req saveCellRequest
+		var req []saveCellRequest
 
 		err = json.Unmarshal(reqData, &req)
 		if err != nil {
+			_ = deleteLevel(db, lastID)
 			http.Error(w, "Error with cell json", 500)
 			log.Println(err.Error())
 			return
 		}
 
-		err = insertObjTodb(db, levelID, req)
-		if err != nil {
-			http.Error(w, "Error with inserting cell to db", 500)
-			log.Println(err.Error())
-			return
+		for _, value := range req {
+			err = insertObjTodb(db, value)
+			if err != nil {
+				_ = deleteLevel(db, lastID)
+				http.Error(w, "Error with inserting cell to db", 500)
+				log.Println(err.Error())
+				return
+			}
 		}
+
+		return
 	}
 }
 
-func insertObjTodb(db *sqlx.DB, levelID int, req saveCellRequest) error {
+func insertObjTodb(db *sqlx.DB, obj saveCellRequest) error {
 	const query = `
 	INSERT INTO
 	  level_obj
@@ -170,6 +212,22 @@ func insertObjTodb(db *sqlx.DB, levelID int, req saveCellRequest) error {
 	  ?
 	)
 	`
-	_, err := db.Exec(query, levelID, req.Name, req.Is_Destructible, req.CanTPass, req.CanBPass, req.Img_URL, req.Pos_x, req.Pos_y)
+	_, err := db.Exec(query, obj.LevelID, obj.Name, obj.Is_Destructible, obj.CanTPass, obj.CanBPass, obj.Img_URL, obj.Pos_x, obj.Pos_y)
 	return err
+}
+
+func deleteLevel(db *sqlx.DB, levelId int) error {
+	const query = `
+			DELETE FROM
+			  level
+			WHERE
+			 id = ?
+	`
+
+	_, err := db.Exec(query, levelId)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
